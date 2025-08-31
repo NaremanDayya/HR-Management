@@ -32,6 +32,124 @@ const userIdMeta = document.querySelector('meta[name="user-id"]');
 const userId = userIdMeta ? userIdMeta.getAttribute("content") : null;
 
 if (userId) {
+
+ window.Echo.private(`new-employee`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+
+window.Echo.private(`employee-requests`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+    window.Echo.private(`employee-request-status`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+    window.Echo.private(`employee-alerts`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+          window.Echo.private(`employee-login-ip`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+          window.Echo.private(`birthday`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+      window.Echo.private(`employee-deductions`).listen(
+        ".Illuminate\\Notifications\\Events\\BroadcastNotificationCreated",
+        (data) => {
+            Toast.fire({
+                icon: "success",
+                title: "✅ تم قبول الطلب",
+                html: `<div>
+                    <p>${data.message}</p>
+                    <a href="${data.url}" class="text-blue-500 hover:underline">
+                        عرض الطلب الموافق عليه
+                    </a>
+                </div>`,
+                timer: 8000,
+            });
+        }
+    );
+Echo.private(`participant.${encodedType}.${userId}`)
+    .listen('.Namu\\WireChat\\Events\\NotifyParticipant', (e) => {
+        console.log(e);
+    });
 }
 
 import "./echo";

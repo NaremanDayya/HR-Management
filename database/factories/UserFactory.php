@@ -26,16 +26,34 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = $this->faker;
+        $faker->locale('ar_SA'); 
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $faker->name,
+            'email' => $faker->unique()->safeEmail,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
+            'password' => bcrypt('password'), // default password
+            'role' => $faker->randomElement(['employee', 'manager', 'admin']),
+            'privileges' => null,
+            'account_status' => $faker->randomElement(['active', 'inactive']),
+            'contact_info' => [
+                'phone_type' => $faker->randomElement(['mobile', 'home', 'work']),
+                'phone_number' => $faker->phoneNumber,
+                'residence' => $faker->city,
+                'area' => $faker->streetName,
+                'residence_neighborhood' => $faker->word,
+            ],
+            'size_info' => [
+                'Tshirt_size' => $faker->randomElement(['S', 'M', 'L', 'XL']),
+                'pants_size' => $faker->randomElement(['30', '32', '34', '36']),
+            ],
+            'birthday' => $faker->dateTimeBetween('-60 years', '-18 years')->format('Y-m-d'),
+            'age' => null, // will be dynamic
+            'id_card' => $faker->numerify('###########'), // random 11 digit number
+            'nationality' => $faker->randomElement(['فلسطيني', 'مصري', 'سوري', 'لبناني']),
+            'gender' => $faker->randomElement(['male', 'female']),
             'remember_token' => Str::random(10),
-            'profile_photo_path' => null,
-            'current_team_id' => null,
         ];
     }
 

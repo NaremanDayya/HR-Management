@@ -9,6 +9,8 @@ export default {
         './vendor/laravel/jetstream/**/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './vendor/namu/wirechat/resources/views/**/*.blade.php',
+        './vendor/namu/wirechat/src/Livewire/**/*.php',
     ],
 
     theme: {

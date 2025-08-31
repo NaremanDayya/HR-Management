@@ -34,5 +34,12 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+   'browsershot' => [
+    'node_binary' => 'C:\Program Files\nodejs\node.exe',
+    'npm_binary' => 'C:\Program Files\nodejs\npm.cmd',
+    'chrome_path' => 'C:\Program Files\Google\Chrome\Application\chrome.exe',
+    'timeout' => 120,
+    'bin' => null,
+],
 
 ];

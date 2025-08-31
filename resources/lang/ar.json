@@ -1,0 +1,16 @@
+{
+    "admin": "مدير",
+    "project_manager": "مدير مشروع",
+    "employee": "موظف",
+    "hr_manager": "مدير موارد بشرية",
+    "hr_assistant": "مساعد مدير موارد بشرية",
+    "shelf_stacker": "مصفف أرفف",
+    "area_manager": "مدير منطقة",
+    "supervisor": "مشرف",
+    "All Roles": "جميع الأدوار الوظيفية",
+    "review_employee_requests": "مراجعة طلبات الموظفين",
+    "add_employee": "إضافة موظف",
+    "add_project_manager": "إضافة مدير مشروع",
+    "change_employees_password": "تحديد كلمات مرور الموظفين",
+    "view_credentials": "وصول بيانات دخول الموظفين"
+}

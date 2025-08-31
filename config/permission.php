@@ -3,6 +3,8 @@
 return [
 
     'models' => [
+            'user' => App\Models\User::class,
+
 
         /*
          * When using the "HasPermissions" trait from this package, we need to know which
