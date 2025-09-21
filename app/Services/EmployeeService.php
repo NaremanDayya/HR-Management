@@ -18,7 +18,8 @@ class EmployeeService
     {
         $imagePath = null;
         if (isset($data['personal_image']) && $data['personal_image']) {
-            $imagePath = $data['personal_image']->store('employees/images', 'public');
+            $imagePath = $data['personal_image']->store('employees/images', 's3');
+            Storage::disk('s3')->setVisibility($imagePath, 'public');
         }
         // dd($imagePath);
         $user = User::create([

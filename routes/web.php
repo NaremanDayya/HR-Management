@@ -11,36 +11,10 @@ use App\Http\Controllers\SettingController;
 use App\Services\ImageMessageService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 
 
-Route::get('/test-alert-image', function () {
-    $imageService = new ImageMessageService();
-
-    $testData = [
-        'company_name' => 'شركة الاختبار - نظام الموارد البشرية',
-        'employee_name' => 'محمد أحمد',
-        'manager_name' => 'علي محمد',
-        'alert_title' => 'تأخير متكرر في الدخول',
-        'alert_message' => "بناءً على سجلات الحضور والانصراف، نلاحظ تأخرك في الدخول لأكثر من 30 دقيقة في 3 أيام خلال هذا الأسبوع.\n\nنرجو الالتزام بمواعيد العمل المحددة.",
-        'alert_date' => now()->format('Y-m-d'),
-        'manager_whatsapp' => '+966501234567',
-    ];
-
-    try {
-        $imageUrl = $imageService->generateAlertImage($testData);
-
-        return view('test-alert', [
-            'imageUrl' => $imageUrl,
-            'testData' => $testData
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-});
 
 Route::get('/', function () {
     return view('welcome');
@@ -158,3 +132,74 @@ Route::middleware([
 });
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
+
+
+Route::get('/test-upload', function () {
+    return '<form method="POST" action="/s3-upload-test" enctype="multipart/form-data">
+                '.csrf_field().'
+                <input type="file" name="image">
+                <button type="submit">Upload</button>
+            </form>';
+})->middleware('auth');
+
+Route::post('/s3-upload-test', function(Request $request) {
+    if (!$request->hasFile('image')) {
+        return response()->json(['error' => 'No file uploaded.']);
+    }
+
+    $file = $request->file('image');
+    $originalName = $file->getClientOriginalName();
+    $tempPath = $file->getPathname();
+    $size = $file->getSize();
+
+    // Debug info
+    dump('Original name: ' . $originalName);
+    dump('Temp path: ' . $tempPath);
+    dump('Size: ' . $size);
+
+    try {
+        $disk = Storage::disk('s3');
+        $path = $disk->putFile('test-uploads', $file);
+
+        if (!$path) {
+            return response()->json([
+                'error' => 'Failed to store the file. Path is empty.',
+                'disk_config' => config('filesystems.disks.s3')
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'path' => $path,
+            'url' => $disk->url($path)
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
+})->middleware('auth');
+
+
+
+Route::get('/s3-test', function () {
+    try {
+        $disk = Storage::disk('s3');
+
+        // Debug S3 configuration
+        $config = method_exists($disk->getDriver(), 'getAdapter')
+            ? $disk->getDriver()->getAdapter()->getClient()->getConfig()->toArray()
+            : null;
+
+        // Test upload
+        $result = $disk->put('test.txt', 'Hello S3!');
+
+        return response()->json([
+            's3_config' => $config,
+            'upload_result' => $result ? 'Upload succeeded!' : 'Upload failed!',
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});

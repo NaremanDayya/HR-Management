@@ -258,37 +258,5 @@ class Employee extends Model
     {
         return $this->hasMany(AdvanceDeduction::class);
     }
-    public function actions(Request $request)
-{
-    $filters = $request->only([
-        'search',
-        'account_status',
-        'project',
-        'marital_status',
-        'english_level',
-        'residence',
-        'residence_neighborhood',
-        'black_list',
-        'role',
-        'health_card',
-        'nationality',
-    ]);
 
-    $employeesQuery = $this->employeeService->filterEmployees($filters);
-
-    $employees = $employeesQuery->withCount([
-        'replacements',
-        'alerts',
-        'deductions',
-        'advances',
-        'increases',
-        'temporaryAssignments',
-        'employeeRequests',
-        'advanceDeductions',
-    ])->get();
-
-    return view('Employees.table', [
-        'employees' => $employees,
-    ]);
-}
 }

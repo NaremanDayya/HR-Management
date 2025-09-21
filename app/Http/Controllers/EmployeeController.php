@@ -153,11 +153,16 @@ class EmployeeController extends Controller
         $supervisors = Employee::whereHas('user', function ($query) {
             $query->where('role', 'supervisor');
         })->select('id', 'name', 'project_id')->get();
-
+        $area_managers = Employee::whereHas('user', function ($query) {
+            $query->where('role', 'area_manager');
+        })
+            ->select('id', 'name', 'project_id')
+            ->get();
         return view('Employees.financials', array_merge([
             'employees' => $employees,
             'projectsObjects' => $projectsObjects,
             'supervisors' => $supervisors,
+            'area_managers' => $area_managers,
             'totalSalaries' => $employees->sum('base_salary'),
             'totalIncreases' => $employees->sum('current_month_increases'),
             'totalNetSalaries' => $employees->sum('net_salary'),
@@ -220,6 +225,11 @@ class EmployeeController extends Controller
         })
             ->select('id', 'name', 'project_id')
             ->get();
+        $area_managers = Employee::whereHas('user', function ($query) {
+            $query->where('role', 'area_manager');
+        })
+            ->select('id', 'name', 'project_id')
+            ->get();
         return view('Employees.show', array_merge([
             'emp' => $employee,
             'editedFields' => EmployeeEditRequest::editableFields(),
@@ -228,6 +238,7 @@ class EmployeeController extends Controller
             'canReplace' => $canReplace,
             'employees' => $employees,
             'supervisors' => $supervisors,
+            'area_managers' => $area_managers,
             'authRole' => Auth::user()->role,
             'role' => Role::where('name', Auth::user()->role)->first(),
             'tool_bag_count' => $employee->requestTypeCount('tool_bag'),
@@ -331,7 +342,6 @@ class EmployeeController extends Controller
         $year = $request->input('year', now()->year);
         $type = $request->input('type');
         $status = $request->input('status');
-
         $query = $employee->increases()
             ->whereYear('created_at', $year)
             ->latest();
@@ -606,7 +616,7 @@ class EmployeeController extends Controller
         'employeeRequests',
         'advanceDeductions',
     ])->get();
-
+//dd($employees);
     return view('Employees.actions', [
         'employees' => $employees,
     ]);

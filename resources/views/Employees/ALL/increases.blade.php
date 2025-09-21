@@ -124,6 +124,14 @@
             font-weight: 700;
             color: #2e7d32;
         }
+        .employee-link {
+            transition: all 0.2s ease;
+        }
+
+        .employee-link:hover {
+            color: #d81b60 !important;
+            text-decoration: underline;
+        }
     </style>
 @endpush
 
@@ -342,9 +350,13 @@
                                 </td>
 
                                 <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
+
                                     <div class="flex flex-col items-center space-y-1">
-                                        <span
-                                            class="text-sm font-medium text-gray-900">{{ $employee->user->name ?? '-' }}</span>
+                                        <a href="{{ route('employees.increases', $increase->employee->id) }}"
+                                           class="employee-link text-sm font-medium text-gray-900 hover:text-green-600">
+                                            {{ $increase->employee->user->name ?? '-' }}
+                                        </a>
+
                                     </div>
                                 </td>
 
