@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->string('iban')->nullable();
             $table->string('owner_account_name')->nullable();
             $table->foreignId('supervisor_id')->nullable()->constrained('employees')->nullOnDelete();
-            $table->foreignId('manager_id')->constrained('employees')->nullOnDelete();
+            $table->foreignId('manager_id')->nullable()->constrained('employees')->nullOnDelete();
             $table->json('payload')->nullable();
             $table->timestamps();
         });
