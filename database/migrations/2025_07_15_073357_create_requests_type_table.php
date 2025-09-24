@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('requests_types', function (Blueprint $table) {
+        Schema::create('request_types', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
             $table->string('label');
