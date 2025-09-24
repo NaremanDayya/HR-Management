@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('work_area')->nullable();
             $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('iban')->nullable()->after('bank_name');
+            $table->string('iban')->nullable();
             $table->string('owner_account_name')->nullable();
             $table->foreignId('supervisor_id')->constrained('employees')->nullOnDelete();
             $table->foreignId('manager_id')->constrained('employees')->nullOnDelete();
