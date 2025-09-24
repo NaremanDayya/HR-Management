@@ -23,10 +23,10 @@ return new class extends Migration {
             $table->string('work_area')->nullable();
             $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('iban')->nullable()->after('bank_name');
-            $table->string('owner_account_name')->nullable()->after('iban');
+            $table->string('owner_account_name')->nullable();
             $table->foreignId('supervisor_id')->constrained('employees')->nullOnDelete();
             $table->foreignId('manager_id')->constrained('employees')->nullOnDelete();
-            $table->json('payload')->nullable()->after('reason');
+            $table->json('payload')->nullable();
             $table->timestamps();
         });
     }
