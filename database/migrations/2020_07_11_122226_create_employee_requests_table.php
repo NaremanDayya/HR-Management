@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->foreignId('request_type_id')->constrained('requests_type')->onDelete('cascade');
             $table->timestamps();
         });
+//        test
     }
 
     /**
