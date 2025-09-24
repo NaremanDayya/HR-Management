@@ -137,7 +137,7 @@ class ProjectController extends Controller
             ->pluck('count', 'role')
             ->toArray();
 
-        return view('projects.statistics', compact(
+        return view('Projects.statistics', compact(
             'totalProjects',
             'projectsByManager',
             'projects',
