@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->timestamp('response_date')->nullable();
             $table->text('notes')->nullable();
             $table->string('edited_field')->nullable();
-            $table->foreignId('request_type_id')->constrained()->onDelete('cascade');
+            $table->foreignId('request_type_id')->constrained('requests_type')->onDelete('cascade');
             $table->timestamps();
         });
     }
