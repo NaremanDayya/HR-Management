@@ -1907,9 +1907,9 @@
                                     <td>
                                         <div class="d-flex px-2 py-1 no-print">
                                             <div>
-                                                @php
-                                                dd($employee['personal_image']);
-                                                @endphp
+{{--                                                @php--}}
+{{--                                                dd($employee['personal_image']);--}}
+{{--                                                @endphp--}}
                                                 <img src="{{ $employee['personal_image'] }}"
                                                     style="width: 60px; height: 60px; object-fit: cover;"
                                                     class="h-16 w-16 mx-auto rounded-full border object-cover rounded-5"
