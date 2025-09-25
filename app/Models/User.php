@@ -87,7 +87,7 @@ class User extends Authenticatable
         if (!empty($this->attributes['personal_image'])) {
             return Storage::disk('s3')->temporaryUrl($this->attributes['personal_image'], Carbon::now()->addMinutes(5) );
         }
-
+//test
         $name = $this->attributes['name'] ?? 'User';
         return 'https://avatar.oxro.io/avatar.svg?name=' . urlencode($name) . '&background=random';
     }
