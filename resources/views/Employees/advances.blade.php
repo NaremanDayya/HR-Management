@@ -204,10 +204,13 @@
                                 النسبة من الراتب</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                الحالة</th>
+                            مدير المشروع</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                المسؤول</th>
+                                المشرف</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                منطقة العمل</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 السبب</th>
@@ -217,6 +220,13 @@
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 تاريخ المعالجة</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                مدة الاستجابة
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الحالة</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -236,21 +246,6 @@
                                     </span>
                                 </td>
 
-                                <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
-                                    @if ($advance->status == 'approved')
-                                        <span class="status-badge bg-green-100 text-green-800">
-                                            <i class="fas fa-check-circle ml-1"></i> معتمدة
-                                        </span>
-                                    @elseif($advance->status == 'rejected')
-                                        <span class="status-badge bg-red-100 text-red-800">
-                                            <i class="fas fa-times-circle ml-1"></i> مرفوضة
-                                        </span>
-                                    @else
-                                        <span class="status-badge bg-yellow-100 text-yellow-800">
-                                            <i class="fas fa-clock ml-1"></i> قيد الانتظار
-                                        </span>
-                                    @endif
-                                </td>
 
                                 <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
                                     @if ($advance->manager)
@@ -269,7 +264,8 @@
                                         <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
-
+                                <td class="alert-cell px-6 py-4 whitespace-nowrap text-center">{{$advance->employee?->supervisor?->name}}</td>
+                                <td class="alert-cell px-6 py-4 whitespace-nowrap text-center">{{$advance->employee?->work_area}}</td>
                                 <td class="advance-cell px-6 py-4 text-sm text-gray-500 max-w-xs text-center">
                                     <div class="mx-auto" style="max-width: 200px;">{{ $advance->reason ?? '-' }}</div>
                                 </td>
@@ -294,10 +290,48 @@
                                         @endif
                                     </div>
                                 </td>
+                                <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
+                                    <div class="flex flex-col items-center">
+                                        @if ($advance->approved_at)
+                                            @php
+                                                $diff = $advance->created_at->diff($advance->approved_at);
+                                                $parts = [];
+                                                if ($diff->d > 0) $parts[] = $diff->d . ' يوم';
+                                                if ($diff->h > 0) $parts[] = $diff->h . ' ساعة';
+                                                if ($diff->i > 0) $parts[] = $diff->i . ' دقيقة';
+                                                $formattedDiff = implode(', ', $parts);
+                                            @endphp
+
+                                            <span class="text-sm font-medium text-gray-900">
+                {{ $formattedDiff }}
+            </span>
+                                            <span class="text-xs text-gray-500">
+                {{ $advance->created_at->diffForHumans($advance->approved_at) }}
+            </span>
+                                        @else
+                                            <span class="text-sm font-medium text-gray-900">-</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
+                                    @if ($advance->status == 'approved')
+                                        <span class="status-badge bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle ml-1"></i> معتمدة
+                                        </span>
+                                    @elseif($advance->status == 'rejected')
+                                        <span class="status-badge bg-red-100 text-red-800">
+                                            <i class="fas fa-times-circle ml-1"></i> مرفوضة
+                                        </span>
+                                    @else
+                                        <span class="status-badge bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock ml-1"></i> قيد الانتظار
+                                        </span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
+                                <td colspan="11" class="px-6 py-12 text-center">
                                     <div class="empty-state-advance">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 empty-icon-advance"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">

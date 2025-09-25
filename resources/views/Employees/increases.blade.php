@@ -302,10 +302,10 @@
                                 التغيير</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                الحالة</th>
+                                مدير المشروع</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                المسؤول</th>
+                                المشرف</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 السبب</th>
@@ -315,6 +315,13 @@
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 تاريخ المعالجة</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                مدة الاستجابة
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الحالة</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -330,7 +337,7 @@
 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-800">
+                                        class="inline-flex items-center justify-center w-15 h-8 rounded-full bg-green-100 text-green-800">
                                         {{ $increase->increase_percentage }}%
                                     </span>
                                 </td>
@@ -363,22 +370,6 @@
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @if ($increase->status == 'approved')
-                                        <span class="status-badge approved-badge">
-                                            <i class="fas fa-check-circle ml-1"></i> معتمدة
-                                        </span>
-                                    @elseif($increase->status == 'rejected')
-                                        <span class="status-badge rejected-badge">
-                                            <i class="fas fa-times-circle ml-1"></i> مرفوضة
-                                        </span>
-                                    @else
-                                        <span class="status-badge pending-badge">
-                                            <i class="fas fa-clock ml-1"></i> قيد الانتظار
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <div class="flex items-center justify-center">
                                         @if ($increase->manager)
                                             <span>{{ $increase->manager->name }}</span>
@@ -387,7 +378,10 @@
                                         @endif
                                     </div>
                                 </td>
-
+                                <td class="increases-cell px-6 py-4 text-sm text-gray-500 text-center">
+                                    <div class="mx-auto" style="max-width: 200px;">{{ $increase->employee->supervisor->name ?? 'لا يوجد' }}
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 text-center max-w-xs">
                                     <div class="mx-auto truncate" style="max-width: 200px;"
                                         title="{{ $increase->reason }}">
@@ -416,6 +410,45 @@
                                         @endif
                                     </div>
                                 </td>
+                                <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
+                                    <div class="flex flex-col items-center">
+                                        @if ($increase->approved_at)
+                                            @php
+                                                $diff = $increase->created_at->diff($increase->approved_at);
+                                                $parts = [];
+                                                if ($diff->d > 0) $parts[] = $diff->d . ' يوم';
+                                                if ($diff->h > 0) $parts[] = $diff->h . ' ساعة';
+                                                if ($diff->i > 0) $parts[] = $diff->i . ' دقيقة';
+                                                $formattedDiff = implode(', ', $parts);
+                                            @endphp
+
+                                            <span class="text-sm font-medium text-gray-900">
+                {{ $formattedDiff }}
+            </span>
+                                            <span class="text-xs text-gray-500">
+                {{ $increase->created_at->diffForHumans($increase->approved_at) }}
+            </span>
+                                        @else
+                                            <span class="text-sm font-medium text-gray-900">-</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @if ($increase->status == 'approved')
+                                        <span class="status-badge approved-badge">
+                                            <i class="fas fa-check-circle ml-1"></i> معتمدة
+                                        </span>
+                                    @elseif($increase->status == 'rejected')
+                                        <span class="status-badge rejected-badge">
+                                            <i class="fas fa-times-circle ml-1"></i> مرفوضة
+                                        </span>
+                                    @else
+                                        <span class="status-badge pending-badge">
+                                            <i class="fas fa-clock ml-1"></i> قيد الانتظار
+                                        </span>
+                                    @endif
+                                </td>
+
                             </tr>
                         @empty
                             <tr>

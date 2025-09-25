@@ -1798,8 +1798,16 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-purple-800">مدى الرواتب</h3>
-                            <p class="text-xl font-bold text-purple-600" id="salaryRangeDisplay">
-                                {{ $minSalaries }} ر.س - {{ $maxSalaries }} ر.س
+                            <p class="text-xl font-bold text-purple-600 flex space-x-2" id="salaryRangeDisplay">
+                <span class="text-red-600 flex items-center">
+                    {{ $minSalaries }} ر.س
+                    <i class="fas fa-arrow-down ml-1 text-red-600"></i>
+                </span>
+                                <span class="text-purple-600">-</span>
+                                <span class="text-green-600 flex items-center">
+                    {{ $maxSalaries }} ر.س
+                    <i class="fas fa-arrow-up ml-1 text-green-600"></i>
+                </span>
                             </p>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-full">
@@ -1808,6 +1816,7 @@
                     </div>
                     <p class="text-sm text-purple-500 mt-2">أقل وأعلى راتب</p>
                 </div>
+
 
                 <!-- Employee Count Card (New) -->
                 <div class="bg-amber-50 border border-amber-100 rounded-lg p-4 flex-1 min-w-[250px]">

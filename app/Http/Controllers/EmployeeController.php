@@ -342,42 +342,36 @@ class EmployeeController extends Controller
         $year = $request->input('year', now()->year);
         $type = $request->input('type');
         $status = $request->input('status');
-        $query = $employee->increases()
-            ->whereYear('created_at', $year)
-            ->latest();
 
-        if ($type) {
-            // Use is_reward boolean field instead of increase_type
-            $query->where('is_reward', $type === 'reward');
-        }
+        $employee->load(['increases' => function ($query) use ($year, $type, $status) {
+            $query->whereYear('created_at', $year)->latest();
 
-        if ($status) {
-            $query->where('status', $status);
-        }
+            if ($type) {
+                $query->where('is_reward', $type === 'reward');
+            }
 
-        // Calculate summary statistics
-        $staticIncreasesQuery = clone $query;
-        $rewardIncreasesQuery = clone $query;
+            if ($status) {
+                $query->where('status', $status);
+            }
+        }]);
 
-        $staticIncreasesTotal = $staticIncreasesQuery->where('is_reward', false)->sum('increase_amount');
-        $staticIncreasesCount = $staticIncreasesQuery->where('is_reward', false)->count();
+        $increases = $employee->increases;
 
-        $rewardIncreasesTotal = $rewardIncreasesQuery->where('is_reward', true)->sum('increase_amount');
-        $rewardIncreasesCount = $rewardIncreasesQuery->where('is_reward', true)->count();
+        $staticIncreases = $increases->where('is_reward', false);
+        $rewardIncreases = $increases->where('is_reward', true);
 
-        $totalIncreases = $staticIncreasesTotal + $rewardIncreasesTotal;
-        $totalIncreasesCount = $staticIncreasesCount + $rewardIncreasesCount;
         return view('employees.increases', [
             'employee' => $employee,
-            'increases' => $query,
-            'staticIncreasesTotal' => $staticIncreasesTotal,
-            'staticIncreasesCount' => $staticIncreasesCount,
-            'rewardIncreasesTotal' => $rewardIncreasesTotal,
-            'rewardIncreasesCount' => $rewardIncreasesCount,
-            'totalIncreases' => $totalIncreases,
-            'totalIncreasesCount' => $totalIncreasesCount,
+            'increases' => $increases,
+            'staticIncreasesTotal' => $staticIncreases->sum('increase_amount'),
+            'staticIncreasesCount' => $staticIncreases->count(),
+            'rewardIncreasesTotal' => $rewardIncreases->sum('increase_amount'),
+            'rewardIncreasesCount' => $rewardIncreases->count(),
+            'totalIncreases' => $increases->sum('increase_amount'),
+            'totalIncreasesCount' => $increases->count(),
         ]);
     }
+
     public function showTemporaryProjectAssignments(Employee $employee)
     {
         $assignments = TemporaryProjectAssignment::with(['fromProject', 'toProject', 'manager'])

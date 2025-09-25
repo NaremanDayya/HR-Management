@@ -311,6 +311,9 @@
                                 مبلغ الزيادة</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                نوع الزيادة</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 نسبة الزيادة</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -320,10 +323,10 @@
                                 الراتب الجديد</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                الحالة</th>
+                                مدير المشروع</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                المسؤول</th>
+                                 المشرف</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 السبب</th>
@@ -333,6 +336,13 @@
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 تاريخ المعالجة</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                مدة الاستجابة
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الحالة</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -364,6 +374,17 @@
                                     class="increases-cell px-6 py-4 whitespace-nowrap text-center increase-amount salary-cell">
                                     +{{ number_format($increase->increase_amount) }} ر.س
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @if ($increase->is_reward)
+                                        <span class="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-800">
+                                            مكافأة
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                            زيادة ثابتة
+                                        </span>
+                                    @endif
+                                </td>
 
                                 <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
                                     <span
@@ -382,36 +403,6 @@
                                     {{ number_format($newSalary) }} ر.س
                                 </td>
 
-                                <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
-                                    @if ($increase->request->status == 'approved')
-                                        <span
-                                            class="status-badge inline-flex items-center rounded-full bg-green-100 text-green-800">
-                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-500" fill="currentColor"
-                                                viewBox="0 0 8 8">
-                                                <circle cx="4" cy="4" r="3" />
-                                            </svg>
-                                            معتمدة
-                                        </span>
-                                    @elseif($increase->request->status == 'rejected')
-                                        <span
-                                            class="status-badge inline-flex items-center rounded-full bg-red-100 text-red-800">
-                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-red-500" fill="currentColor"
-                                                viewBox="0 0 8 8">
-                                                <circle cx="4" cy="4" r="3" />
-                                            </svg>
-                                            مرفوضة
-                                        </span>
-                                    @else
-                                        <span
-                                            class="status-badge inline-flex items-center rounded-full bg-yellow-100 text-yellow-800">
-                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-yellow-500" fill="currentColor"
-                                                viewBox="0 0 8 8">
-                                                <circle cx="4" cy="4" r="3" />
-                                            </svg>
-                                            قيد الانتظار
-                                        </span>
-                                    @endif
-                                </td>
 
                                 <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
                                     @if ($increase->manager)
@@ -422,12 +413,14 @@
                                         <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
-
+                                <td class="increases-cell px-6 py-4 text-sm text-gray-500 text-center">
+                                    <div class="mx-auto" style="max-width: 200px;">{{ $increase->employee->supervisor->name ?? 'لا يوجد' }}
+                                    </div>
+                                </td>
                                 <td class="increases-cell px-6 py-4 text-sm text-gray-500 text-center">
                                     <div class="mx-auto" style="max-width: 200px;">{{ $increase->reason ?? 'لا يوجد' }}
                                     </div>
                                 </td>
-
                                 <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
                                     <div class="flex flex-col items-center">
                                         <span
@@ -447,6 +440,59 @@
                                         </div>
                                     @else
                                         <span class="text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
+                                    <div class="flex flex-col items-center">
+                                        @if ($increase->approved_at)
+                                            @php
+                                                $diff = $increase->created_at->diff($increase->approved_at);
+                                                $parts = [];
+                                                if ($diff->d > 0) $parts[] = $diff->d . ' يوم';
+                                                if ($diff->h > 0) $parts[] = $diff->h . ' ساعة';
+                                                if ($diff->i > 0) $parts[] = $diff->i . ' دقيقة';
+                                                $formattedDiff = implode(', ', $parts);
+                                            @endphp
+
+                                            <span class="text-sm font-medium text-gray-900">
+                {{ $formattedDiff }}
+            </span>
+                                            <span class="text-xs text-gray-500">
+                {{ $increase->created_at->diffForHumans($increase->approved_at) }}
+            </span>
+                                        @else
+                                            <span class="text-sm font-medium text-gray-900">-</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="increases-cell px-6 py-4 whitespace-nowrap text-center">
+                                    @if ($increase->request->status == 'approved')
+                                        <span
+                                            class="status-badge inline-flex items-center rounded-full bg-green-100 text-green-800">
+                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-500" fill="currentColor"
+                                                 viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            معتمدة
+                                        </span>
+                                    @elseif($increase->request->status == 'rejected')
+                                        <span
+                                            class="status-badge inline-flex items-center rounded-full bg-red-100 text-red-800">
+                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-red-500" fill="currentColor"
+                                                 viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            مرفوضة
+                                        </span>
+                                    @else
+                                        <span
+                                            class="status-badge inline-flex items-center rounded-full bg-yellow-100 text-yellow-800">
+                                            <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-yellow-500" fill="currentColor"
+                                                 viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3" />
+                                            </svg>
+                                            قيد الانتظار
+                                        </span>
                                     @endif
                                 </td>
                             </tr>

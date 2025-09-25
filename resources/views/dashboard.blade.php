@@ -310,21 +310,6 @@
                     </a>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-gray-600 font-medium">مرتبي الرفوف</h3>
-                        <span
-                            class="bg-yellow-100 text-yellow-800 text-sm font-medium px-2.5 py-0.5 rounded">{{ $statistics['role_counts']['shelf_stacker'] }}</span>
-                    </div>
-                    <a href="{{ route('employees.index', ['role' => 'shelf_stacker']) }}"
-                        class="mt-2 inline-flex items-center text-yellow-600 hover:underline text-sm">
-                        عرض القائمة
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </a>
-                </div>
 
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="flex justify-between items-center">
@@ -337,6 +322,22 @@
                         عرض القائمة
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-gray-600 font-medium">مرتبي الرفوف</h3>
+                        <span
+                            class="bg-yellow-100 text-yellow-800 text-sm font-medium px-2.5 py-0.5 rounded">{{ $statistics['role_counts']['shelf_stacker'] }}</span>
+                    </div>
+                    <a href="{{ route('employees.index', ['role' => 'shelf_stacker']) }}"
+                       class="mt-2 inline-flex items-center text-yellow-600 hover:underline text-sm">
+                        عرض القائمة
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </a>
