@@ -126,6 +126,12 @@
                                 مدير المشروع</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                 المشرف</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                منطقة العمل</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 عنوان الإنذار</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -171,7 +177,8 @@
                                         <span class="text-gray-400">-</span>
                                     @endif
                                 </td>
-
+                                <td class="alert-cell px-6 py-4 whitespace-nowrap text-center">{{$employee?->supervisor?->name}}</td>
+                                <td class="alert-cell px-6 py-4 whitespace-nowrap text-center">{{$employee?->work_area}}</td>
                                 <td class="alert-cell px-6 py-4 text-center">
                                     <div class="flex flex-col items-center space-y-1">
                                         <div class="h-5 w-5 text-red-500">
