@@ -591,10 +591,10 @@ class EmployeeController extends Controller
         ]);
 
         $user = $employee->user;
-        dd($employee);
+//        dd($employee);
 
-        if ($user->personal_image && Storage::exists('public/' . $user->personal_image)) {
-            Storage::delete('public/' . $user->personal_image);
+        if ($user->personal_image && Storage::exists('s3/' . $user->personal_image)) {
+            Storage::delete('s3/' . $user->personal_image);
         }
 
         $path = $request->file('profile_photo_path')->store('employees/images', 'public');

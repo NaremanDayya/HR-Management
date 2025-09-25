@@ -85,7 +85,7 @@ class User extends Authenticatable
     public function getPersonalImageAttribute()
     {
         if (!empty($this->attributes['personal_image'])) {
-            return Storage::disk('s3')->temporaryUrl($this->attributes['personal_image']);
+            return Storage::disk('s3')->temporaryUrl($this->attributes['personal_image'], Carbon::now()->addMinutes(5) );
         }
 
         $name = $this->attributes['name'] ?? 'User';
