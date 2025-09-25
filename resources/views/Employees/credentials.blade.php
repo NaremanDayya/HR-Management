@@ -22,7 +22,7 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-            
+
         }
         .password-container {
     display: flex;
@@ -224,7 +224,7 @@
                             x-transition:leave-end="transform opacity-0 scale-95"
                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                             <div class="py-1">
-                              
+
                                 <button @click="exportToPDF(); open = false"
                                     class="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none"
@@ -288,10 +288,13 @@
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                    $user = \App\Models\User::where('name',$credential[0])->first();
+                                    @endphp
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
                                             <img class="h-10 w-10 rounded-full"
-                                                src="https://ui-avatars.com/api/?name={{ urlencode($credential[0] ?? 'N/A') }}&background=random"
+                                                src="{{$user->personal_image}}"
                                                 alt="">
                                         </div>
                                         <div class="mr-4">
