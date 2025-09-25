@@ -159,7 +159,7 @@ class EmployeeService
 
             case 'personal_image':
                 if ($image) {
-                    $path = $image->store('personal_images', 's3');
+                    $path = $image->store('personal_images', 'public');
                     $user->personal_image = $path;
                 }
                 break;
