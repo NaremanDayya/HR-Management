@@ -565,7 +565,7 @@ class EmployeeController extends Controller
 
         $replacements = $query->get();
 
-        return view('employees.ALL.replacements', compact('replacements'));
+        return view('Employees.ALL.replacements', compact('replacements'));
     }
 
     public function temporaryAssignmentsView()
