@@ -63,6 +63,33 @@
             bottom: 0;
             background: linear-gradient(135deg, rgba(245, 247, 250, 0.95) 0%, rgba(245, 247, 250, 0.85) 100%);
         }
+        .input-field {
+            text-align: right;
+            direction: rtl;
+        }
+
+        .input-field::placeholder {
+            text-align: right;
+            direction: rtl;
+        }
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button,
+        input[type="password"]::-webkit-strong-password-auto-fill-button {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* For Firefox */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+        }
+
+        /* For Edge */
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            display: none !important;
+        }
 
         /* Login Container */
         .login-container {
@@ -214,7 +241,20 @@
             text-align: center;
             font-weight: 500;
         }
+        .password-toggle {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s ease;
+            z-index: 2;
+        }
 
+        .password-toggle:hover {
+            color: #495057;
+        }
         /* Responsive */
         @media (max-width: 576px) {
             .login-container {
@@ -274,22 +314,22 @@
                     <div class="input-with-icon">
                         <i class="fas fa-envelope input-icon"></i>
                         <input id="email" type="email" name="email" required autofocus class="input-field"
-                            placeholder="أدخل بريدك الإلكتروني">
+                               placeholder="أدخل بريدك الإلكتروني" value="{{ old('email') }}">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">كلمة المرور</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-lock input-icon"></i>
                         <input id="password" type="password" name="password" required class="input-field"
-                            placeholder="أدخل كلمة المرور">
+                               placeholder="أدخل كلمة المرور">
+                        <i class="fas fa-eye-slash password-toggle" id="passwordToggle"></i>
                     </div>
                 </div>
 
                 <div class="login-options">
                     {{-- <div class="remember-me">
-                        <input type="checkbox" name="remember" id="remember">
+                        <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                         <label for="remember">تذكرني</label>
                     </div>
                     <a href="#" class="forgot-password">نسيت كلمة المرور؟</a> --}}
@@ -304,6 +344,25 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+
+            passwordToggle.addEventListener('click', function() {
+                // Toggle password visibility
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordToggle.classList.remove('fa-eye-slash');
+                    passwordToggle.classList.add('fa-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    passwordToggle.classList.remove('fa-eye');
+                    passwordToggle.classList.add('fa-eye-slash');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
