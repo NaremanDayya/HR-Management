@@ -741,7 +741,17 @@
 
                                             <x-bulk-action-modal action="activate" modal-title="تأكيد تفعيل الحساب"
                                                 confirm-text="تفعيل الحساب" button-class="bg-green-600"
-                                                modal-id="activate" />
+                                                modal-id="activate" :has-form="true">
+                                            <div class="mb-4 text-right">
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 mb-1 text-right">تاريخ
+                                                الالتحاق بالعمل مجددا
+                                            </label>
+                                            <input type="text" id="start_date" name="start_date"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                   placeholder="اختر التاريخ" required>
+                                            </div>
+                                            </x-bulk-action-modal>
                                         </li>
 
                                         <li>

@@ -8,6 +8,7 @@ use App\Models\Alert;
 use App\Models\Deduction;
 use App\Models\Employee;
 use App\Models\EmployeeRequest;
+use App\Models\EmployeeWorkHistory;
 use App\Models\RequestType;
 use App\Models\SalaryIncrease;
 use App\Models\TemporaryProjectAssignment;
@@ -56,7 +57,7 @@ class EmployeeActionController extends Controller
         try {
             switch ($action) {
                 case 'activate':
-                    return $this->handleActivate($employeeIds);
+                    return $this->handleActivate($employeeIds, $request);
 
                 case 'deactivate':
                     return $this->handleDeactivate($employeeIds, $request);
@@ -104,18 +105,31 @@ class EmployeeActionController extends Controller
     }
 
 
-    private function handleActivate(array $employeeIds)
+    private function handleActivate(array $employeeIds, Request $request)
     {
-
-        User::whereIn('id', function ($query) use ($employeeIds) {
-            $query->select('user_id')
-                ->from('employees')
-                ->whereIn('id', $employeeIds);
-        })->update([
-            'account_status' => 'active',
-            'updated_at' => now(),
+        $validated = $request->validate([
+            'start_date' => 'required|date',
         ]);
 
+        $userIds = Employee::whereIn('id', $employeeIds)->pluck('user_id');
+
+        User::whereIn('id', $userIds)->update([
+            'account_status' => 'active',
+        ]);
+
+        Employee::whereIn('id', $employeeIds)->update([
+            'joining_date' => $validated['start_date'],
+        ]);
+
+        foreach ($employeeIds as $id) {
+            EmployeeWorkHistory::create([
+                'employee_id' => $id,
+                'start_date' => $validated['start_date'],
+                'end_date' => null,
+                'status' => 'active',
+                'work_days' => 0,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -155,6 +169,14 @@ class EmployeeActionController extends Controller
                     'stop_reason' => $finalReason,
                     'payload' => $payload,
                     'updated_at' => now(),
+                ]);
+                EmployeeWorkHistory::create([
+                    'employee_id' => $id,
+                    'start_date' => $employee->joining_date,
+                    'end_date' => $validated['stop_date'] ?? now(),
+                    'status' => 'stopped',
+                    'stop_reason' => $finalReason,
+                    'work_days' => 0
                 ]);
             }
         }

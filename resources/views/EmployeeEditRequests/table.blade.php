@@ -52,22 +52,22 @@
                             <a href="{{ route('employee-request.index') }}"
                                 class="px-4 py-2 text-sm font-medium rounded-full border transition-all
                 {{ request('status') === null ? 'bg-blue-50 border-blue-200 text-blue-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50' }}">
-                                الكل
+                                الكل {{$allRequests}}
                             </a>
 
                             <a href="{{ route('employee-request.index', ['status' => 'pending'] + request()->except('page')) }}"
                                 class="px-4 py-2 text-sm font-medium rounded-full border bg-amber-100 border-amber-300 text-amber-700">
-                                قيد الانتظار
+                                 قيد الانتظار {{$pendedRequests}}
                             </a>
 
                             <a href="{{ route('employee-request.index', ['status' => 'approved'] + request()->except('page')) }}"
                                 class="px-4 py-2 text-sm font-medium rounded-full border bg-green-100 border-green-300 text-green-700">
-                                تم القبول
+                                تم القبول {{$approvedRequests}}
                             </a>
 
                             <a href="{{ route('employee-request.index', ['status' => 'rejected'] + request()->except('page')) }}"
                                 class="px-4 py-2 text-sm font-medium rounded-full border bg-red-100 border-red-300 text-red-700">
-                                تم الرفض
+                                تم الرفض {{$rejectedRequests}}
                             </a>
 
                         </div>
@@ -170,6 +170,9 @@
                                     <th scope="col"
                                         class="px-8 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200/60">
                                         تاريخ استجابة الطلب</th>
+                                    <th scope="col"
+                                        class="px-8 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200/60">
+                                        مدة استجابة الطلب</th>
                                     @if (($role && $role->hasPermissionTo('review_employee_requests')) || Auth::user()->role('admin'))
                                         <th scope="col"
                                             class="px-8 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200/60">
@@ -290,7 +293,27 @@
                                                 </span>
                                             </div>
                                         </td>
+                                        <td class="advance-cell px-6 py-4 whitespace-nowrap text-center">
+                                            <div class="flex flex-col items-center">
+                                                @if ($parsedResponseDate)
+                                                    @php
+                                                        $diff = $request->created_at->diff($parsedResponseDate);
+                                                        $parts = [];
+                                                        if ($diff->d > 0) $parts[] = $diff->d . ' يوم';
+                                                        if ($diff->h > 0) $parts[] = $diff->h . ' ساعة';
+                                                        if ($diff->i > 0) $parts[] = $diff->i . ' دقيقة';
+                                                        $formattedDiff = implode(', ', $parts);
+                                                    @endphp
 
+                                                    <span class="text-sm font-medium text-gray-900">
+                {{ $formattedDiff }}
+            </span>
+
+                                                @else
+                                                    <span class="text-sm font-medium text-gray-900">-</span>
+                                                @endif
+                                            </div>
+                                        </td>
                                         <!-- Actions -->
                                         <td class="px-8 py-5 whitespace-nowrap text-sm font-medium">
                                             @if ($request->status === 'pending')

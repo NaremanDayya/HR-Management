@@ -8,12 +8,11 @@ use App\Http\Controllers\EmployeeRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\EmployeeWorkHistoryController;
 use App\Services\ImageMessageService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
-
-
 
 
 Route::get('/', function () {
@@ -40,43 +39,45 @@ Route::get('/employees/credentials', function () {
     return view('Employees.credentials', compact('credentials'));
 })->name('employees.credentials');
 Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess::class])
-->prefix('employees')->name('employees.')->group(function () {
-    // Route::middleware(['auth'])->prefix('employees')->name('employees.')->group(function () {
-    Route::get('/', [EmployeeController::class, 'index'])->name('index');
-    Route::get('/actions', [EmployeeController::class, 'actions'])->name('actions');
-    Route::get('/alerts', [EmployeeController::class, 'allAlerts'])->name('alerts.all');
-    Route::get('/advances', [EmployeeController::class, 'allAdvances'])->name('advances.all');
-    Route::get('/advances_deductions', [EmployeeController::class, 'allAdvancesDeductions'])->name('advances.deductions.all');
-    Route::get('/deductions', [EmployeeController::class, 'allDeductions'])->name('deductions.all');
-    Route::get('/increases', [EmployeeController::class, 'allIncreases'])->name('increases.all');
-    Route::get('/assignments', [EmployeeController::class, 'allTemporaryProjectAssignments'])->name('assignments.all');
-    Route::get('/replacements', [EmployeeController::class, 'allReplacements'])->name('replacements.all');
-    Route::get('/projects/{projectId}/employees', [EmployeeController::class, 'employeesByProject']);
-    Route::get('/managers/{managerId}/employees', [EmployeeController::class, 'employeesByManager']);
-    Route::get('/create', [EmployeeController::class, 'create'])->name('create');
-    Route::post('/', [EmployeeController::class, 'store'])->name('store');
-    Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
-    Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->name('edit');
-    Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
-    Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
-    Route::post('/replace', [EmployeeController::class, 'replace'])->name('replace');
-    Route::get('/{employee}/replacements', [EmployeeController::class, 'showReplacements'])->name('replacements');
-    Route::post('/bulk/{action}', [EmployeeActionController::class, 'bulkAction'])->name('action');
-    Route::get('/{employee}/alerts', [EmployeeController::class, 'showAlerts'])->name('alerts');
-    Route::get('/{employee}/deductions', [EmployeeController::class, 'showDeductions'])->name('deductions');
-    Route::get('/{employee}/advances', [EmployeeController::class, 'showAdvances'])->name('advances');
-    Route::get('/{employee}/advances_deductions', [EmployeeController::class, 'showAdvanceDeductions'])->name('advances_deductions');
-    Route::get('/{employee}/increases', [EmployeeController::class, 'showIncreases'])->name('increases');
-    Route::get('/{employee}/assignments', [EmployeeController::class, 'showTemporaryProjectAssignments'])->name('assignments');
-    Route::put('/{employee}/change-password', [EmployeeController::class, 'changePassword'])->name('change-password');
-    Route::post('/{employee}/update-photo', [EmployeeController::class, 'updatePhoto'])->name('updatePhoto');
-});
+    ->prefix('employees')->name('employees.')->group(function () {
+        // Route::middleware(['auth'])->prefix('employees')->name('employees.')->group(function () {
+        Route::get('/', [EmployeeController::class, 'index'])->name('index');
+        Route::get('/actions', [EmployeeController::class, 'actions'])->name('actions');
+        Route::get('/alerts', [EmployeeController::class, 'allAlerts'])->name('alerts.all');
+        Route::get('/advances', [EmployeeController::class, 'allAdvances'])->name('advances.all');
+        Route::get('/advances_deductions', [EmployeeController::class, 'allAdvancesDeductions'])->name('advances.deductions.all');
+        Route::get('/deductions', [EmployeeController::class, 'allDeductions'])->name('deductions.all');
+        Route::get('/increases', [EmployeeController::class, 'allIncreases'])->name('increases.all');
+        Route::get('/assignments', [EmployeeController::class, 'allTemporaryProjectAssignments'])->name('assignments.all');
+        Route::get('/replacements', [EmployeeController::class, 'allReplacements'])->name('replacements.all');
+        Route::get('/histories', [EmployeeWorkHistoryController::class, 'getWorkHistory'])->name('histories.all');
+        Route::get('/projects/{projectId}/employees', [EmployeeController::class, 'employeesByProject']);
+        Route::get('/managers/{managerId}/employees', [EmployeeController::class, 'employeesByManager']);
+        Route::get('/create', [EmployeeController::class, 'create'])->name('create');
+        Route::post('/', [EmployeeController::class, 'store'])->name('store');
+        Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
+        Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->name('edit');
+        Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
+        Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+        Route::post('/replace', [EmployeeController::class, 'replace'])->name('replace');
+        Route::get('/{employee}/replacements', [EmployeeController::class, 'showReplacements'])->name('replacements');
+        Route::post('/bulk/{action}', [EmployeeActionController::class, 'bulkAction'])->name('action');
+        Route::get('/{employee}/alerts', [EmployeeController::class, 'showAlerts'])->name('alerts');
+        Route::get('/{employee}/deductions', [EmployeeController::class, 'showDeductions'])->name('deductions');
+        Route::get('/{employee}/advances', [EmployeeController::class, 'showAdvances'])->name('advances');
+        Route::get('/{employee}/advances_deductions', [EmployeeController::class, 'showAdvanceDeductions'])->name('advances_deductions');
+        Route::get('/{employee}/increases', [EmployeeController::class, 'showIncreases'])->name('increases');
+        Route::get('/{employee}/history', [EmployeeWorkHistoryController::class, 'getWorkHistory'])->name('histories');
+        Route::get('/{employee}/assignments', [EmployeeController::class, 'showTemporaryProjectAssignments'])->name('assignments');
+        Route::put('/{employee}/change-password', [EmployeeController::class, 'changePassword'])->name('change-password');
+        Route::post('/{employee}/update-photo', [EmployeeController::class, 'updatePhoto'])->name('updatePhoto');
+    });
 Route::middleware(['auth'])->prefix('/admin/settings/')->name('settings.')->group(function () {
     Route::post('age-threshold', [SettingController::class, 'updateAgeThreshold'])->name('age_threshold.update');
 });
 Route::get('manager/temporary-assignments', [EmployeeController::class, 'temporaryAssignmentsView'])
     ->name('manager.temporary.assignments')->middleware('auth');
-        Route::post('/admin/update-photo', [DashboardController::class, 'updatePhoto'])->name('admin.updatePhoto');
+Route::post('/admin/update-photo', [DashboardController::class, 'updatePhoto'])->name('admin.updatePhoto');
 
 Route::middleware([
     'auth',
@@ -136,13 +137,13 @@ Route::get('/reports', [DashboardController::class, 'reports'])->name('reports')
 
 Route::get('/test-upload', function () {
     return '<form method="POST" action="/s3-upload-test" enctype="multipart/form-data">
-                '.csrf_field().'
+                ' . csrf_field() . '
                 <input type="file" name="image">
                 <button type="submit">Upload</button>
             </form>';
 })->middleware('auth');
 
-Route::post('/s3-upload-test', function(Request $request) {
+Route::post('/s3-upload-test', function (Request $request) {
     if (!$request->hasFile('image')) {
         return response()->json(['error' => 'No file uploaded.']);
     }
@@ -177,7 +178,6 @@ Route::post('/s3-upload-test', function(Request $request) {
         return response()->json(['error' => $e->getMessage()]);
     }
 })->middleware('auth');
-
 
 
 Route::get('/s3-test', function () {

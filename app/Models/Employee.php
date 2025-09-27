@@ -110,6 +110,12 @@ class Employee extends Model
 
         return $this->translateDurationToArabic("{$diff->y} years, {$diff->m} months, {$diff->d} days");
     }
+    public function currentWorkPeriod()
+    {
+        return $this->hasOne(EmployeeWorkHistory::class)
+            ->whereNull('end_date')
+            ->latest('start_date');
+    }
     public function scopeByProject($query, $projectId)
     {
         return $query->where('project_id', $projectId);

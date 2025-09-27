@@ -17,16 +17,16 @@ class EmployeeViewDataService
             'project_manager' => 'مدير مشروع',
             'hr_manager' => 'مدير موارد بشرية',
             'hr_assistant' => 'مساعد مدير موارد بشرية',
-            'shelf_stacker' => 'مصفف أرفف',
-            'area_manager' => 'مدير منطقة',
-            'supervisor' => 'مشرف',
+//            'shelf_stacker' => 'مصفف أرفف',
+//            'area_manager' => 'مدير منطقة',
+//            'supervisor' => 'مشرف',
         ];
         $allowedForHrManager = [
             'project_manager' => 'مدير مشروع',
             'hr_assistant' => 'مساعد مدير موارد بشرية',
-            'shelf_stacker' => 'مصفف أرفف',
-            'area_manager' => 'مدير منطقة',
-            'supervisor' => 'مشرف',
+//            'shelf_stacker' => 'مصفف أرفف',
+//            'area_manager' => 'مدير منطقة',
+//            'supervisor' => 'مشرف',
         ];
 
         $allowedForProjectManager = [

@@ -603,11 +603,13 @@
                             <i class="fas fa-envelope"></i>
                             <span>Email</span>
                         </a>
+                        @if(\Illuminate\Support\Facades\Auth::user()->role !== 'admin')
                         <button @click="editRequestOpen = true" class="action-button"
                             style="background: linear-gradient(to right, var(--warning), #ff9500); color: white; box-shadow: 0 2px 10px rgba(255, 158, 0, 0.3);">
                             <i class="fas fa-edit"></i>
                             <span>إرسال طلب تعديل</span>
                         </button>
+                        @endif
                         @if ($canReplace)
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#replaceEmployeeModal">
                                 <i class="fas fa-exchange-alt"></i> استبدال موظف
@@ -933,25 +935,30 @@
                 <!-- Uniform Sizes Section -->
                 <div class="unified-section">
                     <div class="section-header">
-                        <h2><i class="bi bi-person-lines-fill"></i>مقاسات الملابس</h2>
+                        <h2><i class="fas fa-tshirt"></i>مقاسات الملابس</h2>
                     </div>
                     <div class="section-body">
                         <div class="info-row">
                             <div class="info-label">
-                                <i class="bi bi-tshirt" style="color: var(--info)"></i>مقاس التي شيرت:
+                                <i class="fas fa-tshirt" style="color: var(--info)"></i>مقاس التي شيرت:
                             </div>
                             <div class="info-value">{{ $emp->user->size_info['Tshirt_size'] }}</div>
                         </div>
 
                         <div class="info-row">
                             <div class="info-label">
-                                <i class="bi bi-slash-square" style="color: var(--secondary)"></i>مقاس البنطال:
+                                <i class="bi bi-pants" style="color: var(--secondary)"></i>مقاس البنطال:
                             </div>
                             <div class="info-value">{{ $emp->user->size_info['pants_size'] }}</div>
                         </div>
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="fas fa-shoe-prints" style="color: black"></i>مقاس الحذاء:
+                            </div>
+                            <div class="info-value">{{ $emp->user->size_info['Shoes_size'] ?? '-' }}</div>
+                        </div>
                     </div>
                 </div>
-
                 <!-- Vehicle Information Section -->
                 @if ($emp->vehicle_info['vehicle_type'] || $emp->vehicle_info['vehicle_model'] || $emp->vehicle_info['vehicle_ID'])
                     <div class="unified-section">

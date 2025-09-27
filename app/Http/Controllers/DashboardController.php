@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $permissions = Permission::all()->groupBy('group');
 
         $accountStatus = $request->query('account_status');
-
+        $managedProjectIds = Project::all();
         $employeesQuery = Employee::with('user');
         $user = Auth::user();
         if ($user->role === 'project_manager') {
@@ -67,7 +67,7 @@ class DashboardController extends Controller
                 ->pluck('nationality')
                 ->unique()
                 ->count(),
-
+            'managedProjectIds' => $managedProjectIds->count(),
             'role_counts' => [
                 'project_manager' => $employees->filter(fn($emp) => $emp->user?->role === 'project_manager')->count(),
                 'area_manager' => $employees->filter(fn($emp) => $emp->user?->role === 'area_manager')->count(),

@@ -32,10 +32,15 @@ class EmployeeRequestController extends Controller
         $requests = $this->employeeRequestService->filterRequests($filters);
 
         $resources = EmployeeRequestResource::collection($requests);
+        $pendedRequests =$requests->where('status','pending')->count();
+        $approvedRequests =$requests->where('status','approved')->count();
+        $rejectedRequests =$requests->where('status','rejected')->count();
+        $allRequests =$requests->count();
         $projects = Project::all();
         $requestTypes = RequestType::all();
         $role = $role = Role::where('name', Auth::user()->role)->first();
-        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role'));
+        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role','pendedRequests', 'approvedRequests', 'rejectedRequests', 'allRequests'));
+
     }
     public function storeEditRequest(Request $request)
     {

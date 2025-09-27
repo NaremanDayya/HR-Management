@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\EmployeeWorkHistory;
 use App\Models\User;
 use App\Models\Employee;
 use Illuminate\Http\Request;
@@ -68,6 +69,12 @@ class EmployeeService
             'owner_account_name' => $data['owner_account_name'],
             'iban' => 'SA' . $data['iban'],
             'bank_name' => $data['bank_name'],
+        ]);
+        EmployeeWorkHistory::create([
+            'employee_id' => $employee->id,
+            'start_date' => $employee->joining_date,
+            'end_date' => null,
+            'status' => 'active',
         ]);
         if (isset($data['project'])) {
             $employee->project_id = $data['project'];

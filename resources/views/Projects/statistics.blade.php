@@ -23,7 +23,7 @@
 
     <div class="w-full rtl p-6 bg-gray-50 min-h-screen">
 
-        <div class="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl shadow-xl p-4 mb-8 text-white">
+        <div class="bg-gradient-to-r from-purple-300 to-indigo-400 rounded-2xl shadow-xl p-4 mb-8 text-white">
             <div class="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
                 <div class="text-center lg:text-right">
                     <h1 class="text-2xl font-bold mb-2 tracking-tight">إحصائيات المشاريع</h1>

@@ -56,7 +56,27 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-medium">إجمالي المشاريع</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ $statistics['managedProjectIds'] }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-project-diagram ml-2 group-hover:text-white transition-colors"></i>
+                    </div>
+                </div>
+                <a href="{{ route('projects-statistics') }}"
+                   class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    عرض الكل
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+            </div>
+{{--            test--}}
             <!-- Employee Stats -->
             <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                 <div class="flex justify-between items-start">
@@ -367,6 +387,7 @@
                     @endphp
 
                     <div class="border rounded-lg p-3 hover:shadow-md transition-shadow group">
+                        <a href="{{route('employees.index',['nationality' => $baseNationality])}}">
                         <h3
                             class="text-gray-600 font-medium text-center flex items-center justify-center space-x-1 rtl:space-x-reverse">
                             @if ($flagCode)
@@ -376,6 +397,7 @@
                             <span>{{ $nationality }}</span>
                         </h3>
                         <p class="text-2xl font-bold text-center mt-1">{{ $count }}</p>
+                        </a>
                     </div>
                 @endforeach
 
