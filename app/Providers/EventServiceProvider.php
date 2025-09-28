@@ -13,9 +13,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
    protected $listen = [
-    \Illuminate\Auth\Events\Authenticated::class => [
-        LogEmployeeIp::class,
-    ],
+//    \Illuminate\Auth\Events\Authenticated::class => [
+//        LogEmployeeIp::class,
+//    ],
 ];
 
     /**
