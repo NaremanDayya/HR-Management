@@ -12,7 +12,11 @@ export default {
         './vendor/namu/wirechat/resources/views/**/*.blade.php',
         './vendor/namu/wirechat/src/Livewire/**/*.php',
     ],
-
+    safelist: [
+        'bg-blue-100', 'bg-blue-500', 'bg-red-500', 'bg-green-500',
+        'text-blue-600', 'text-white', 'bg-white/10', 'bg-white/20',
+        'from-purple-300', 'to-indigo-400',
+    ],
     theme: {
         extend: {
             fontFamily: {

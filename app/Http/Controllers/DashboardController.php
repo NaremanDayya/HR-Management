@@ -28,7 +28,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $roles = Role::with('permissions')
-            ->whereIn('name', ['project_manager', 'hr_manager', 'hr_assistant'])
+            ->whereNotIn('name', ['admin', 'shelf_stacker', 'area_manager', 'supervisor'])
             ->get();
 
         $permissions = Permission::all()->groupBy('group');
@@ -263,5 +263,21 @@ class DashboardController extends Controller
         $user->save();
 
         return back()->with('success', 'تم تغيير الصورة الشخصية بنجاح.');
+    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:roles,name'
+        ]);
+
+        $role = Role::create([
+            'name' => $request->name,
+            'guard_name' => 'web'
+        ]);
+
+        return response()->json([
+            'message' => 'تم إضافة الدور بنجاح',
+            'role' => $role
+        ]);
     }
 }

@@ -87,6 +87,7 @@ Route::middleware([
     Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('roles/{role}/permissions', [DashboardController::class, 'edit'])->name('admin.roles.permissions.edit');
         Route::put('roles/{role}/permissions', [DashboardController::class, 'update'])->name('admin.roles.permissions.update');
+        Route::post('roles', [DashboardController::class, 'store'])->name('admin.roles.store');
     });
     Route::post('/admin/change-password', [DashboardController::class, 'changePassword'])->name('admin.change-password')->middleware('auth');
 
