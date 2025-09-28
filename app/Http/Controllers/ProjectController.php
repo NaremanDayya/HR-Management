@@ -117,13 +117,17 @@ class ProjectController extends Controller
         $maxActiveEmployeesProject = $projects->sortByDesc('active_employees_count')->first();
         $minActiveEmployeesProject = $projects->sortBy('active_employees_count')->first();
 
-        $ageGroups = $this->getEmployeeAgies($request);
-        $nationalities = $this->getEmployeeNationalities($request);
-        $salariesStats = $this->getEmployeeSalariesStats($request);
-        $salaryCounts = $this->getEmployeeSalaryCounts($request);
+        // Get the project IDs for the filtered projects
         $projectIds = $query->pluck('id');
-        // Add employee roles statistics
-        $rolesStats = Employee::with('user') // Eager load the user relationship
+
+        // Update all statistics methods to filter by project IDs
+        $ageGroups = $this->getEmployeeAgies($request, $projectIds);
+        $nationalities = $this->getEmployeeNationalities($request, $projectIds);
+        $salariesStats = $this->getEmployeeSalariesStats($request, $projectIds);
+        $salaryCounts = $this->getEmployeeSalaryCounts($request, $projectIds);
+
+        // Add employee roles statistics with project filtering
+        $rolesStats = Employee::with('user')
             ->when($request->account_status === 'active', function ($q) {
                 $q->where('account_status', 'active');
             })
@@ -132,28 +136,28 @@ class ProjectController extends Controller
             })
             ->whereIn('project_id', $projectIds)
             ->select(DB::raw('users.role as role'), DB::raw('count(*) as count'))
-            ->join('users', 'employees.user_id', '=', 'users.id') // Join with users table
-            ->groupBy('users.role') // Group by the role from users table
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->groupBy('users.role')
             ->orderByDesc('count')
             ->pluck('count', 'role')
             ->toArray();
 
         return view('Projects.statistics', compact(
-            'totalProjects',
-            'projectsByManager',
-            'projects',
-            'maxActiveEmployeesProject',
-            'minActiveEmployeesProject',
-            'ageGroups',
-            'nationalities',
-            'salariesStats',
-            'salaryCounts',
-            'totalActiveEmployees',
-            'totalInActiveEmployees',
-            'rolesStats' // Add this
-        ) + $this->dropdownService->getDropdownData());
+                'totalProjects',
+                'projectsByManager',
+                'projects',
+                'maxActiveEmployeesProject',
+                'minActiveEmployeesProject',
+                'ageGroups',
+                'nationalities',
+                'salariesStats',
+                'salaryCounts',
+                'totalActiveEmployees',
+                'totalInActiveEmployees',
+                'rolesStats'
+            ) + $this->dropdownService->getDropdownData());
     }
-    public function getEmployeeAgies(Request $request)
+    public function getEmployeeAgies(Request $request, $projectIds = null)
     {
         $query = Employee::with('user');
 
@@ -163,6 +167,11 @@ class ProjectController extends Controller
             $query->whereHas('user', function ($q) use ($status) {
                 $q->where('account_status', $status);
             });
+        }
+
+        // Filter by project IDs if provided
+        if ($projectIds) {
+            $query->whereIn('project_id', $projectIds);
         }
 
         $employees = $query->get();
@@ -177,7 +186,7 @@ class ProjectController extends Controller
         return $ageGroups;
     }
 
-    public function getEmployeeNationalities(Request $request)
+    public function getEmployeeNationalities(Request $request, $projectIds = null)
     {
         $status = $request->get('account_status');
 
@@ -190,15 +199,19 @@ class ProjectController extends Controller
             $query->where('users.account_status', $status);
         }
 
+        // Filter by project IDs if provided
+        if ($projectIds) {
+            $query->whereIn('employees.project_id', $projectIds);
+        }
+
         $results = $query->get();
 
-        // تحويل النتيجة إلى مصفوفة مفتاحية nationality => count
         return $results->mapWithKeys(function ($item) {
             return [$item->nationality => $item->count];
         });
     }
 
-    public function getEmployeeSalariesStats(Request $request)
+    public function getEmployeeSalariesStats(Request $request, $projectIds = null)
     {
         $status = $request->get('account_status');
 
@@ -210,6 +223,11 @@ class ProjectController extends Controller
             $query->whereHas('user', function ($q) use ($status) {
                 $q->where('account_status', $status);
             });
+        }
+
+        // Filter by project IDs if provided
+        if ($projectIds) {
+            $query->whereIn('project_id', $projectIds);
         }
 
         $employees = $query->get();
@@ -226,7 +244,8 @@ class ProjectController extends Controller
             ]
         ];
     }
-    public function getEmployeeSalaryCounts(Request $request)
+
+    public function getEmployeeSalaryCounts(Request $request, $projectIds = null)
     {
         $status = $request->get('account_status');
 
@@ -240,9 +259,13 @@ class ProjectController extends Controller
             $query->where('users.account_status', $status);
         }
 
+        // Filter by project IDs if provided
+        if ($projectIds) {
+            $query->whereIn('employees.project_id', $projectIds);
+        }
+
         $results = $query->get();
 
-        // تحويل النتيجة إلى مصفوفة salary => count
         return $results->mapWithKeys(function ($item) {
             return [$item->salary => $item->count];
         });
