@@ -32,7 +32,7 @@
 
                 <div class="flex flex-col sm:flex-row items-center gap-3">
                     <button
-                        class="btn btn-purple d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple text-purple-600 shadow-lg"
+                        class="btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-500 text-white shadow-lg hover:bg-purple-600"
                         data-bs-toggle="modal" data-bs-target="#createProjectModal">
                         <i class="fas fa-plus"></i>
                         <span>إضافة مشروع</span>
@@ -40,14 +40,12 @@
 
                     <div class="export-btn-group no-print flex gap-2">
                         <button id="pdfExportBtn"
-                            class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg"
-                            style="background: linear-gradient(195deg, #e74c3c 0%, #c0392b 100%);">
+                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-red-500 hover:bg-red-600 text-white">
                             <i class="fas fa-file-pdf"></i> تصدير PDF
                         </button>
 
                         <button id="excelExportBtn"
-                            class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg"
-                            style="background: linear-gradient(195deg, #2ecc71 0%, #27ae60 100%);">
+                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-green-500 hover:bg-green-600 text-white">
                             <i class="fas fa-file-excel"></i> تصدير Excel
                         </button>
                     </div>

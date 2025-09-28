@@ -274,7 +274,7 @@ class DashboardController extends Controller
             'name' => $request->name,
             'guard_name' => 'web'
         ]);
-
+        $role->load('permissions');
         return response()->json([
             'message' => 'تم إضافة الدور بنجاح',
             'role' => $role

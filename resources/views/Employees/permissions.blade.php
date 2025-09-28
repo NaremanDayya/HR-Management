@@ -208,7 +208,7 @@
                         toastr.success(response.message);
                         $('#permissionsModal').modal('hide');
                         // Refresh the page to see changes
-                        setTimeout(() => location.reload(), 1000);
+                        updateRolePermissions(currentRoleId, response.permissions);
                     },
                     error: function(xhr) {
                         let errorMessage = 'حدث خطأ أثناء حفظ الصلاحيات';
@@ -257,7 +257,7 @@
                         $('#addRoleModal').modal('hide');
                         $('#addRoleForm')[0].reset();
                         // Refresh the page to see the new role
-                        setTimeout(() => location.reload(), 1000);
+                        addRoleToTable(response.role);
                     },
                     error: function(xhr) {
                         let errorMessage = 'حدث خطأ أثناء إضافة الدور';
@@ -275,7 +275,83 @@
                     }
                 });
             });
+            function updateRolePermissions(roleId, permissions) {
+                const permissionElements = permissions.map(permission =>
+                    `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${permission}</span>`
+                ).join('');
 
+                // Find the row and update permissions cell
+                $(`button[data-role-id="${roleId}"]`).closest('tr').find('td:eq(1) .text-sm').html(`
+        <div class="flex flex-wrap gap-1">
+            ${permissionElements}
+        </div>
+    `);
+            }
+            function addRoleToTable(role) {
+                // Create permissions HTML (empty since new role has no permissions)
+                const permissionsHtml = '<span class="text-gray-400">لا توجد صلاحيات</span>';
+
+                // Create the new table row
+                const newRow = `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">${role.name}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <div class="text-sm text-gray-500">
+                    ${permissionsHtml}
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 edit-permissions-btn"
+                    data-role-id="${role.id}"
+                    data-role-name="${role.name}">
+                    تعديل
+                </button>
+            </td>
+        </tr>
+    `;
+
+                // Append the new row to the table body
+                $('table tbody').append(newRow);
+
+                // Re-initialize the edit button click handler for the new row
+                $('.edit-permissions-btn').off('click').on('click', function() {
+                    currentRoleId = $(this).data('role-id');
+                    const roleName = $(this).data('role-name');
+
+                    $('#modalRoleName').text(roleName);
+                    $('#permissionsForm').attr('action', `/admin/roles/${currentRoleId}/permissions`);
+
+                    // Reset form and checkboxes
+                    $('#permissionsForm')[0].reset();
+                    $('.select-all-group').prop('checked', false);
+
+                    // Fetch current permissions for this role
+                    $.get(`/admin/roles/${currentRoleId}/permissions`, function(response) {
+                        if (response.permissions) {
+                            response.permissions.forEach(permission => {
+                                $(`input[name="permissions[]"][value="${permission}"]`).prop('checked', true);
+                            });
+
+                            // Update "Select All" checkboxes
+                            $('.select-all-group').each(function() {
+                                const group = $(this).data('group');
+                                const allChecked = $(
+                                    `input.permission-checkbox[data-group="${group}"]:not(:checked)`
+                                ).length === 0;
+                                $(this).prop('checked', allChecked);
+                            });
+                        }
+                    });
+
+                    $('#permissionsModal').modal('show');
+                });
+            }
             // Reset form when modal is closed
             $('#addRoleModal').on('hidden.bs.modal', function() {
                 $('#addRoleForm')[0].reset();
