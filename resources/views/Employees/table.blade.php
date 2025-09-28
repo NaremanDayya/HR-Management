@@ -666,8 +666,8 @@
                                     <i class="fas fa-user-lock feature-icon"></i>
                                 </a>
                             @endif
-                                @if (($role && $role->hasPermissionTo('view_financials')) || Auth::user()->role === 'admin')
-{{--                                                                @if (Auth::user()->role === 'admin')--}}
+{{--                                @if (($role && $role->hasPermissionTo('view_financials')) || Auth::user()->role === 'admin')--}}
+                                                                @if (Auth::user()->role === 'admin')
                                     <a href="{{ route('financials.all') }}" class="btn btn-icon-only"
                                        title="السجل المالي الموظفين">
                                         <i class="fas fa-coins feature-icon"></i>
