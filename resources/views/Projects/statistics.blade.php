@@ -23,7 +23,7 @@
 
     <div class="w-full rtl p-6 bg-gray-50 min-h-screen">
 
-        <div class="bg-gradient-to-r from-purple-300 to-indigo-400 rounded-2xl shadow-xl p-4 mb-8 text-white">
+        <div class="bg-gradient-to-r from-purple-400 to-indigo-500 rounded-2xl shadow-xl p-4 mb-8 text-black">
             <div class="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
                 <div class="text-center lg:text-right">
                     <h1 class="text-2xl font-bold mb-2 tracking-tight">إحصائيات المشاريع</h1>
@@ -32,7 +32,7 @@
 
                 <div class="flex flex-col sm:flex-row items-center gap-3">
                     <button
-                        class="btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-500 text-white shadow-lg hover:bg-purple-600"
+                        class="btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-500 text-black shadow-lg hover:bg-purple-600"
                         data-bs-toggle="modal" data-bs-target="#createProjectModal">
                         <i class="fas fa-plus"></i>
                         <span>إضافة مشروع</span>
@@ -40,12 +40,12 @@
 
                     <div class="export-btn-group no-print flex gap-2">
                         <button id="pdfExportBtn"
-                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-red-500 hover:bg-red-600 text-white">
+                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-red-500 hover:bg-red-600 text-black">
                             <i class="fas fa-file-pdf"></i> تصدير PDF
                         </button>
 
                         <button id="excelExportBtn"
-                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-green-500 hover:bg-green-600 text-white">
+                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-green-500 hover:bg-green-600 text-black">
                             <i class="fas fa-file-excel"></i> تصدير Excel
                         </button>
                     </div>
@@ -56,28 +56,28 @@
                 class="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
                     <div
-                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-white backdrop-blur-md border border-white/20">
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">إجمالي الموظفين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-blue-500 text-white">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-blue-500 text-black">
                             {{ $totalActiveEmployees + $totalInActiveEmployees }}
                         </span>
                     </div>
 
                     <div
-                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-white backdrop-blur-md border border-white/20">
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">الموظفين النشطين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-green-500 text-white">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-green-500 text-black">
                             {{ $totalActiveEmployees }}
                         </span>
                     </div>
 
                     <div
-                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-white backdrop-blur-md border border-white/20">
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">الموظفين غير النشطين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-red-500 text-white">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-red-500 text-black">
                             {{ $totalInActiveEmployees }}
                         </span>
                     </div>
@@ -86,11 +86,11 @@
                     <div class="flex flex-wrap justify-center gap-3">
                         <a href="{{ route('projects-statistics') }}"
                             class="px-5 py-2.5 text-sm font-bold rounded-full transition-all transform hover:scale-105
-                    {{ !request()->route('project') ? 'bg-white text-blue-600 shadow-lg' : 'bg-white/10 text-white hover:bg-white/20' }}">
+                    {{ !request()->route('project') ? 'bg-white text-blue-600 shadow-lg' : 'bg-white/10 text-black hover:bg-white/20' }}">
                             جميع المشاريع
                             <span
                                 class="inline-flex items-center justify-center w-6 h-6 ml-1 text-xs font-bold rounded-full
-                    {{ !request()->route('project') ? 'bg-blue-100 text-blue-600' : 'bg-white/20 text-white' }}">
+                    {{ !request()->route('project') ? 'bg-blue-100 text-blue-600' : 'bg-white/20 text-black' }}">
                                 {{ $totalProjects }}
                             </span>
                         </a>
@@ -98,7 +98,7 @@
                         <!-- Projects Dropdown -->
                         <div class="relative group">
                             <button
-                                class="px-5 py-2.5 text-sm font-bold rounded-full transition-all bg-white/10 text-white hover:bg-white/20 flex items-center">
+                                class="px-5 py-2.5 text-sm font-bold rounded-full transition-all bg-white/10 text-black hover:bg-white/20 flex items-center">
                                 المشاريع
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -185,10 +185,10 @@
 
                     <!-- Year Filter -->
                     {{-- <div class="flex items-center gap-3">
-                        <label for="year" class="text-sm text-white font-medium whitespace-nowrap">السنة:</label>
+                        <label for="year" class="text-sm text-black font-medium whitespace-nowrap">السنة:</label>
                         <div class="relative">
                             <select name="year" id="year" onchange="this.form.submit()"
-                                class="appearance-none w-full text-sm rounded-xl px-5 py-2 bg-purple-600 border border-purple/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200">
+                                class="appearance-none w-full text-sm rounded-xl px-5 py-2 bg-purple-600 border border-purple/30 text-black focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition duration-200">
                                 @php
                                     $currentYear = request('year', now()->year);
                                     $startYear = now()->year - 10;
@@ -202,7 +202,7 @@
                             </select>
 
                             <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                                <svg class="w-4 h-4 text-white opacity-70" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                <svg class="w-4 h-4 text-black opacity-70" xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -259,7 +259,7 @@
                                 إلغاء
                             </button>
                             <button type="submit"
-                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                class="px-6 py-2 bg-blue-600 text-black rounded-lg hover:bg-blue-700 transition">
                                 حفظ
                             </button>
                         </div>
@@ -285,7 +285,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="nationalitiesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-indigo-600 text-white text-lg rounded-t-xl">
+                        <thead class="bg-indigo-600 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الجنسية</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
@@ -357,7 +357,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="ageGroupsTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-green-600 text-white text-lg rounded-t-xl">
+                        <thead class="bg-green-600 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-green-700">العمر</th>
                                 <th class="py-3 px-5 border border-green-700">عدد الموظفين</th>
@@ -475,7 +475,7 @@
                 <!-- جدول توزيع الرواتب -->
                 <div class="overflow-x-auto">
                     <table id="salariesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-indigo-600 text-white text-lg rounded-t-xl">
+                        <thead class="bg-indigo-600 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الراتب (ر.س)</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
@@ -514,7 +514,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="rolesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-purple-600 text-white text-lg rounded-t-xl">
+                        <thead class="bg-purple-600 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-purple-700">الدور الوظيفي</th>
                                 <th class="py-3 px-5 border border-purple-700">عدد الموظفين</th>
@@ -1006,13 +1006,13 @@
 
                             const excelBtn = document.createElement('button');
                             excelBtn.className =
-                                'px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm';
+                                'px-3 py-1 bg-green-500 text-black rounded hover:bg-green-600 text-sm';
                             excelBtn.innerHTML = '<i class="fas fa-file-excel mr-1"></i> Excel';
                             excelBtn.onclick = () => exportToExcel(table.id, table.title);
                             exportDiv.appendChild(excelBtn);
 
                             const pdfBtn = document.createElement('button');
-                            pdfBtn.className = 'px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm';
+                            pdfBtn.className = 'px-3 py-1 bg-red-500 text-black rounded hover:bg-red-600 text-sm';
                             pdfBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i> PDF';
                             pdfBtn.onclick = () => exportToPDF(table.id, table.title, table.title);
                             exportDiv.appendChild(pdfBtn);
