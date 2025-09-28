@@ -12,5 +12,6 @@
     "add_employee": "إضافة موظف",
     "add_project_manager": "إضافة مدير مشروع",
     "change_employees_password": "تحديد كلمات مرور الموظفين",
-    "view_credentials": "وصول بيانات دخول الموظفين"
+    "view_credentials": "وصول بيانات دخول الموظفين",
+    "view_financials": "وصول السجل المالي للموظفين"
 }

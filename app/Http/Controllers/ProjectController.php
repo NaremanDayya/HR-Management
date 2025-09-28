@@ -121,7 +121,7 @@ class ProjectController extends Controller
         $nationalities = $this->getEmployeeNationalities($request);
         $salariesStats = $this->getEmployeeSalariesStats($request);
         $salaryCounts = $this->getEmployeeSalaryCounts($request);
-
+        $projectIds = $query->pluck('id');
         // Add employee roles statistics
         $rolesStats = Employee::with('user') // Eager load the user relationship
             ->when($request->account_status === 'active', function ($q) {
@@ -130,6 +130,7 @@ class ProjectController extends Controller
             ->when($request->account_status === 'inactive', function ($q) {
                 $q->where('account_status', 'inactive');
             })
+            ->whereIn('project_id', $projectIds)
             ->select(DB::raw('users.role as role'), DB::raw('count(*) as count'))
             ->join('users', 'employees.user_id', '=', 'users.id') // Join with users table
             ->groupBy('users.role') // Group by the role from users table
