@@ -288,7 +288,7 @@ class EmployeeController extends Controller
                 'message' => 'تم استبدال الموظف بنجاح وإضافة الموظف الجديد',
                 'data' => [
                     'new_employee' => new EmployeeResource($newEmployee),
-                    'redirect_url' => route('employees.show', $newEmployee->id)
+                    'redirect_url' => route('Employees.show', $newEmployee->id)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -307,7 +307,7 @@ class EmployeeController extends Controller
     public function showReplacements($employee)
     {
         $oldEmployee = Employee::with(['replacements', 'replacements.newEmployee'])->first();
-        return view('employees.replacements', compact('oldEmployee'));
+        return view('Employees.replacements', compact('oldEmployee'));
     }
     public function showAlerts(Employee $employee)
     {
@@ -360,7 +360,7 @@ class EmployeeController extends Controller
         $staticIncreases = $increases->where('is_reward', false);
         $rewardIncreases = $increases->where('is_reward', true);
 
-        return view('employees.increases', [
+        return view('Employees.increases', [
             'employee' => $employee,
             'increases' => $increases,
             'staticIncreasesTotal' => $staticIncreases->sum('increase_amount'),

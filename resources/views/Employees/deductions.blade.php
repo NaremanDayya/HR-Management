@@ -135,20 +135,20 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 deduction-shadow deduction-gradient-bg">
-            <div class="deduction-header-gradient bg-red-900 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-red-50 hover:bg-red-100 border-l-4 border-red-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-red-800 bg-opacity-80">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="bg-red-100 p-3 rounded-full group-hover:bg-red-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">خصومات الموظف</h2>
-                        <p class="opacity-90">{{ $employee->user->name }}</p>
+                        <h2 class="text-xl font-bold text-gray-800">خصومات الموظف</h2>
+                        <p class="text-gray-600">{{ $employee->user->name }}</p>
                     </div>
-                      <form method="GET" action="{{ route('employees.deductions', $employee->id) }}">
+                    <form method="GET" action="{{ route('employees.deductions', $employee->id) }}">
                         <select name="year" onchange="this.form.submit()"
-                            class="bg-red-800 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring focus:ring-red-500 text-sm">
+                                class="bg-red-100 hover:bg-red-200 text-gray-800 px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 transition-all text-sm">
                             @php
                                 $currentYear = request('year', now()->year);
                                 $startYear = now()->year - 10;
@@ -163,19 +163,19 @@
                     </form>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span class="deduction-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ number_format($employee->deductions->sum('value')) }} ر.س إجمالي الخصومات
-                    </span>
-                    <span class="deduction-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ count($employee->deductions) }} خصم
-                    </span>
-                     <a href="{{ route('employees.deductions.all') }}"
-               class="bg-red-800 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>جميع الخصومات</span>
-            </a>
+        <span class="bg-red-100 hover:bg-red-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ number_format($employee->deductions->sum('value')) }} ر.س إجمالي الخصومات
+        </span>
+                    <span class="bg-red-100 hover:bg-red-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ count($employee->deductions) }} خصم
+        </span>
+                    <a href="{{ route('employees.deductions.all') }}"
+                       class="bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span>جميع الخصومات</span>
+                    </a>
                 </div>
             </div>
         </div>

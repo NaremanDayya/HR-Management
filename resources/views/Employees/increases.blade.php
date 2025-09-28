@@ -121,30 +121,30 @@
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Header Section -->
         <div class="rounded-xl overflow-hidden mb-6 increase-shadow increase-gradient-bg">
-            <div class="increase-header-gradient bg-green-800 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-green-50 hover:bg-green-100 border-l-4 border-green-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <div class="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">زيادات راتب الموظف</h2>
-                        <p class="opacity-90">{{ $employee->user->name }}</p>
+                        <h2 class="text-xl font-bold text-gray-800">زيادات راتب الموظف</h2>
+                        <p class="text-gray-600">{{ $employee->user->name }}</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span class="increase-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ number_format($employee->salary) }} ر.س الراتب الحالي
-                    </span>
+        <span class="bg-green-100 hover:bg-green-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ number_format($employee->salary) }} ر.س الراتب الحالي
+        </span>
                     <a href="{{ route('employees.increases.all') }}"
-                        class="bg-green-800 hover:bg-green-600 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                       class="bg-green-100 hover:bg-green-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-green-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                         <span>جميع الزيادات</span>
                     </a>

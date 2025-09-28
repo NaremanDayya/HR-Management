@@ -76,26 +76,27 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 deductions-shadow deductions-gradient-bg">
-            <div class="deductions-header-gradient bg-red-800 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-red-50 hover:bg-red-100 border-l-4 border-red-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-red-900">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    <div class="bg-red-100 p-3 rounded-full group-hover:bg-red-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">خصومات الموظفين</h2>
-                        <p class="opacity-90">إجمالي الخصومات: {{ number_format($deductions->sum('value')) }} ر.س</p>
+                        <h2 class="text-xl font-bold text-gray-800">خصومات الموظفين</h2>
+                        <p class="text-gray-600">إجمالي الخصومات: {{ number_format($deductions->sum('value')) }} ر.س</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span class="deductions-badge px-3 py-1 rounded-full text-sm font-medium">{{ $deductions->count() }}
-                        خصم</span>
+        <span class="bg-red-100 hover:bg-red-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ $deductions->count() }} خصم
+        </span>
                     <button onclick="window.print()"
-                            class="bg-red-900 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-red-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                   d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
                                   clip-rule="evenodd"/>

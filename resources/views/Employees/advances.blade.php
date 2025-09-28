@@ -126,22 +126,22 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 advance-shadow advance-gradient-bg">
-            <div class="advance-header-gradient bg-teal-700 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-teal-50 hover:bg-teal-100 border-l-4 border-teal-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-teal-900 bg-opacity-80">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <div class="bg-teal-100 p-3 rounded-full group-hover:bg-teal-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">سلف الموظف</h2>
-                        <p class="opacity-90">{{ $employee->user->name }}</p>
+                        <h2 class="text-xl font-bold text-gray-800">سلف الموظف</h2>
+                        <p class="text-gray-600">{{ $employee->user->name }}</p>
                     </div>
                     <form method="GET" action="{{ route('employees.advances', $employee->id) }}">
                         <select name="year" onchange="this.form.submit()"
-                            class="bg-teal-800 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 text-sm">
+                                class="bg-teal-100 hover:bg-teal-200 text-gray-800 px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 transition-all text-sm">
                             @php
                                 $currentYear = request('year', now()->year);
                                 $startYear = now()->year - 10;
@@ -157,35 +157,31 @@
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
                     <a href="{{ route('employees.advances.all') }}"
-                        class="bg-teal-900 bg-opacity-80 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                       class="bg-teal-100 hover:bg-teal-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-teal-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
                         <span>جميع السلف</span>
                     </a>
                     <a href="{{ route('employees.advances_deductions', $employee->id) }}"
-                        class="bg-teal-900 bg-opacity-80 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                       class="bg-teal-100 hover:bg-teal-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-teal-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v8m0 0H6m6 0h6M4 6h16M4 6v12a2 2 0 002 2h12a2 2 0 002-2V6M4 6l8 6 8-6" />
+                                  d="M12 8v8m0 0H6m6 0h6M4 6h16M4 6v12a2 2 0 002 2h12a2 2 0 002-2V6M4 6l8 6 8-6" />
                         </svg>
                         <span>خصومات السلف</span>
                     </a>
-                    <span class="advance-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ number_format($employee->advances->where('status', 'approved')->sum('amount')) }} ر.س إجمالي
-                        السلف
-                    </span>
-
-                    <span class="advance-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ $employee->advances->count() }} طلبات
-                    </span>
-
+                    <span class="bg-teal-100 hover:bg-teal-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ number_format($employee->advances->where('status', 'approved')->sum('amount')) }} ر.س إجمالي السلف
+        </span>
+                    <span class="bg-teal-100 hover:bg-teal-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ $employee->advances->count() }} طلبات
+        </span>
                 </div>
-            </div>
-        </div>
+            </div>        </div>
 
         <!-- Advances Table -->
         <div class="bg-white rounded-xl overflow-hidden advance-shadow">

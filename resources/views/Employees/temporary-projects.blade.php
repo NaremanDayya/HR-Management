@@ -89,20 +89,20 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 assignment-shadow assignment-gradient-bg">
-            <div class="assignment-header-gradient bg-teal-950 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-teal-50 hover:bg-teal-100 border-l-4 border-teal-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-teal-900">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="bg-teal-100 p-3 rounded-full group-hover:bg-teal-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">التكليفات المؤقتة للموظف</h2>
-                        <p class="opacity-90">{{ $employee->user->name }}</p>
+                        <h2 class="text-xl font-bold text-gray-800">التكليفات المؤقتة للموظف</h2>
+                        <p class="text-gray-600">{{ $employee->user->name }}</p>
                     </div>
                     <form method="GET" action="{{ route('employees.assignments', $employee->id) }}">
                         <select name="year" onchange="this.form.submit()"
-                            class="bg-teal-800 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring focus:ring-teal-500 text-sm">
+                                class="bg-teal-100 hover:bg-teal-200 text-gray-800 px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 transition-all text-sm">
                             @php
                                 $currentYear = request('year', now()->year);
                                 $startYear = now()->year - 10;
@@ -117,19 +117,19 @@
                     </form>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span class="assignment-badge px-3 py-1 rounded-full text-sm font-medium">
-                        {{ $employee->temporaryAssignments->where('status', 'approved')->count() }} معتمدة
-                    </span>
-                    <span class="assignment-badge px-3 py-1 rounded-full text-sm font-medium bg-teal-700">
-                        {{ $employee->temporaryAssignments->count() }} طلبات
-                    </span>
-                     <a href="{{ route('employees.assignments.all') }}"
-               class="bg-teal-800 hover:bg-teal-600 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>جميع التكليفات المؤقتة</span>
-            </a>
+        <span class="bg-teal-100 hover:bg-teal-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ $employee->temporaryAssignments->where('status', 'approved')->count() }} معتمدة
+        </span>
+                    <span class="bg-teal-100 hover:bg-teal-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ $employee->temporaryAssignments->count() }} طلبات
+        </span>
+                    <a href="{{ route('employees.assignments.all') }}"
+                       class="bg-teal-100 hover:bg-teal-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-teal-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        <span>جميع التكليفات المؤقتة</span>
+                    </a>
                 </div>
             </div>
         </div>

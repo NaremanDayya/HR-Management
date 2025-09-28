@@ -57,57 +57,74 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
        <div class="rounded-xl overflow-hidden mb-6 alert-shadow alert-gradient-bg">
-    <div class="alert-header-gradient bg-red-800 px-6 py-4 flex items-center justify-between text-white">
-        <div class="flex items-center space-x-4 rtl:space-x-reverse">
-            <div class="p-3 rounded-full bg-red-900">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold">إنذارات الموظف</h2>
-                <p class="opacity-90">{{ $employee->user->name }}</p>
-            </div>
-              <form method="GET" action="{{ route('employees.alerts', $employee->id) }}">
-                        <select name="year" onchange="this.form.submit()"
-                            class="bg-red-800 text-white px-3 py-1 rounded-lg focus:outline-none focus:ring focus:ring-red-500 text-sm">
-                            @php
-                                $currentYear = request('year', now()->year);
-                                $startYear = now()->year - 10;
-                                $endYear = now()->year + 1;
-                            @endphp
-                            @for ($year = $endYear; $year >= $startYear; $year--)
-                                <option value="{{ $year }}" @selected($year == $currentYear)>
-                                    {{ $year }}
-                                </option>
-                            @endfor
-                        </select>
-                    </form>
-        </div>
-        <div class="flex items-center space-x-3 rtl:space-x-reverse">
-            <span class="alert-badge px-3 py-1 rounded-full text-sm font-medium">{{ count($employee->alerts) }}
-                إنذار</span>
-            <a href="{{ route('employees.alerts.all') }}"
-               class="bg-red-800 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>جميع الإنذارات</span>
-            </a>
-            <button onclick="window.print()"
-                class="bg-grey bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span>طباعة</span>
-            </button>
-        </div>
-    </div>
-</div>
+           <div class="bg-red-50 hover:bg-red-100 border-l-4 border-red-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
+               <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                   <div class="bg-red-100 p-3 rounded-full group-hover:bg-red-200 transition-all">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                       </svg>
+                   </div>
+                   <div>
+                       <h2 class="text-xl font-bold text-gray-800">إنذارات الموظف</h2>
+                       <p class="text-gray-600">{{ $employee->user->name }}</p>
+                   </div>
+                   <form method="GET" action="{{ route('employees.alerts', $employee->id) }}">
+                       <select name="year" onchange="this.form.submit()"
+                               class="bg-red-100 hover:bg-red-200 text-gray-800 px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 transition-all text-sm">
+                           @php
+                               $currentYear = request('year', now()->year);
+                               $startYear = now()->year - 10;
+                               $endYear = now()->year + 1;
+                           @endphp
+                           @for ($year = $endYear; $year >= $startYear; $year--)
+                               <option value="{{ $year }}" @selected($year == $currentYear)>
+                                   {{ $year }}
+                               </option>
+                           @endfor
+                       </select>
+                   </form>
+               </div>
+               <div class="flex items-center space-x-3 rtl:space-x-reverse">
+        <span class="bg-red-100 hover:bg-red-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ count($employee->alerts) }} إنذار
+        </span>
+                   <a href="{{ route('employees.alerts.all') }}"
+                      class="bg-red-100 hover:bg-red-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-red-200">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                       </svg>
+                       <span>جميع الإنذارات</span>
+                   </a>
+
+                   <button onclick="exportToPDF()"
+                           class="bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                       </svg>
+                       <span>PDF</span>
+                   </button>
+
+                   <!-- Export Excel Button -->
+                   <button onclick="exportToExcel()"
+                           class="bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                       </svg>
+                       <span>Excel</span>
+                   </button>
+                   <button onclick="window.print()"
+                           class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-gray-200">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                           <path fill-rule="evenodd"
+                                 d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                 clip-rule="evenodd" />
+                       </svg>
+                       <span>طباعة</span>
+                   </button>
+               </div>
+           </div></div>
 
         <!-- Alerts Table -->
         <div class="bg-white rounded-xl overflow-hidden alert-shadow">
@@ -189,7 +206,7 @@
                                             </svg>
                                         </div>
                                         <span
-                                            class="text-sm font-medium text-red-600 alert-title">{{ $alert->title }}</span>
+                                            class="text-sm font-medium text-black alert-title">{{ $alert->title }}</span>
                                     </div>
                                 </td>
 
@@ -226,4 +243,283 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+        <script>
+            // Export to Excel function (defined globally)
+            function exportToExcel() {
+                if (typeof XLSX === 'undefined') {
+                    alert('مكتبة Excel غير محملة');
+                    return;
+                }
+
+                try {
+                    const table = document.querySelector('table.table');
+                    const tableClone = table.cloneNode(true);
+
+                    // Prepare data
+                    const headers = Array.from(tableClone.querySelectorAll('thead th'))
+                        .map(th => th.textContent.trim());
+
+                    const data = [
+                        headers,
+                        ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
+                            return Array.from(row.querySelectorAll('td')).map(td => {
+                                // Remove any HTML content and get only text
+                                return td.textContent.trim();
+                            });
+                        })
+                    ];
+
+                    // Create workbook
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    XLSX.utils.book_append_sheet(wb, ws, "إنذارات الموظف");
+                    XLSX.writeFile(wb, `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+                } catch (error) {
+                    console.error('Excel export error:', error);
+                    alert('حدث خطأ أثناء تصدير ملف Excel: ' + error.message);
+                }
+            }
+
+            // Export to PDF function (defined globally)
+            async function exportToPDF() {
+                if (typeof html2pdf === 'undefined') {
+                    alert('مكتبة PDF غير محملة');
+                    return;
+                }
+
+                try {
+                    // Create a new container for PDF content
+                    const pdfContainer = document.createElement('div');
+                    pdfContainer.style.padding = '20px';
+                    pdfContainer.style.direction = 'rtl';
+                    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                    pdfContainer.style.textAlign = 'right';
+                    pdfContainer.style.width = '100%';
+
+                    // Create header
+                    const header = document.createElement('div');
+                    header.style.marginBottom = '20px';
+                    header.style.borderBottom = '2px solid #dc2626';
+                    header.style.paddingBottom = '15px';
+                    header.style.textAlign = 'center';
+
+                    const companyName = document.createElement('h1');
+                    companyName.textContent = 'شركة افاق الخليج';
+                    companyName.style.color = '#dc2626';
+                    companyName.style.margin = '0 0 10px 0';
+                    companyName.style.fontSize = '24px';
+                    companyName.style.fontWeight = 'bold';
+                    companyName.style.whiteSpace = 'nowrap';
+
+                    const title = document.createElement('h2');
+                    title.textContent = 'تقرير إنذارات الموظف - {{ $employee->user->name }}';
+                    title.style.color = '#333';
+                    title.style.margin = '0 0 10px 0';
+                    title.style.fontSize = '18px';
+                    title.style.fontWeight = '600';
+                    title.style.whiteSpace = 'nowrap';
+
+                    const reportDate = document.createElement('p');
+                    reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
+                    reportDate.style.color = '#666';
+                    reportDate.style.margin = '0';
+                    reportDate.style.fontSize = '14px';
+                    reportDate.style.whiteSpace = 'nowrap';
+
+                    header.appendChild(companyName);
+                    header.appendChild(title);
+                    header.appendChild(reportDate);
+                    pdfContainer.appendChild(header);
+
+                    // Create table for PDF
+                    const table = document.createElement('table');
+                    table.style.width = '100%';
+                    table.style.borderCollapse = 'collapse';
+                    table.style.marginTop = '20px';
+                    table.style.fontSize = '12px';
+                    table.style.fontFamily = 'Arial, sans-serif';
+                    table.style.direction = 'rtl';
+
+                    // Create table header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+
+                    // Define headers with proper RTL handling
+                    const headers = [
+                        '#',
+                        'المشروع',
+                        'مدير المشروع',
+                        'المشرف',
+                        'منطقة العمل',
+                        'عنوان الإنذار',
+                        'السبب',
+                        'تاريخ الإرسال'
+                    ];
+
+                    headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        th.style.backgroundColor = '#dc2626';
+                        th.style.color = 'white';
+                        th.style.padding = '12px 8px';
+                        th.style.border = '1px solid #ddd';
+                        th.style.textAlign = 'center';
+                        th.style.fontWeight = 'bold';
+                        th.style.fontSize = '13px';
+                        th.style.whiteSpace = 'nowrap';
+                        th.style.wordWrap = 'normal';
+                        th.style.letterSpacing = 'normal';
+
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Create table body
+                    const tbody = document.createElement('tbody');
+
+                    @forelse($employee->alerts as $index => $alert)
+                    const row = document.createElement('tr');
+
+                    // Serial number
+                    const serialCell = document.createElement('td');
+                    serialCell.textContent = '{{ $index + 1 }}';
+                    serialCell.style.padding = '10px 8px';
+                    serialCell.style.border = '1px solid #ddd';
+                    serialCell.style.textAlign = 'center';
+                    serialCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(serialCell);
+
+                    // Project
+                    const projectCell = document.createElement('td');
+                    projectCell.textContent = '{{ $employee->project ? addslashes($employee->project->name) : "-" }}';
+                    projectCell.style.padding = '10px 8px';
+                    projectCell.style.border = '1px solid #ddd';
+                    projectCell.style.textAlign = 'center';
+                    projectCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(projectCell);
+
+                    // Project Manager
+                    const managerCell = document.createElement('td');
+                    managerCell.textContent = '{{ $employee->project && $employee->project->manager ? addslashes($employee->project->manager->name) : "-" }}';
+                    managerCell.style.padding = '10px 8px';
+                    managerCell.style.border = '1px solid #ddd';
+                    managerCell.style.textAlign = 'center';
+                    managerCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(managerCell);
+
+                    // Supervisor
+                    const supervisorCell = document.createElement('td');
+                    supervisorCell.textContent = '{{ $employee?->supervisor?->name ? addslashes($employee->supervisor->name) : "-" }}';
+                    supervisorCell.style.padding = '10px 8px';
+                    supervisorCell.style.border = '1px solid #ddd';
+                    supervisorCell.style.textAlign = 'center';
+                    supervisorCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(supervisorCell);
+
+                    // Work Area
+                    const workAreaCell = document.createElement('td');
+                    workAreaCell.textContent = '{{ $employee?->work_area ? addslashes($employee->work_area) : "-" }}';
+                    workAreaCell.style.padding = '10px 8px';
+                    workAreaCell.style.border = '1px solid #ddd';
+                    workAreaCell.style.textAlign = 'center';
+                    workAreaCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(workAreaCell);
+
+                    // Alert Title
+                    const titleCell = document.createElement('td');
+                    titleCell.textContent = '{{ addslashes($alert->title) }}';
+                    titleCell.style.padding = '10px 8px';
+                    titleCell.style.border = '1px solid #ddd';
+                    titleCell.style.textAlign = 'center';
+                    titleCell.style.maxWidth = '200px';
+                    titleCell.style.wordWrap = 'break-word';
+                    row.appendChild(titleCell);
+
+                    // Alert Reason
+                    const reasonCell = document.createElement('td');
+                    reasonCell.textContent = '{{ addslashes($alert->reason) }}';
+                    reasonCell.style.padding = '10px 8px';
+                    reasonCell.style.border = '1px solid #ddd';
+                    reasonCell.style.textAlign = 'center';
+                    reasonCell.style.maxWidth = '250px';
+                    reasonCell.style.wordWrap = 'break-word';
+                    row.appendChild(reasonCell);
+
+                    // Date
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = '{{ $alert->created_at->format("Y-m-d") }}';
+                    dateCell.style.padding = '10px 8px';
+                    dateCell.style.border = '1px solid #ddd';
+                    dateCell.style.textAlign = 'center';
+                    dateCell.style.whiteSpace = 'nowrap';
+                    row.appendChild(dateCell);
+
+                    tbody.appendChild(row);
+                    @empty
+                    const emptyRow = document.createElement('tr');
+                    const emptyCell = document.createElement('td');
+                    emptyCell.colSpan = 8;
+                    emptyCell.textContent = 'لا يوجد إنذارات';
+                    emptyCell.style.padding = '20px';
+                    emptyCell.style.textAlign = 'center';
+                    emptyCell.style.color = '#666';
+                    emptyRow.appendChild(emptyCell);
+                    tbody.appendChild(emptyRow);
+                    @endforelse
+
+                    table.appendChild(tbody);
+                    pdfContainer.appendChild(table);
+
+                    // Add footer
+                    const footer = document.createElement('div');
+                    footer.style.marginTop = '20px';
+                    footer.style.paddingTop = '10px';
+                    footer.style.borderTop = '1px solid #eee';
+                    footer.style.textAlign = 'center';
+                    footer.style.color = '#666';
+                    footer.style.fontSize = '12px';
+
+                    const copyright = document.createElement('p');
+                    copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
+                    copyright.style.whiteSpace = 'nowrap';
+                    footer.appendChild(copyright);
+                    pdfContainer.appendChild(footer);
+
+                    // PDF options with better RTL support
+                    const options = {
+                        margin: [15, 15, 15, 15],
+                        filename: `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: {
+                            scale: 2,
+                            useCORS: true,
+                            logging: false,
+                            letterRendering: true
+                        },
+                        jsPDF: {
+                            unit: 'mm',
+                            format: 'a3',
+                            orientation: 'landscape',
+                            compress: true
+                        }
+                    };
+
+                    await html2pdf().set(options).from(pdfContainer).save();
+
+                } catch (error) {
+                    console.error('PDF export error:', error);
+                    alert('حدث خطأ أثناء تصدير ملف PDF: ' + error.message);
+                }
+            }
+
+            // DOMContentLoaded for any other initialization if needed
+            document.addEventListener('DOMContentLoaded', function() {
+                // Any other initialization code can go here
+            });
+        </script>
+    @endpush
 @endsection

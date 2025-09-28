@@ -291,7 +291,7 @@ class ProjectController extends Controller
         $project->loadCount(['activeEmployees', 'inactiveEmployees']);
 
         return view(
-            'projects.show',
+            'Projects.show',
             compact(
                 'project',
                 'employeesByNationality',

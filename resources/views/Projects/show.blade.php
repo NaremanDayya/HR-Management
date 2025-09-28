@@ -575,116 +575,119 @@
                 </div>
             </div>
         </div>
-        @push('scripts')
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    if (typeof $ === 'undefined' || typeof Swal === 'undefined') {
-                        console.error('Required libraries not loaded');
-                        return;
-                    }
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof $ === 'undefined' || typeof Swal === 'undefined') {
+                    console.error('Required libraries not loaded');
+                    return;
+                }
 
-                    document.querySelectorAll('.edit-project-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const projectId = this.getAttribute('data-id');
-                            const projectName = this.getAttribute('data-name');
-                            const projectDescription = this.getAttribute('data-description');
-                            const projectManagerName = this.getAttribute('data-manager-name');
+                document.querySelectorAll('.edit-project-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const projectId = this.getAttribute('data-id');
+                        const projectName = this.getAttribute('data-name');
+                        const projectDescription = this.getAttribute('data-description');
+                        const projectManagerName = this.getAttribute('data-manager-name');
 
-                            document.getElementById('edit_name').value = projectName || '';
-                            document.getElementById('edit_description').value = projectDescription || '';
-                            document.getElementById('edit_manager_name').value = projectManagerName || '';
+                        document.getElementById('edit_name').value = projectName || '';
+                        document.getElementById('edit_description').value = projectDescription || '';
+                        document.getElementById('edit_manager_name').value = projectManagerName || '';
 
-                            document.getElementById('editProjectForm').setAttribute('action',
-                                `/projects/${projectId}`);
-                        });
+                        document.getElementById('editProjectForm').setAttribute('action',
+                            `/projects/${projectId}`);
                     });
+                });
 
-                    $(document).on('submit', '#editProjectForm', function(e) {
-                        e.preventDefault();
+                $(document).on('submit', '#editProjectForm', function(e) {
+                    e.preventDefault();
 
-                        const form = $(this);
-                        const submitButton = form.find('button[type="submit"]');
-                        const originalText = submitButton.html();
+                    const form = $(this);
+                    const submitButton = form.find('button[type="submit"]');
+                    const originalText = submitButton.html();
 
-                        submitButton.prop('disabled', true).html(`
+                    submitButton.prop('disabled', true).html(`
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         جاري التحديث...
     `);
 
-                        $.ajax({
-                            url: form.attr('action'),
-                            method: 'POST',
-                            data: form.serialize() + '&_method=PUT',
-                            success: function(response) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'نجاح!',
-                                    text: response.message || 'تم التحديث بنجاح',
-                                    confirmButtonText: 'حسناً',
-                                    customClass: {
-                                        confirmButton: 'btn btn-success'
-                                    },
-                                    timer: 2000,
-                                    timerProgressBar: true,
-                                    willClose: () => {
-                                        location.reload();
-                                    }
-                                });
-                            },
-                            error: function(xhr) {
-                                console.error('Error:', xhr);
-                                let errorMessage = 'حدث خطأ غير متوقع';
-
-                                if (xhr.status === 422) {
-                                    const errors = xhr.responseJSON?.errors || {};
-                                    errorMessage = Object.values(errors).flat().join('<br>');
-                                } else {
-                                    errorMessage = xhr.responseJSON?.message || errorMessage;
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize() + '&_method=PUT',
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'نجاح!',
+                                text: response.message || 'تم التحديث بنجاح',
+                                confirmButtonText: 'حسناً',
+                                customClass: {
+                                    confirmButton: 'btn btn-success'
+                                },
+                                timer: 2000,
+                                timerProgressBar: true,
+                                willClose: () => {
+                                    location.reload();
                                 }
+                            });
+                        },
+                        error: function(xhr) {
+                            console.error('Error:', xhr);
+                            let errorMessage = 'حدث خطأ غير متوقع';
 
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'خطأ!',
-                                    html: errorMessage,
-                                    confirmButtonText: 'حسناً',
-                                    customClass: {
-                                        confirmButton: 'btn btn-danger'
-                                    }
-                                });
-                            },
-                            complete: function() {
-                                submitButton.prop('disabled', false).html(originalText);
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON?.errors || {};
+                                errorMessage = Object.values(errors).flat().join('<br>');
+                            } else {
+                                errorMessage = xhr.responseJSON?.message || errorMessage;
                             }
-                        });
-                    });
 
-
-
-                    function exportToExcel(tableId, fileName) {
-                        if (typeof XLSX === 'undefined') {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'خطأ!',
-                                text: 'مكتبة Excel غير محملة',
-                                confirmButtonText: 'حسناً'
-                            });
-                            return;
-                        }
-
-                        try {
-                            const table = document.getElementById(tableId);
-                            if (!table) throw new Error('Table not found');
-
-                            const tableClone = table.cloneNode(true);
-
-                            // Remove action columns if they exist
-                            Array.from(tableClone.querySelectorAll('th')).forEach((th, index) => {
-                                if (th.textContent.trim() === 'الإجراءات') {
-                                    tableClone.querySelectorAll('tr').forEach(tr => {
-                                        tr.querySelectorAll('td, th')[index]?.remove();
-                                    });
+                                html: errorMessage,
+                                confirmButtonText: 'حسناً',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
                                 }
                             });
+                        },
+                        complete: function() {
+                            submitButton.prop('disabled', false).html(originalText);
+                        }
+                    });
+                });
+
+                // Function to export all tables to Excel in one file with multiple sheets
+                function exportAllToExcel(fileName) {
+                    if (typeof XLSX === 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: 'مكتبة Excel غير محملة',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
+                    }
+
+                    try {
+                        const tables = [
+                            { id: 'nationalitiesTable', name: 'جنسيات الموظفين' },
+                            { id: 'ageGroupsTable', name: 'الفئات العمرية' },
+                            { id: 'salariesTable', name: 'توزيع الرواتب' },
+                            { id: 'rolesTable', name: 'أدوار الموظفين' }
+                        ];
+
+                        const wb = XLSX.utils.book_new();
+
+                        tables.forEach(tableInfo => {
+                            const table = document.getElementById(tableInfo.id);
+                            if (!table) {
+                                console.warn(`Table with id ${tableInfo.id} not found`);
+                                return;
+                            }
+
+                            const tableClone = table.cloneNode(true);
 
                             // Prepare data
                             const headers = Array.from(tableClone.querySelectorAll('thead th'))
@@ -695,10 +698,20 @@
                                 ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
                                     return Array.from(row.querySelectorAll('td')).map((td, index) => {
                                         // Special handling for age groups table
-                                        if (tableId === 'ageGroupsTable' && index === 0) {
+                                        if (tableInfo.id === 'ageGroupsTable' && index === 0) {
                                             const ageSpan = td.querySelector(
                                                 '.flex.flex-col.items-start.gap-y-2 span');
-                                            return ageSpan ? ageSpan.textContent.trim() : '';
+                                            return ageSpan ? ageSpan.textContent.trim() : td.textContent.trim();
+                                        }
+                                        // Special handling for nationalities table (remove flag images)
+                                        if (tableInfo.id === 'nationalitiesTable' && index === 0) {
+                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
+                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
+                                        }
+                                        // Special handling for roles table (remove icons)
+                                        if (tableInfo.id === 'rolesTable' && index === 0) {
+                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
+                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
                                         }
                                         // Default handling for all other cases
                                         return td.textContent.trim();
@@ -706,276 +719,457 @@
                                 })
                             ];
 
-                            // Create workbook
-                            const wb = XLSX.utils.book_new();
                             const ws = XLSX.utils.aoa_to_sheet(data);
-                            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-                            XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                            XLSX.utils.book_append_sheet(wb, ws, tableInfo.name);
+                        });
 
-                            return true;
-                        } catch (error) {
-                            console.error('Excel export error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطأ!',
-                                text: `حدث خطأ أثناء تصدير ملف Excel: ${error.message}`,
-                                confirmButtonText: 'حسناً'
-                            });
-                            return false;
+                        // Check if any sheets were added
+                        if (wb.SheetNames.length === 0) {
+                            throw new Error('لم يتم العثور على أي جداول للتصدير');
                         }
+
+                        XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                        return true;
+                    } catch (error) {
+                        console.error('Excel export error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: `حدث خطأ أثناء تصدير ملف Excel: ${error.message}`,
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
                     }
-                    async function exportToPDF(tableId, fileName, reportTitle) {
-                        if (typeof html2pdf === 'undefined') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطأ!',
-                                text: 'مكتبة PDF غير محملة',
-                                confirmButtonText: 'حسناً'
-                            });
-                            return;
-                        }
+                }
 
-                        try {
-                            const table = document.getElementById(tableId);
-                            if (!table) throw new Error('Table not found');
+                // Function to export all tables to PDF in one file
+                async function exportAllToPDF(fileName, reportTitle) {
+                    if (typeof html2pdf === 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: 'مكتبة PDF غير محملة',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
+                    }
 
-                            // Clone table to avoid modifying the original
+                    try {
+                        const tables = [
+                            { id: 'nationalitiesTable', title: 'جنسيات الموظفين' },
+                            { id: 'ageGroupsTable', title: 'الفئات العمرية' },
+                            { id: 'salariesTable', title: 'توزيع الرواتب' },
+                            { id: 'rolesTable', title: 'أدوار الموظفين' }
+                        ];
+
+                        const pdfContainer = document.createElement('div');
+                        pdfContainer.style.padding = '15px';
+                        pdfContainer.style.direction = 'rtl';
+                        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                        pdfContainer.style.textAlign = 'center';
+                        pdfContainer.style.lineHeight = '1.4';
+
+                        // Create main header
+                        const header = document.createElement('div');
+                        header.style.marginBottom = '20px';
+                        header.style.borderBottom = '2px solid #6e48aa';
+                        header.style.paddingBottom = '12px';
+                        header.style.textAlign = 'center';
+
+                        const companyName = document.createElement('h1');
+                        companyName.textContent = 'شركة افاق الخليج';
+                        companyName.style.color = '#6e48aa';
+                        companyName.style.margin = '0 0 8px 0';
+                        companyName.style.fontSize = '22px';
+                        companyName.style.fontWeight = 'bold';
+
+                        const title = document.createElement('h2');
+                        title.textContent = reportTitle;
+                        title.style.color = '#333';
+                        title.style.margin = '0 0 8px 0';
+                        title.style.fontSize = '18px';
+                        title.style.fontWeight = '600';
+
+                        const reportDate = document.createElement('p');
+                        reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
+                        reportDate.style.color = '#666';
+                        reportDate.style.margin = '0';
+                        reportDate.style.fontSize = '14px';
+
+                        header.appendChild(companyName);
+                        header.appendChild(title);
+                        header.appendChild(reportDate);
+                        pdfContainer.appendChild(header);
+
+                        // Add each table to the PDF with compact spacing
+                        tables.forEach((tableInfo, index) => {
+                            const table = document.getElementById(tableInfo.id);
+                            if (!table) return;
+
+                            // Add section title with compact spacing
+                            const sectionTitle = document.createElement('h3');
+                            sectionTitle.textContent = tableInfo.title;
+                            sectionTitle.style.color = '#6e48aa';
+                            sectionTitle.style.margin = '20px 0 10px 0';
+                            sectionTitle.style.fontSize = '16px';
+                            sectionTitle.style.fontWeight = 'bold';
+                            sectionTitle.style.textAlign = 'right';
+                            sectionTitle.style.padding = '5px 0';
+                            pdfContainer.appendChild(sectionTitle);
+
+                            // Clone and style table with compact design
                             const tableClone = table.cloneNode(true);
-
-                            // Remove any action columns if they exist
-                            Array.from(tableClone.querySelectorAll('th')).forEach((th, index) => {
-                                if (th.textContent.trim() === 'الإجراءات') {
-                                    tableClone.querySelectorAll('tr').forEach(tr => {
-                                        tr.querySelectorAll('td, th')[index]?.remove();
-                                    });
-                                }
-                            });
-
-                            // Create PDF container
-                            const pdfContainer = document.createElement('div');
-                            pdfContainer.style.padding = '20px';
-                            pdfContainer.style.direction = 'rtl';
-                            pdfContainer.style.fontFamily = 'Arial, sans-serif';
-                            pdfContainer.style.textAlign = 'center';
-                            pdfContainer.style.lineHeight = '1.6';
-
-                            // Add header
-                            const header = document.createElement('div');
-                            header.style.marginBottom = '30px';
-                            header.style.borderBottom = '2px solid #6e48aa';
-                            header.style.paddingBottom = '15px';
-                            header.style.textAlign = 'center';
-
-                            const companyName = document.createElement('h1');
-                            companyName.textContent = 'شركة افاق الخليج';
-                            companyName.style.color = '#6e48aa';
-                            companyName.style.margin = '0 0 5px 0';
-                            companyName.style.fontSize = '24px';
-                            companyName.style.fontWeight = 'bold';
-
-                            const title = document.createElement('h2');
-                            title.textContent = reportTitle;
-                            title.style.color = '#333';
-                            title.style.margin = '0 0 5px 0';
-                            title.style.fontSize = '20px';
-                            title.style.fontWeight = '600';
-
-                            const reportDate = document.createElement('p');
-                            reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
-                            reportDate.style.color = '#666';
-                            reportDate.style.margin = '0';
-                            reportDate.style.fontSize = '16px';
-
-                            header.appendChild(companyName);
-                            header.appendChild(title);
-                            header.appendChild(reportDate);
-
                             tableClone.style.width = '100%';
                             tableClone.style.borderCollapse = 'collapse';
-                            tableClone.style.marginTop = '20px';
+                            tableClone.style.marginBottom = '15px';
                             tableClone.style.direction = 'rtl';
-                            tableClone.style.wordBreak = 'break-word';
+                            tableClone.style.fontSize = '12px';
 
+                            // Style table headers more compact
                             tableClone.querySelectorAll('th').forEach(th => {
                                 th.style.backgroundColor = '#6e48aa';
                                 th.style.color = 'white';
-                                th.style.padding = '12px';
+                                th.style.padding = '8px 6px';
                                 th.style.border = '1px solid #ddd';
                                 th.style.textAlign = 'center';
                                 th.style.fontWeight = 'bold';
+                                th.style.fontSize = '12px';
                             });
 
+                            // Style table cells more compact
                             tableClone.querySelectorAll('td').forEach(td => {
-                                td.style.padding = '8px';
+                                td.style.padding = '6px 4px';
                                 td.style.border = '1px solid #ddd';
                                 td.style.textAlign = 'center';
-                                td.style.wordBreak = 'break-word';
-
-                                if (td.classList.contains('text-center')) {
-                                    td.style.textAlign = 'center';
-                                }
+                                td.style.fontSize = '11px';
                             });
 
-                            const footer = document.createElement('div');
-                            footer.style.marginTop = '20px';
-                            footer.style.paddingTop = '10px';
-                            footer.style.borderTop = '1px solid #eee';
-                            footer.style.textAlign = 'center';
-                            footer.style.color = '#666';
-                            footer.style.fontSize = '12px';
+                            // Remove any existing margins/padding from inner elements
+                            tableClone.querySelectorAll('div, span').forEach(el => {
+                                el.style.margin = '0';
+                                el.style.padding = '0';
+                            });
 
-                            const copyright = document.createElement('p');
-                            copyright.textContent =
-                                `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
-                            footer.appendChild(copyright);
-
-                            pdfContainer.appendChild(header);
                             pdfContainer.appendChild(tableClone);
-                            pdfContainer.appendChild(footer);
 
-                            const options = {
-                                margin: [15, 15, 30, 15],
-                                filename: `${fileName}_${new Date().toISOString().slice(0, 10)}.pdf`,
-                                image: {
-                                    type: 'jpeg',
-                                    quality: 0.98
-                                },
-                                html2canvas: {
-                                    scale: 2,
-                                    logging: true,
-                                    useCORS: true,
-                                    scrollX: 0,
-                                    scrollY: 0,
-                                    letterRendering: true
-                                },
-                                jsPDF: {
-                                    unit: 'mm',
-                                    format: 'a2',
-                                    orientation: 'landscape'
-                                }
-                            };
+                            // Add a subtle separator instead of page break (except after last table)
+                            if (index < tables.length - 1) {
+                                const separator = document.createElement('div');
+                                separator.style.height = '1px';
+                                separator.style.backgroundColor = '#f0f0f0';
+                                separator.style.margin = '10px 0';
+                                pdfContainer.appendChild(separator);
+                            }
+                        });
 
-                            // Generate PDF
-                            await html2pdf().set(options).from(pdfContainer).save();
-                            return true;
-                        } catch (error) {
-                            console.error('PDF export error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'خطأ!',
-                                text: `حدث خطأ أثناء تصدير ملف PDF: ${error.message}`,
-                                confirmButtonText: 'حسناً'
-                            });
-                            return false;
-                        }
+                        // Add compact footer
+                        const footer = document.createElement('div');
+                        footer.style.marginTop = '20px';
+                        footer.style.paddingTop = '10px';
+                        footer.style.borderTop = '1px solid #eee';
+                        footer.style.textAlign = 'center';
+                        footer.style.color = '#666';
+                        footer.style.fontSize = '11px';
+
+                        const copyright = document.createElement('p');
+                        copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
+                        copyright.style.margin = '5px 0';
+                        footer.appendChild(copyright);
+                        pdfContainer.appendChild(footer);
+
+                        // PDF options - using smaller format for better flow
+                        const options = {
+                            margin: [10, 10, 15, 10],
+                            filename: `${fileName}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                            image: {
+                                type: 'jpeg',
+                                quality: 0.98
+                            },
+                            html2canvas: {
+                                scale: 2,
+                                useCORS: true,
+                                scrollX: 0,
+                                scrollY: 0
+                            },
+                            jsPDF: {
+                                unit: 'mm',
+                                format: 'a4',
+                                orientation: 'portrait'
+                            }
+                        };
+
+                        await html2pdf().set(options).from(pdfContainer).save();
+                        return true;
+                    } catch (error) {
+                        console.error('PDF export error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: `حدث خطأ أثناء تصدير ملف PDF: ${error.message}`,
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
                     }
-                    document.getElementById('excelExportBtn')?.addEventListener('click', async function() {
-                        const btn = this;
-                        const originalText = btn.innerHTML;
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
-                        btn.disabled = true;
+                }
 
-                        try {
-                            const results = await Promise.all([
-                                exportToExcel('nationalitiesTable', 'جنسيات_الموظفين'),
-                                exportToExcel('ageGroupsTable', 'الفئات_العمرية'),
-                                exportToExcel('salariesTable', 'توزيع_الرواتب'),
-                                exportToExcel('rolesTable', 'أدوار_الموظفين')
+                // Individual table export functions
+                function exportToExcel(tableId, fileName) {
+                    if (typeof XLSX === 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: 'مكتبة Excel غير محملة',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
+                    }
 
-                            ]);
+                    try {
+                        const table = document.getElementById(tableId);
+                        if (!table) throw new Error('Table not found');
 
-                            if (results.every(Boolean)) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'نجاح!',
-                                    text: 'تم تصدير جميع الجداول بنجاح',
-                                    confirmButtonText: 'حسناً',
-                                    timer: 2000
+                        const tableClone = table.cloneNode(true);
+
+                        // Prepare data
+                        const headers = Array.from(tableClone.querySelectorAll('thead th'))
+                            .map(th => th.textContent.trim());
+
+                        const data = [
+                            headers,
+                            ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
+                                return Array.from(row.querySelectorAll('td')).map((td, index) => {
+                                    // Special handling for age groups table
+                                    if (tableId === 'ageGroupsTable' && index === 0) {
+                                        const ageSpan = td.querySelector(
+                                            '.flex.flex-col.items-start.gap-y-2 span');
+                                        return ageSpan ? ageSpan.textContent.trim() : '';
+                                    }
+                                    // Default handling for all other cases
+                                    return td.textContent.trim();
                                 });
-                            }
-                        } finally {
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        }
-                    });
-
-                    document.getElementById('pdfExportBtn')?.addEventListener('click', async function() {
-                        const btn = this;
-                        const originalText = btn.innerHTML;
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
-                        btn.disabled = true;
-
-                        try {
-                            const results = await Promise.all([
-                                exportToPDF('nationalitiesTable', 'جنسيات_الموظفين',
-                                    'تقرير جنسيات الموظفين'),
-                                exportToPDF('ageGroupsTable', 'الفئات_العمرية', 'تقرير الفئات العمرية'),
-                                exportToPDF('salariesTable', 'توزيع_الرواتب', 'تقرير توزيع الرواتب'),
-                                exportToPDF('rolesTable', 'أدوار_الموظفين', 'تقرير أدوار الموظفين')
-
-                            ]);
-
-                            if (results.every(Boolean)) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'نجاح!',
-                                    text: 'تم تصدير جميع الجداول بنجاح',
-                                    confirmButtonText: 'حسناً',
-                                    timer: 2000
-                                });
-                            }
-                        } finally {
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        }
-                    });
-
-                    function addTableExportButtons() {
-                        const tables = [{
-                                id: 'nationalitiesTable',
-                                title: 'جنسيات الموظفين'
-                            },
-                            {
-                                id: 'ageGroupsTable',
-                                title: 'الفئات العمرية'
-                            },
-                            {
-                                id: 'salariesTable',
-                                title: 'توزيع الرواتب'
-                            },
-                            {
-                                id: 'rolesTable',
-                                title: 'أدوار الموظفين'
-                            }
-
+                            })
                         ];
 
-                        tables.forEach(table => {
-                            const tableElement = document.getElementById(table.id);
-                            if (!tableElement) return;
+                        // Create workbook
+                        const wb = XLSX.utils.book_new();
+                        const ws = XLSX.utils.aoa_to_sheet(data);
+                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                        XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
-                            const exportDiv = document.createElement('div');
-                            exportDiv.className = 'flex gap-2 justify-end mb-4';
-
-                            const excelBtn = document.createElement('button');
-                            excelBtn.className =
-                                'px-3 py-1 bg-green-500 text-black rounded hover:bg-green-600 text-sm';
-                            excelBtn.innerHTML = '<i class="fas fa-file-excel mr-1"></i> Excel';
-                            excelBtn.onclick = () => exportToExcel(table.id, table.title);
-                            exportDiv.appendChild(excelBtn);
-
-                            const pdfBtn = document.createElement('button');
-                            pdfBtn.className = 'px-3 py-1 bg-red-500 text-black rounded hover:bg-red-600 text-sm';
-                            pdfBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i> PDF';
-                            pdfBtn.onclick = () => exportToPDF(table.id, table.title, table.title);
-                            exportDiv.appendChild(pdfBtn);
-
-                            tableElement.parentNode.insertBefore(exportDiv, tableElement);
+                        return true;
+                    } catch (error) {
+                        console.error('Excel export error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: `حدث خطأ أثناء تصدير ملف Excel: ${error.message}`,
+                            confirmButtonText: 'حسناً'
                         });
+                        return false;
+                    }
+                }
+
+                async function exportToPDF(tableId, fileName, reportTitle) {
+                    if (typeof html2pdf === 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: 'مكتبة PDF غير محملة',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
                     }
 
-                    addTableExportButtons();
+                    try {
+                        const table = document.getElementById(tableId);
+                        if (!table) throw new Error('Table not found');
+
+                        const tableClone = table.cloneNode(true);
+
+                        const pdfContainer = document.createElement('div');
+                        pdfContainer.style.padding = '20px';
+                        pdfContainer.style.direction = 'rtl';
+                        pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                        pdfContainer.style.textAlign = 'center';
+
+                        const header = document.createElement('div');
+                        header.style.marginBottom = '30px';
+                        header.style.borderBottom = '2px solid #6e48aa';
+                        header.style.paddingBottom = '15px';
+                        header.style.textAlign = 'center';
+
+                        const companyName = document.createElement('h1');
+                        companyName.textContent = 'شركة افاق الخليج';
+                        companyName.style.color = '#6e48aa';
+                        companyName.style.margin = '0 0 5px 0';
+                        companyName.style.fontSize = '24px';
+                        companyName.style.fontWeight = 'bold';
+
+                        const title = document.createElement('h2');
+                        title.textContent = reportTitle;
+                        title.style.color = '#333';
+                        title.style.margin = '0 0 5px 0';
+                        title.style.fontSize = '20px';
+                        title.style.fontWeight = '600';
+
+                        const reportDate = document.createElement('p');
+                        reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
+                        reportDate.style.color = '#666';
+                        reportDate.style.margin = '0';
+                        reportDate.style.fontSize = '16px';
+
+                        header.appendChild(companyName);
+                        header.appendChild(title);
+                        header.appendChild(reportDate);
+
+                        tableClone.style.width = '100%';
+                        tableClone.style.borderCollapse = 'collapse';
+                        tableClone.style.marginTop = '20px';
+                        tableClone.style.direction = 'rtl';
+
+                        tableClone.querySelectorAll('th').forEach(th => {
+                            th.style.backgroundColor = '#6e48aa';
+                            th.style.color = 'white';
+                            th.style.padding = '12px';
+                            th.style.border = '1px solid #ddd';
+                            th.style.textAlign = 'center';
+                            th.style.fontWeight = 'bold';
+                        });
+
+                        tableClone.querySelectorAll('td').forEach(td => {
+                            td.style.padding = '8px';
+                            td.style.border = '1px solid #ddd';
+                            td.style.textAlign = 'center';
+                        });
+
+                        const footer = document.createElement('div');
+                        footer.style.marginTop = '20px';
+                        footer.style.paddingTop = '10px';
+                        footer.style.borderTop = '1px solid #eee';
+                        footer.style.textAlign = 'center';
+                        footer.style.color = '#666';
+                        footer.style.fontSize = '12px';
+
+                        const copyright = document.createElement('p');
+                        copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
+                        footer.appendChild(copyright);
+
+                        pdfContainer.appendChild(header);
+                        pdfContainer.appendChild(tableClone);
+                        pdfContainer.appendChild(footer);
+
+                        const options = {
+                            margin: [15, 15, 30, 15],
+                            filename: `${fileName}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                            image: {
+                                type: 'jpeg',
+                                quality: 0.98
+                            },
+                            html2canvas: {
+                                scale: 2,
+                                useCORS: true
+                            },
+                            jsPDF: {
+                                unit: 'mm',
+                                format: 'a2',
+                                orientation: 'portrait'
+                            }
+                        };
+
+                        await html2pdf().set(options).from(pdfContainer).save();
+                        return true;
+                    } catch (error) {
+                        console.error('PDF export error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ!',
+                            text: `حدث خطأ أثناء تصدير ملف PDF: ${error.message}`,
+                            confirmButtonText: 'حسناً'
+                        });
+                        return false;
+                    }
+                }
+
+                // Header export buttons - Export ALL tables
+                document.getElementById('excelExportBtn')?.addEventListener('click', async function() {
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+                    btn.disabled = true;
+
+                    try {
+                        const success = await exportAllToExcel('إحصائيات_المشروع_' + '{{ $project->name }}');
+                        if (success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'نجاح!',
+                                text: 'تم تصدير جميع الجداول في ملف Excel واحد',
+                                confirmButtonText: 'حسناً',
+                                timer: 2000
+                            });
+                        }
+                    } finally {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
                 });
-            </script>
-        @endpush
+
+                document.getElementById('pdfExportBtn')?.addEventListener('click', async function() {
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+                    btn.disabled = true;
+
+                    try {
+                        const success = await exportAllToPDF('إحصائيات_المشروع_' + '{{ $project->name }}', 'تقرير إحصائيات مشروع {{ $project->name }}');
+                        if (success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'نجاح!',
+                                text: 'تم تصدير جميع الجداول في ملف PDF واحد',
+                                confirmButtonText: 'حسناً',
+                                timer: 2000
+                            });
+                        }
+                    } finally {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                });
+
+                function addTableExportButtons() {
+                    const tables = [
+                        { id: 'nationalitiesTable', title: 'جنسيات الموظفين' },
+                        { id: 'ageGroupsTable', title: 'الفئات العمرية' },
+                        { id: 'salariesTable', title: 'توزيع الرواتب' },
+                        { id: 'rolesTable', title: 'أدوار الموظفين' }
+                    ];
+
+                    tables.forEach(table => {
+                        const tableElement = document.getElementById(table.id);
+                        if (!tableElement) return;
+
+                        const exportDiv = document.createElement('div');
+                        exportDiv.className = 'flex gap-2 justify-end mb-4';
+
+                        const excelBtn = document.createElement('button');
+                        excelBtn.className = 'px-3 py-1 bg-green-500 text-black rounded hover:bg-green-600 text-sm';
+                        excelBtn.innerHTML = '<i class="fas fa-file-excel mr-1"></i> Excel';
+                        excelBtn.onclick = () => exportToExcel(table.id, table.title);
+                        exportDiv.appendChild(excelBtn);
+
+                        const pdfBtn = document.createElement('button');
+                        pdfBtn.className = 'px-3 py-1 bg-red-500 text-black rounded hover:bg-red-600 text-sm';
+                        pdfBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i> PDF';
+                        pdfBtn.onclick = () => exportToPDF(table.id, table.title, table.title);
+                        exportDiv.appendChild(pdfBtn);
+
+                        tableElement.parentNode.insertBefore(exportDiv, tableElement);
+                    });
+                }
+
+                addTableExportButtons();
+            });
+        </script>
+    @endpush
     @endsection

@@ -104,29 +104,47 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 replacements-shadow replacements-gradient-bg">
-            <div class="replacements-header-gradient bg-blue-800 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-blue-900">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <div class="bg-purple-100 p-3 rounded-full group-hover:bg-purple-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                  d="M8 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">استبدالات الموظفين</h2>
-                        <p class="opacity-90">سجل استبدالات الموظفين في النظام</p>
+                        <h2 class="text-xl font-bold text-gray-800">استبدالات الموظفين</h2>
+                        <p class="text-gray-600">سجل استبدالات الموظفين في النظام</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <span class="replacements-badge px-3 py-1 rounded-full text-sm font-medium">{{ $replacements->count() }}
-                        استبدالات</span>
+        <span class="bg-purple-100 hover:bg-purple-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+            {{ $replacements->count() }} استبدالات
+        </span>
+                    <button onclick="exportToPDF()"
+                            class="bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>PDF</span>
+                    </button>
+
+                    <!-- Export Excel Button -->
+                    <button onclick="exportToExcel()"
+                            class="bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Excel</span>
+                    </button>
+
                     <button onclick="window.print()"
-                        class="bg-blue-900 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
-                                d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                                clip-rule="evenodd" />
+                                  d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                  clip-rule="evenodd" />
                         </svg>
                         <span>طباعة</span>
                     </button>
@@ -290,5 +308,300 @@
                 });
             }
         });
+
+        // Export to PDF function
+        // Export to PDF function - FIXED VERSION
+        async function exportToPDF() {
+            const pdfBtn = event.target.closest('button');
+            const originalHTML = pdfBtn.innerHTML;
+
+            // Show loading
+            pdfBtn.innerHTML = `
+        <div class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #dc2626; border-radius: 50%;"></div>
+        <span>جاري التصدير...</span>
+    `;
+            pdfBtn.disabled = true;
+
+            try {
+                // Create a temporary div for PDF content
+                const pdfContent = document.createElement('div');
+                pdfContent.style.direction = 'rtl';
+                pdfContent.style.padding = '20px';
+                pdfContent.style.fontFamily = 'Arial, sans-serif';
+
+                // Get current date
+                const currentDate = new Date().toLocaleDateString('ar-SA');
+
+                // Start building the HTML content
+                let htmlContent = `
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #6b46c1; padding-bottom: 10px;">
+                <h1 style="color: #6b46c1; margin: 0;">تقرير استبدالات الموظفين</h1>
+                <p style="color: #666; margin: 5px 0 0 0;">تاريخ التصدير: ${currentDate}</p>
+                <p style="color: #666; margin: 0;">إجمالي الاستبدالات: ${document.querySelectorAll('tbody tr').length}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">#</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">الموظف القديم</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">الموظف البديل</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">تاريخ التعيين</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">تاريخ آخر يوم عمل</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">سبب الاستبدال</th>
+                        <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">حالة البديل</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+                // Get all table rows and build the content dynamically
+                const rows = document.querySelectorAll('tbody tr');
+                rows.forEach((row, index) => {
+                    const cells = row.querySelectorAll('td');
+
+                    // Extract data from each cell
+                    const oldEmployee = cells[1].textContent.trim();
+                    const newEmployee = cells[2].textContent.trim();
+
+                    // Extract dates
+                    const replacementDate = cells[3].querySelector('.date-badge')?.textContent.replace(/[^0-9\-]/g, '').trim() || '';
+                    const lastWorkingDate = cells[4].querySelector('.date-badge')?.textContent.replace(/[^0-9\-]/g, '').trim() || '';
+
+                    // Extract reason (try to get full reason from button data if available)
+                    let reason = cells[5].textContent.trim();
+                    const reasonButton = cells[5].querySelector('button');
+                    if (reasonButton && reasonButton.getAttribute('data-reason')) {
+                        reason = reasonButton.getAttribute('data-reason');
+                    }
+
+                    // Extract status
+                    const statusBadge = cells[6].querySelector('.status-badge');
+                    const isActive = statusBadge?.classList.contains('status-active');
+                    const statusText = isActive ? 'نشط' : 'غير نشط';
+                    const statusColor = isActive ? '#d1fae5' : '#fee2e2';
+                    const statusTextColor = isActive ? '#065f46' : '#991b1b';
+
+                    htmlContent += `
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center; background-color: #f8fafc;">${index + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${oldEmployee}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${newEmployee}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${replacementDate}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${lastWorkingDate}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center; max-width: 300px; word-wrap: break-word; white-space: normal;">${reason}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+                        <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; background-color: ${statusColor}; color: ${statusTextColor};">
+                            ${statusText}
+                        </span>
+                    </td>
+                </tr>
+            `;
+                });
+
+                htmlContent += `
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; text-align: center; color: #666; font-size: 10px;">
+                تم إنشاء هذا التقرير بواسطة النظام - ${document.querySelector('title')?.textContent || 'النظام'}
+            </div>
+        `;
+
+                pdfContent.innerHTML = htmlContent;
+
+                // PDF options
+                const options = {
+                    margin: [10, 10, 10, 10],
+                    filename: `استبدالات-الموظفين-${currentDate}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: true,
+                        scrollY: -window.scrollY
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape'
+                    }
+                };
+
+                // Generate PDF
+                await html2pdf().set(options).from(pdfContent).save();
+
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('حدث خطأ أثناء تصدير PDF: ' + error.message);
+            } finally {
+                // Restore button
+                pdfBtn.innerHTML = originalHTML;
+                pdfBtn.disabled = false;
+            }
+        }
+
+        async function exportToExcel() {
+            const excelBtn = event.target.closest('button');
+            const originalHTML = excelBtn.innerHTML;
+
+            // Show loading
+            excelBtn.innerHTML = `
+        <div class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #16a34a; border-radius: 50%;"></div>
+        <span>جاري التصدير...</span>
+    `;
+            excelBtn.disabled = true;
+
+            try {
+                // Get table data
+                const table = document.querySelector('table');
+                const rows = table.querySelectorAll('tbody tr');
+
+                // Prepare data for Excel
+                const data = [];
+
+                // Add headers with styling info
+                const headers = [];
+                table.querySelectorAll('thead th').forEach(th => {
+                    headers.push(th.textContent.trim());
+                });
+                data.push(headers);
+
+                // Add rows data
+                rows.forEach(row => {
+                    const rowData = [];
+                    const cells = row.querySelectorAll('td');
+
+                    cells.forEach((cell, index) => {
+                        let cellText = cell.textContent.trim();
+
+                        // Handle special cases
+                        if (index === 3 || index === 4) { // Date columns
+                            // Extract date from badge
+                            const dateSpan = cell.querySelector('.date-badge');
+                            if (dateSpan) {
+                                cellText = dateSpan.textContent.replace(/[^0-9\-]/g, '').trim();
+                            }
+                        } else if (index === 6) { // Status column
+                            // Extract status text
+                            const statusSpan = cell.querySelector('.status-badge');
+                            if (statusSpan) {
+                                cellText = statusSpan.textContent.trim();
+                            }
+                        } else if (index === 5) { // Reason column
+                            // Get full reason if available
+                            const fullReasonBtn = cell.querySelector('button');
+                            if (fullReasonBtn && fullReasonBtn.getAttribute('data-reason')) {
+                                cellText = fullReasonBtn.getAttribute('data-reason');
+                            }
+                        }
+
+                        rowData.push(cellText);
+                    });
+
+                    data.push(rowData);
+                });
+
+                // Create worksheet
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Set column widths for better readability
+                const colWidths = [
+                    { wch: 5 },   // #
+                    { wch: 20 },  // الموظف القديم
+                    { wch: 20 },  // الموظف البديل
+                    { wch: 15 },  // تاريخ التعيين
+                    { wch: 15 },  // تاريخ آخر يوم عمل
+                    { wch: 50 },  // سبب الاستبدال (wider for long text)
+                    { wch: 12 }   // حالة البديل
+                ];
+                ws['!cols'] = colWidths;
+
+                // Add header styling
+                if (!ws['!merges']) ws['!merges'] = [];
+
+                // Style header row
+                const headerRange = XLSX.utils.decode_range(ws['!ref']);
+                for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+                    if (!ws[cellAddress]) continue;
+
+                    // Add header styling
+                    ws[cellAddress].s = {
+                        fill: {
+                            fgColor: { rgb: "6b46c1" } // Purple background
+                        },
+                        font: {
+                            color: { rgb: "FFFFFF" }, // White text
+                            bold: true,
+                            sz: 12
+                        },
+                        alignment: {
+                            horizontal: "center",
+                            vertical: "center"
+                        },
+                        border: {
+                            top: { style: "thin", color: { rgb: "000000" } },
+                            left: { style: "thin", color: { rgb: "000000" } },
+                            bottom: { style: "thin", color: { rgb: "000000" } },
+                            right: { style: "thin", color: { rgb: "000000" } }
+                        }
+                    };
+                }
+
+                // Style data rows
+                for (let R = 1; R <= headerRange.e.r; ++R) {
+                    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                        if (!ws[cellAddress]) continue;
+
+                        // Add data row styling
+                        ws[cellAddress].s = {
+                            font: {
+                                sz: 11
+                            },
+                            alignment: {
+                                horizontal: "center",
+                                vertical: "center",
+                                wrapText: true // Enable text wrapping
+                            },
+                            border: {
+                                top: { style: "thin", color: { rgb: "dddddd" } },
+                                left: { style: "thin", color: { rgb: "dddddd" } },
+                                bottom: { style: "thin", color: { rgb: "dddddd" } },
+                                right: { style: "thin", color: { rgb: "dddddd" } }
+                            }
+                        };
+
+                        // Add background color for first column
+                        if (C === 0) {
+                            ws[cellAddress].s.fill = {
+                                fgColor: { rgb: "f8fafc" } // Light gray background
+                            };
+                        }
+
+                        // Enable text wrapping for reason column
+                        if (C === 5) {
+                            ws[cellAddress].s.alignment.wrapText = true;
+                        }
+                    }
+                }
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'استبدالات الموظفين');
+
+                // Generate Excel file and download
+                const currentDate = new Date().toLocaleDateString('ar-SA');
+                XLSX.writeFile(wb, `استبدالات-الموظفين-${currentDate}.xlsx`);
+
+            } catch (error) {
+                console.error('Excel export error:', error);
+                alert('حدث خطأ أثناء تصدير Excel');
+            } finally {
+                // Restore button
+                excelBtn.innerHTML = originalHTML;
+                excelBtn.disabled = false;
+            }
+        }
+
     </script>
 @endpush

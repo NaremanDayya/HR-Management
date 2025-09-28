@@ -139,27 +139,27 @@
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Header Section -->
         <div class="rounded-xl overflow-hidden mb-6 increase-shadow increase-gradient-bg">
-            <div class="increase-header-gradient bg-green-800 px-6 py-4 flex items-center justify-between text-white">
+            <div class="bg-green-50 hover:bg-green-100 border-l-4 border-green-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="p-3 rounded-full bg-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <div class="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">زيادات الرواتب لجميع الموظفين</h2>
-                        <p class="opacity-90">سجل طلبات زيادة رواتب الموظفين</p>
+                        <h2 class="text-xl font-bold text-gray-800">زيادات الرواتب لجميع الموظفين</h2>
+                        <p class="text-gray-600">سجل طلبات زيادة رواتب الموظفين</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
                     <button onclick="window.print()"
-                        class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="bg-green-100 hover:bg-green-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-green-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
-                                d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                                clip-rule="evenodd" />
+                                  d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                  clip-rule="evenodd" />
                         </svg>
                         <span>طباعة</span>
                     </button>
@@ -281,7 +281,7 @@
                         <div class="summary-value text-green-800">
                             {{ number_format($totalIncreases) }} ر.س
                         </div>
-                        <p class="text-sm text-gray-600">{{ $totalIncreasesCount }} زيادة</p>
+                        <p class="text-sm text-gray-600">{{ $totalIncreasesCount }} زيادة + مكافأة</p>
                     </div>
                     <div class="p-3 rounded-full bg-green-100 text-green-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
