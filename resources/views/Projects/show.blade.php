@@ -230,7 +230,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="nationalitiesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-indigo-600 text-black text-lg rounded-t-xl">
+                        <thead class="bg-indigo-50 hover:bg-indigo-100 border-l-4 border-indigo-500 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الجنسية</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
@@ -303,7 +303,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="ageGroupsTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-green-600 text-black text-lg rounded-t-xl">
+                        <thead class="bg-green-50 hover:bg-green-100 border-l-4 border-green-500 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-green-700">العمر</th>
                                 <th class="py-3 px-5 border border-green-700">عدد الموظفين</th>
@@ -423,7 +423,7 @@
                 <!-- Table -->
                 <div class="overflow-x-auto">
                     <table id="salariesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-indigo-600 text-black text-lg rounded-t-xl">
+                        <thead class="bg-indigo-50 hover:bg-indigo-100 border-l-4 border-indigo-500 text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الراتب (ر.س)</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
@@ -463,7 +463,7 @@
 
                 <div class="overflow-x-auto">
                     <table id="rolesTable" class="min-w-full border-collapse border border-gray-300 text-center">
-                        <thead class="bg-purple-600 text-black text-lg rounded-t-xl">
+                        <thead class="bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-500  text-black text-lg rounded-t-xl">
                             <tr>
                                 <th class="py-3 px-5 border border-purple-700">الدور الوظيفي</th>
                                 <th class="py-3 px-5 border border-purple-700">عدد الموظفين</th>
