@@ -65,7 +65,7 @@ class LogEmployeeIp
         if ($temporary) {
             return;
         }
-        $admins = User::where('role', 'admin')->first();
+        $admins = User::where('role', 'admin')->get();
 
         foreach ($admins as $admin) {
             $admin->notify(new BlockedIpLoginAttempt($employee, $currentIp));
