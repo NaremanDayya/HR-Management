@@ -653,7 +653,6 @@
         <div class="row">
             <div class="col-12">
                 <div class="card my-4">
-{{--                    test--}}
                     <div
                         class="card-header p-2 position-relative z-index-2 d-flex align-items-center justify-content-between w-100">
                         <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 flex-grow-1">
