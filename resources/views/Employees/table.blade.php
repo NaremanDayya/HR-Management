@@ -674,7 +674,6 @@
 
                                     </a>
                                 @endif
-{{--test--}}
                             @if (($role && $role->hasPermissionTo('add_employee')) || Auth::user()->role === 'admin')
                                 <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#createEmployeeModal">
                                     <i class="fas fa-plus"></i> إضافة موظف
