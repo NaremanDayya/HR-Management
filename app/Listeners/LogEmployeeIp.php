@@ -25,6 +25,9 @@ class LogEmployeeIp
      */
     public function handle(Authenticated $event): void
     {
+        if (Session::has('employee_id')) {
+            return;
+        }
         $employee = $event->user->employee;
 
         if (! $employee instanceof Employee) {
