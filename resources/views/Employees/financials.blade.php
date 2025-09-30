@@ -364,10 +364,23 @@
                                                 </td>
                                                 <td>
                                                     <div class="bank-details">
-                                                        @if ($employee['bank_details']['bank_name'])
-                                                            <img src="{{ asset('build/assets/img/' . strtolower(str_replace(' ', '-', $employee['bank_details']['bank_name'])) . '.png') }}"
-                                                                alt="{{ $employee['bank_details']['bank_name'] }}"
-                                                                class="h-12 w-12" onerror="this.style.display='none'">
+                                                        @php
+                                                            $bankFileBase = 'build/assets/img/' . strtolower(str_replace(' ', '-', $employee['bank_details']['bank_name']));
+                                                            $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+
+                                                            $bankLogo = null;
+                                                            foreach ($extensions as $ext) {
+                                                                if (file_exists(public_path($bankFileBase . '.' . $ext))) {
+                                                                    $bankLogo = asset($bankFileBase . '.' . $ext);
+                                                                    break;
+                                                                }
+                                                            }
+                                                        @endphp
+
+                                                        @if ($employee['bank_details']['bank_name'] && $bankLogo)
+                                                            <img src="{{ $bankLogo }}"
+                                                                 alt="{{ $employee['bank_details']['bank_name'] }}"
+                                                                 class="h-12 w-12">
                                                             <span>{{ $employee['bank_details']['bank_name'] }}</span>
                                                         @else
                                                             غير محدد
