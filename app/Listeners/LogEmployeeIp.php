@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use App\Models\User;
 use App\Notifications\BlockedIpLoginAttempt;
+use Illuminate\Support\Facades\Session;
 
 class LogEmployeeIp
 {
