@@ -26,6 +26,8 @@ class LogEmployeeIp
      */
     public function handle(Authenticated $event): void
     {
+        dd(Session::all());
+
         if (Session::has('employee_id')) {
             return;
         }
