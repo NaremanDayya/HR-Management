@@ -172,7 +172,7 @@ class Employee extends Model
             ->whereHas('requestType', function ($query) use ($typeName) {
                 $query->where('key', $typeName);
             })
-            ->whereYear('created_at', 2025) // if you want to filter by year
+            ->whereYear('created_at', 2025)
             ->count();
     }
     public function temporaryPermissions()

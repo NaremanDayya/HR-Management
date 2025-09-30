@@ -78,6 +78,9 @@ Route::middleware(['auth'])->prefix('/admin/settings/')->name('settings.')->grou
 Route::get('manager/temporary-assignments', [EmployeeController::class, 'temporaryAssignmentsView'])
     ->name('manager.temporary.assignments')->middleware('auth');
 Route::post('/admin/update-photo', [DashboardController::class, 'updatePhoto'])->name('admin.updatePhoto');
+Route::get('/admin/impersonate/stop', [EmployeeController::class, 'stopImpersonate'])
+    ->middleware('auth');
+Route::get('/financials', [EmployeeController::class, 'Allfinancials'])->name('financials.all')->middleware('auth');
 
 Route::middleware([
     'auth',
@@ -90,8 +93,9 @@ Route::middleware([
         Route::post('roles', [DashboardController::class, 'store'])->name('admin.roles.store');
     });
     Route::post('/admin/change-password', [DashboardController::class, 'changePassword'])->name('admin.change-password')->middleware('auth');
-
-    Route::get('/financials', [EmployeeController::class, 'Allfinancials'])->name('financials.all');
+    Route::get('/admin/impersonate/{employee}', [EmployeeController::class, 'impersonate'])
+        ->middleware(['auth']);
+//    Route::get('/financials', [EmployeeController::class, 'Allfinancials'])->name('financials.all');
 });
 
 Route::resource('projects', ProjectController::class)->middleware('auth');

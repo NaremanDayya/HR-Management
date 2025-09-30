@@ -610,6 +610,14 @@
                             <span>إرسال طلب تعديل</span>
                         </button>
                         @endif
+                        @if(\Illuminate\Support\Facades\Auth::user()->role == 'admin')
+                            <div class="mt-2">
+                                <a href="{{ url('/admin/impersonate/' . $emp->user->id) }}"
+                                   class="btn btn-warning">
+                                    <i class="bi bi-person-check-fill"></i> الدخول كـ {{ $emp->user->name }}
+                                </a>
+                            </div>
+                        @endif
                         @if ($canReplace)
                             <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#replaceEmployeeModal">
                                 <i class="fas fa-exchange-alt"></i> استبدال موظف

@@ -12,6 +12,12 @@ class EmployeeRequestService
             ->when(!empty($filters['status']), function ($query) use ($filters) {
                 $query->where('status', $filters['status']);
             })
+            ->when(!empty($filters['project_ids']), function ($query) use ($filters) {
+                $query->whereHas('employee.project', function ($q) use ($filters) {
+                    $q->whereIn('id', $filters['project_ids']);
+                });
+            })
+
             ->when(!empty($filters['project_id']), function ($query) use ($filters) {
                 $query->whereHas('employee.project', function ($q) use ($filters) {
                     $q->where('id', $filters['project_id']);

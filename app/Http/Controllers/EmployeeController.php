@@ -87,6 +87,96 @@ class EmployeeController extends Controller
         ], $this->dropdownService->getDropdownData()));
     }
 
+//    public function Allfinancials(Request $request)
+//    {
+//        $filters = $request->only([
+//            'search',
+//            'account_status',
+//            'project',
+//            'marital_status',
+//            'english_level',
+//            'residence',
+//            'black_list',
+//            'role',
+//        ]);
+//
+//        $employees = $this->employeeService->filterEmployees($filters);
+//
+//        $currentMonth = now()->month;
+//        $currentYear = now()->year;
+//
+//        $employees->load([
+//            'deductions' => function ($q) use ($currentMonth, $currentYear) {
+//                $q->whereMonth('created_at', $currentMonth)
+//                    ->whereYear('created_at', $currentYear);
+//            },
+//            'advanceDeductions' => function ($q) use ($currentMonth, $currentYear) {
+//                $q->whereMonth('deducted_at', $currentMonth)
+//                    ->whereYear('deducted_at', $currentYear);
+//            },
+//
+//            'increases' => function ($q) use ($currentMonth, $currentYear) {
+//                $q->where('is_reward', '1')
+//                    ->whereMonth('effective_date', $currentMonth)
+//                    ->whereYear('effective_date', $currentYear);
+//            },
+//        ]);
+//
+//        $employees->transform(function ($employee) {
+//            $currentMonthDeductions = $employee->deductions->sum('value');
+//            $advanceDeductions = $employee->advanceDeductions->sum('amount');
+//
+//            $currentMonthIncreases = $employee->increases->sum('increase_amount');
+//            // dd($currentMonthIncreases);
+//
+//            $grossSalary = $employee->salary + $currentMonthIncreases;
+//            $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions;
+//
+//            return [
+//                'id' => $employee->id,
+//                'name' => $employee->name,
+//                'base_salary' => $employee->salary,
+//                'current_month_increases' => $currentMonthIncreases,
+//                'current_month_deductions' => $currentMonthDeductions,
+//                'advance_deductions' => $advanceDeductions,
+//                'net_salary' => $netSalary,
+//                'bank_details' => [
+//                    'owner_account_name' => $employee->owner_account_name,
+//                    'iban' => $employee->iban,
+//                    'bank_name' => $employee->bank_name,
+//                ],
+//                'account_status' => $employee->account_status,
+//            ];
+//        });
+//
+//        $projectsObjects = Project::all();
+//        $supervisors = Employee::whereHas('user', function ($query) {
+//            $query->where('role', 'supervisor');
+//        })->select('id', 'name', 'project_id')->get();
+//        $area_managers = Employee::whereHas('user', function ($query) {
+//            $query->where('role', 'area_manager');
+//        })
+//            ->select('id', 'name', 'project_id')
+//            ->get();
+//        return view('Employees.financials', array_merge([
+//            'employees' => $employees,
+//            'projectsObjects' => $projectsObjects,
+//            'supervisors' => $supervisors,
+//            'area_managers' => $area_managers,
+//            'totalSalaries' => $employees->sum('base_salary'),
+//            'totalIncreases' => $employees->sum('current_month_increases'),
+//            'totalNetSalaries' => $employees->sum('net_salary'),
+//            'totalDeductions' => $employees->sum(function ($e) {
+//                return $e['current_month_deductions'] + $e['advance_deductions'];
+//            }),
+//            'employeesCount' => $employees->count(),
+//            'avgSalaries' => $employees->avg('base_salary'),
+//            'avgNetSalaries' => $employees->avg('net_salary'),
+//            'minSalaries' => $employees->min('base_salary'),
+//            'maxSalaries' => $employees->max('base_salary'),
+//            'currentMonth' => now()->format('F Y'),
+//        ], $this->dropdownService->getDropdownData()));
+//    }
     public function Allfinancials(Request $request)
     {
         $filters = $request->only([
@@ -99,6 +189,25 @@ class EmployeeController extends Controller
             'black_list',
             'role',
         ]);
+
+        $user = Auth::user();
+
+        // If user is project_manager, filter to show only their employees
+        if ($user->role == 'project_manager') {
+            // Get the employee record of the project manager
+            $projectManagerEmployee = $user->employee;
+
+            if ($projectManagerEmployee) {
+                // Get the managed projects for this project manager
+                $managedProjects = $projectManagerEmployee->managedProjects;
+
+                if ($managedProjects && $managedProjects->isNotEmpty()) {
+                    // Filter employees by the managed projects
+                    $managedProjectIds = $managedProjects->pluck('id');
+                    $filters['project_ids'] = $managedProjectIds;
+                }
+            }
+        }
 
         $employees = $this->employeeService->filterEmployees($filters);
 
@@ -114,7 +223,6 @@ class EmployeeController extends Controller
                 $q->whereMonth('deducted_at', $currentMonth)
                     ->whereYear('deducted_at', $currentYear);
             },
-
             'increases' => function ($q) use ($currentMonth, $currentYear) {
                 $q->where('is_reward', '1')
                     ->whereMonth('effective_date', $currentMonth)
@@ -125,9 +233,7 @@ class EmployeeController extends Controller
         $employees->transform(function ($employee) {
             $currentMonthDeductions = $employee->deductions->sum('value');
             $advanceDeductions = $employee->advanceDeductions->sum('amount');
-
             $currentMonthIncreases = $employee->increases->sum('increase_amount');
-            // dd($currentMonthIncreases);
 
             $grossSalary = $employee->salary + $currentMonthIncreases;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions;
@@ -149,15 +255,21 @@ class EmployeeController extends Controller
             ];
         });
 
-        $projectsObjects = Project::all();
+        // Get projects based on user role (same as your index method)
+        $projectsObjects = ($user->role == 'project_manager')
+            ? $user->employee->managedProjects
+            : Project::all();
+
         $supervisors = Employee::whereHas('user', function ($query) {
             $query->where('role', 'supervisor');
         })->select('id', 'name', 'project_id')->get();
+
         $area_managers = Employee::whereHas('user', function ($query) {
             $query->where('role', 'area_manager');
         })
             ->select('id', 'name', 'project_id')
             ->get();
+
         return view('Employees.financials', array_merge([
             'employees' => $employees,
             'projectsObjects' => $projectsObjects,
@@ -175,6 +287,8 @@ class EmployeeController extends Controller
             'minSalaries' => $employees->min('base_salary'),
             'maxSalaries' => $employees->max('base_salary'),
             'currentMonth' => now()->format('F Y'),
+            'authRole' => $user->role, // Added this like in your index method
+            'role' => Role::where('name', $user->role)->first(), // Added this like in your index method
         ], $this->dropdownService->getDropdownData()));
     }
     public function store(StoreEmployeeRequest $request)
@@ -615,5 +729,34 @@ class EmployeeController extends Controller
         'employees' => $employees,
     ]);
 }
+    public function impersonate(User $employee)
+    {
+//        dd($employee->id);
+        $admin = Auth::user();
 
+        if ($admin->role !== 'admin') {
+            abort(403, 'Access denied');
+        }
+
+        session([
+            'impersonator_id' => $admin->id,
+            'employee_name' => $employee->name,
+        ]);
+
+
+        Auth::login($employee);
+
+        return redirect('/dashboard');
+    }
+    public function stopImpersonate()
+    {
+//        dd(session('impersonator_id'));
+        if (session()->has('impersonator_id')) {
+            $admin = User::find(session('impersonator_id'));
+            Auth::login($admin);
+            session()->forget('impersonator_id');
+        }
+
+        return redirect('/dashboard');
+    }
 }

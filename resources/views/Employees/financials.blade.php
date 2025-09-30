@@ -328,6 +328,8 @@
                                             <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
                                             <th><i class="fas fa-hand-holding-usd me-1 text-danger"></i> خصومات السلف</th>
                                             <th><i class="fas fa-money-bill-wave me-1 text-success"></i> صافي الراتب</th>
+                                            <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
+                                            <th><i class="fas fa-user-circle me-1 text-purple"></i> اسم صاحب الحساب</th>
                                             <th><i class="fas fa-university me-1 text-purple"></i> البنك</th>
                                             <th>الإجراءات</th>
                                         </tr>
@@ -353,6 +355,12 @@
                                                 </td>
                                                 <td class="text-success font-weight-bold">
                                                     {{ number_format($employee['net_salary']) }} ر.س
+                                                </td>
+                                                <td class="text-success font-weight-bold">
+                                                    {{ ($employee['bank_details']['iban']) }}
+
+                                                <td class="text-success font-weight-bold">
+                                                    {{ ($employee['bank_details']['owner_account_name']) }}
                                                 </td>
                                                 <td>
                                                     <div class="bank-details">
@@ -506,9 +514,9 @@
 
             const rows = tableClone.querySelectorAll('tr');
             rows.forEach(row => {
-                const lastCell = row.lastElementChild;
-                if (lastCell && lastCell.classList.contains('no-print')) {
-                    row.removeChild(lastCell);
+                const cells = row.querySelectorAll('th, td');
+                if (cells.length > 0) {
+                    row.removeChild(cells[cells.length - 1]);
                 }
             });
 
@@ -627,7 +635,7 @@
                 },
                 jsPDF: {
                     unit: 'mm',
-                    format: 'a3',
+                    format: 'a2',
                     orientation: 'portrait',
                     compress: true
                 }

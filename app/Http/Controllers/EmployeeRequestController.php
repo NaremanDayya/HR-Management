@@ -27,20 +27,36 @@ class EmployeeRequestController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['status', 'request_type', 'search', 'project_id', 'request_type_id']);
+        $filters = $request->only(['status', 'request_type', 'search', 'project_id', 'request_type_id','project_ids']);
 
-        $requests = $this->employeeRequestService->filterRequests($filters);
+        $user = Auth::user();
+
+        // If user is project manager, get their managed projects and filter requests
+        if ($user->role == 'project_manager') {
+            $managedProjects = $user?->employee?->managedProjects?->pluck('id');
+//            dd($managedProjects);
+            $filters['project_ids'] = $managedProjects;
+
+            $requests = $this->employeeRequestService->filterRequests($filters);
+        } else {
+            $requests = $this->employeeRequestService->filterRequests($filters);
+        }
 
         $resources = EmployeeRequestResource::collection($requests);
-        $pendedRequests =$requests->where('status','pending')->count();
-        $approvedRequests =$requests->where('status','approved')->count();
-        $rejectedRequests =$requests->where('status','rejected')->count();
-        $allRequests =$requests->count();
-        $projects = Project::all();
-        $requestTypes = RequestType::all();
-        $role = $role = Role::where('name', Auth::user()->role)->first();
-        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role','pendedRequests', 'approvedRequests', 'rejectedRequests', 'allRequests'));
+        $pendedRequests = $requests->where('status','pending')->count();
+        $approvedRequests = $requests->where('status','approved')->count();
+        $rejectedRequests = $requests->where('status','rejected')->count();
+        $allRequests = $requests->count();
 
+        // Get projects for dropdown
+        $projects = ($user->role == 'project_manager')
+            ? $user?->employee?->managedProjects
+            : Project::all();
+//dd($projects);
+        $requestTypes = RequestType::all();
+        $role = Role::where('name', $user->role)->first();
+
+        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role','pendedRequests', 'approvedRequests', 'rejectedRequests', 'allRequests'));
     }
     public function storeEditRequest(Request $request)
     {

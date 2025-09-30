@@ -452,6 +452,12 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container-fluid">
+            @if(session()->has('impersonator_id'))
+                <div class="bg-yellow-200 text-yellow-800 p-2 text-center">
+                    انت تستخدم الأن حساب الموظف : {{session('employee_name')}}
+                    <a href="{{ url('/admin/impersonate/stop') }}" class="underline">العودة لحساب الادمن</a>
+                </div>
+            @endif
             @if (session('success'))
                 <div class="toast-container position-fixed" style="top: 100px; right: 20px; z-index: 1300;">
                     <div class="toast show align-items-center text-bg-success border-0" role="alert"
