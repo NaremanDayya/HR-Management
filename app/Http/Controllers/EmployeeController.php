@@ -87,96 +87,6 @@ class EmployeeController extends Controller
         ], $this->dropdownService->getDropdownData()));
     }
 
-//    public function Allfinancials(Request $request)
-//    {
-//        $filters = $request->only([
-//            'search',
-//            'account_status',
-//            'project',
-//            'marital_status',
-//            'english_level',
-//            'residence',
-//            'black_list',
-//            'role',
-//        ]);
-//
-//        $employees = $this->employeeService->filterEmployees($filters);
-//
-//        $currentMonth = now()->month;
-//        $currentYear = now()->year;
-//
-//        $employees->load([
-//            'deductions' => function ($q) use ($currentMonth, $currentYear) {
-//                $q->whereMonth('created_at', $currentMonth)
-//                    ->whereYear('created_at', $currentYear);
-//            },
-//            'advanceDeductions' => function ($q) use ($currentMonth, $currentYear) {
-//                $q->whereMonth('deducted_at', $currentMonth)
-//                    ->whereYear('deducted_at', $currentYear);
-//            },
-//
-//            'increases' => function ($q) use ($currentMonth, $currentYear) {
-//                $q->where('is_reward', '1')
-//                    ->whereMonth('effective_date', $currentMonth)
-//                    ->whereYear('effective_date', $currentYear);
-//            },
-//        ]);
-//
-//        $employees->transform(function ($employee) {
-//            $currentMonthDeductions = $employee->deductions->sum('value');
-//            $advanceDeductions = $employee->advanceDeductions->sum('amount');
-//
-//            $currentMonthIncreases = $employee->increases->sum('increase_amount');
-//            // dd($currentMonthIncreases);
-//
-//            $grossSalary = $employee->salary + $currentMonthIncreases;
-//            $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions;
-//
-//            return [
-//                'id' => $employee->id,
-//                'name' => $employee->name,
-//                'base_salary' => $employee->salary,
-//                'current_month_increases' => $currentMonthIncreases,
-//                'current_month_deductions' => $currentMonthDeductions,
-//                'advance_deductions' => $advanceDeductions,
-//                'net_salary' => $netSalary,
-//                'bank_details' => [
-//                    'owner_account_name' => $employee->owner_account_name,
-//                    'iban' => $employee->iban,
-//                    'bank_name' => $employee->bank_name,
-//                ],
-//                'account_status' => $employee->account_status,
-//            ];
-//        });
-//
-//        $projectsObjects = Project::all();
-//        $supervisors = Employee::whereHas('user', function ($query) {
-//            $query->where('role', 'supervisor');
-//        })->select('id', 'name', 'project_id')->get();
-//        $area_managers = Employee::whereHas('user', function ($query) {
-//            $query->where('role', 'area_manager');
-//        })
-//            ->select('id', 'name', 'project_id')
-//            ->get();
-//        return view('Employees.financials', array_merge([
-//            'employees' => $employees,
-//            'projectsObjects' => $projectsObjects,
-//            'supervisors' => $supervisors,
-//            'area_managers' => $area_managers,
-//            'totalSalaries' => $employees->sum('base_salary'),
-//            'totalIncreases' => $employees->sum('current_month_increases'),
-//            'totalNetSalaries' => $employees->sum('net_salary'),
-//            'totalDeductions' => $employees->sum(function ($e) {
-//                return $e['current_month_deductions'] + $e['advance_deductions'];
-//            }),
-//            'employeesCount' => $employees->count(),
-//            'avgSalaries' => $employees->avg('base_salary'),
-//            'avgNetSalaries' => $employees->avg('net_salary'),
-//            'minSalaries' => $employees->min('base_salary'),
-//            'maxSalaries' => $employees->max('base_salary'),
-//            'currentMonth' => now()->format('F Y'),
-//        ], $this->dropdownService->getDropdownData()));
-//    }
     public function Allfinancials(Request $request)
     {
         $filters = $request->only([
@@ -420,44 +330,105 @@ class EmployeeController extends Controller
     }
     public function showReplacements($employee)
     {
-        $oldEmployee = Employee::with(['replacements', 'replacements.newEmployee'])->first();
-        return view('Employees.replacements', compact('oldEmployee'));
+        $search = request()->input('search');
+
+        $oldEmployee = Employee::with(['replacements', 'replacements.newEmployee'])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhereHas('replacements.newEmployee', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('replacements.oldEmployee', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->first();
+
+        return view('Employees.replacements', compact('oldEmployee', 'search'));
     }
+
     public function showAlerts(Employee $employee)
     {
-        $employee->load('alerts');
+        $search = request()->input('search');
+
+        if ($search) {
+            $employee->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('position', 'like', "%{$search}%"); // add more employee fields as needed
+            });
+        }
+
         return view('Employees.alerts', array_merge([
-            'employee' => new EmployeeResource($employee)
+            'employee' => new EmployeeResource($employee),
+            'search' => $search
         ], $this->dropdownService->getDropdownData()));
     }
+
     public function showDeductions(Employee $employee)
     {
-        $employee->load('deductions');
+        $search = request()->input('search');
+
+        $employee->load(['deductions' => function ($query) use ($search) {
+            if ($search) {
+                $query->where('reason', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            }
+        }]);
+
         return view('Employees.deductions', array_merge([
-            'employee' => new EmployeeResource($employee)
+            'employee' => new EmployeeResource($employee),
+            'search' => $search
         ], $this->dropdownService->getDropdownData()));
     }
+
     public function showAdvances(Employee $employee)
     {
-        $employee->load('advances');
+        $search = request()->input('search');
+
+        $employee->load(['advances' => function ($query) use ($search) {
+            if ($search) {
+                $query->where('reason', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            }
+        }]);
+
         return view('Employees.advances', array_merge([
-            'employee' => new EmployeeResource($employee)
+            'employee' => new EmployeeResource($employee),
+            'search' => $search
         ], $this->dropdownService->getDropdownData()));
     }
+
     public function showAdvanceDeductions(Employee $employee)
     {
-        $employee->load('advanceDeductions');
+        $search = request()->input('search');
+
+        $employee->load(['advanceDeductions' => function ($query) use ($search) {
+            if ($search) {
+                $query->where('reason', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            }
+        }]);
+
         return view('Employees.advance_deduction', array_merge([
-            'employee' => new EmployeeResource($employee)
+            'employee' => new EmployeeResource($employee),
+            'search' => $search
         ], $this->dropdownService->getDropdownData()));
     }
+
     public function showIncreases(Employee $employee, Request $request)
     {
         $year = $request->input('year', now()->year);
         $type = $request->input('type');
         $status = $request->input('status');
+        $search = $request->input('search');
 
-        $employee->load(['increases' => function ($query) use ($year, $type, $status) {
+        $employee->load(['increases' => function ($query) use ($year, $type, $status, $search) {
             $query->whereYear('created_at', $year)->latest();
 
             if ($type) {
@@ -466,6 +437,14 @@ class EmployeeController extends Controller
 
             if ($status) {
                 $query->where('status', $status);
+            }
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('reason', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('increase_amount', 'like', "%{$search}%");
+                });
             }
         }]);
 
@@ -483,18 +462,40 @@ class EmployeeController extends Controller
             'rewardIncreasesCount' => $rewardIncreases->count(),
             'totalIncreases' => $increases->sum('increase_amount'),
             'totalIncreasesCount' => $increases->count(),
+            'search' => $search,
+            'year' => $year,
+            'type' => $type,
+            'status' => $status,
         ]);
     }
 
     public function showTemporaryProjectAssignments(Employee $employee)
     {
+        $search = request()->input('search');
+
         $assignments = TemporaryProjectAssignment::with(['fromProject', 'toProject', 'manager'])
             ->where('employee_id', $employee->id)
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('assignment_reason', 'like', "%{$search}%")
+                        ->orWhereHas('fromProject', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('toProject', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('manager', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->orderBy('created_at', 'desc')
             ->get();
+
         return view('Employees.temporary-projects', array_merge([
             'employee' => new EmployeeResource($employee),
             'assignments' => $assignments,
+            'search' => $search
         ], $this->dropdownService->getDropdownData()));
     }
     public function allAlerts()

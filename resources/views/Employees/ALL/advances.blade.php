@@ -56,16 +56,53 @@
             font-size: 0.75rem;
             letter-spacing: 0.5px;
         }
+        #pdfExportBtn {
+            background-color: #e74c3c;
+        }
+
+        #pdfExportBtn:hover {
+            background-color: #c0392b;
+        }
+
+        #excelExportBtn {
+            background-color: #2ecc71;
+        }
+
+        #excelExportBtn:hover {
+            background-color: #27ae60;
+        }
+        .search-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            border-color:mediumpurple;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
     </style>
 @endpush
 
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 advance-shadow advance-gradient-bg">
-            <div class="bg-teal-50 hover:bg-teal-100 border-l-4 border-teal-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
+            <div class="bg-blue-50 hover:bg-blue-100 border-l-4 border-blue-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-teal-100 p-3 rounded-full group-hover:bg-teal-200 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24"
+                    <div class="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -77,21 +114,36 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 rtl:space-x-reverse">
-        <span class="bg-teal-100 hover:bg-teal-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
+        <span class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
             {{ count($advances) }} طلب
         </span>
+                    <button onclick="exportToPDF()" id="pdfExportBtn"
+                            class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">PDF</span>
+                    </button>
+
+                    <button onclick="exportToExcel()" id="excelExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">Excel</span>
+                    </button>
                     <button onclick="window.print()"
-                            class="bg-teal-100 hover:bg-teal-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-teal-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" viewBox="0 0 20 20" fill="currentColor">
+                            class="bg-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-bue-600" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                   d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                                  clip-rule="evenodd"/>
+                                  clip-rule="evenodd" />
                         </svg>
                         <span>طباعة</span>
                     </button>
                     <a href="{{ route('employees.advances.deductions.all') }}"
-                       class="bg-teal-100 hover:bg-teal-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-teal-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24"
+                       class="bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 8v8m0 0H6m6 0h6M4 6h16M4 6v12a2 2 0 002 2h12a2 2 0 002-2V6M4 6l8 6 8-6"/>

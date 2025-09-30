@@ -17,13 +17,28 @@
         .fa-calculator:before {
             content: "\f1ec";
         }
+        #pdfExportBtn {
+            background-color: #e74c3c;
+        }
+
+        #pdfExportBtn:hover {
+            background-color: #c0392b;
+        }
+
+        #excelExportBtn {
+            background-color: #2ecc71;
+        }
+
+        #excelExportBtn:hover {
+            background-color: #27ae60;
+        }
     </style>
 @endpush
 @section('content')
 
     <div class="w-full rtl p-6 bg-gray-50 min-h-screen">
 
-        <div  class="bg-purple-100 hover:bg-purple-200 border-r-4 border-purple-600 rounded-2xl p-6 mb-8 transition-all duration-300 shadow-md">
+        <div  class="bg-gray-100 hover:bg-purple-200 border-purple-600 border-2 border-black rounded-2xl p-6 mb-8 transition-all duration-300 shadow-md">
             <div class="flex flex-col lg:flex-row justify-between items-center mb-6 gap-4">
                 <div class="text-center lg:text-right">
                     <h1 class="text-2xl font-bold mb-2 tracking-tight">إحصائيات المشاريع</h1>
@@ -32,34 +47,49 @@
 
                 <div class="flex flex-col sm:flex-row items-center gap-3">
                     <button
-                        class="btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-500 text-black shadow-lg hover:bg-purple-600"
+                        class="btn d-flex align-items-center border-4 border-purple-600 gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-400 text-black shadow-lg hover:bg-purple-500"
                         data-bs-toggle="modal" data-bs-target="#createProjectModal">
                         <i class="fas fa-plus"></i>
                         <span>إضافة مشروع</span>
                     </button>
 
                     <div class="export-btn-group no-print flex gap-2">
-                        <button id="pdfExportBtn"
-                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-red-500 hover:bg-red-600 text-black">
-                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        <button  id="pdfExportBtn"
+                                 class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="text-white">PDF</span>
                         </button>
 
-                        <button id="excelExportBtn"
-                                class="px-4 py-2 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-lg bg-green-500 hover:bg-green-600 text-black">
-                            <i class="fas fa-file-excel"></i> تصدير Excel
+                        <button  id="excelExportBtn"
+                                 class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span class="text-white">Excel</span>
+                        </button>
+                        <button onclick="window.print()"
+                                class="bg-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                      d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                      clip-rule="evenodd" />
+                            </svg>
+                            <span>طباعة</span>
                         </button>
                     </div>
                 </div>
             </div>
 
             <div
-                class="flex flex-col lg:flex-row items-center justify-between gap-6 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+                class="flex flex-col lg:flex-row items-center border-black border-2 justify-between gap-6 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div class="flex flex-wrap items-center justify-center gap-2  text-xs">
                     <div
                         class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">إجمالي الموظفين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-blue-500 text-black">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-blue-400 text-black">
                             {{ $totalActiveEmployees + $totalInActiveEmployees }}
                         </span>
                     </div>
@@ -68,7 +98,7 @@
                         class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">الموظفين النشطين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-green-500 text-black">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-green-400 text-black">
                             {{ $totalActiveEmployees }}
                         </span>
                     </div>
@@ -77,7 +107,7 @@
                         class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-black backdrop-blur-md border border-white/20">
                         <span class="font-semibold">الموظفين غير النشطين</span>
                         <span
-                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-red-500 text-black">
+                            class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-full bg-red-400 text-black">
                             {{ $totalInActiveEmployees }}
                         </span>
                     </div>
@@ -98,7 +128,7 @@
                         <!-- Projects Dropdown -->
                         <div class="relative group">
                             <button
-                                class="px-5 py-2.5 text-sm font-bold rounded-full transition-all bg-white/10 text-black hover:bg-white/20 flex items-center">
+                                class="px-5 py-2.5 text-sm font-bold border-2 border-black rounded-full transition-all bg-white/10 text-black hover:bg-white/20 flex items-center">
                                 المشاريع
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -154,7 +184,7 @@
                     }" x-cloak>
                         <div class="relative">
                             <button @click="open = !open" type="button"
-                                class="px-6 py-3 bg-white/10 border border-white/20 rounded-full hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 flex items-center justify-center gap-2 transition-all duration-200 min-w-[180px]">
+                                class="px-6 py-3 bg-white border border-white rounded-full hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 flex items-center justify-center gap-2 transition-all duration-200 min-w-[180px]">
                                 <span x-text="selected" class="font-medium"></span>
                                 <svg class="w-5 h-5 transform transition-transform duration-200"
                                     :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
@@ -273,8 +303,8 @@
 
             <section class="bg-white rounded-xl shadow-lg p-6 hover:shadow-indigo-300 transition-shadow duration-300">
                 <h2
-                    class="text-2xl font-semibold mb-6 border-b-4 border-indigo-500 pb-2 text-center text-indigo-700 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-700" fill="none"
+                    class="text-2xl font-semibold mb-6 border-b-4 border-black pb-2 text-center text-black flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16l-4 6 4 6H4V6z" />
@@ -340,8 +370,8 @@
 
             <section class="bg-white rounded-xl shadow-lg p-6 hover:shadow-green-300 transition-shadow duration-300">
                 <h2
-                    class="text-2xl font-semibold mb-6 border-b-4 border-green-500 pb-2 text-center text-green-700 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-700" fill="none"
+                    class="text-2xl font-semibold mb-6 border-b-4 border-black pb-2 text-center text-black flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" />
@@ -397,8 +427,8 @@
             {{-- إحصائيات الرواتب --}}
             <section class="bg-white rounded-xl shadow-lg p-6 hover:shadow-indigo-300 transition-shadow duration-300">
                 <h2
-                    class="text-2xl font-semibold mb-6 border-b-4 border-indigo-500 pb-2 text-center text-indigo-700 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-700" fill="none"
+                    class="text-2xl font-semibold mb-6 border-b-4 border-black pb-2 text-center text-black flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 1v22m0-11a4 4 0 110 8 4 4 0 010-8z" />
@@ -504,8 +534,8 @@
             <!-- إحصائيات أدوار الموظفين -->
             <section class="bg-white rounded-xl shadow-lg p-6 hover:shadow-purple-300 transition-shadow duration-300">
                 <h2
-                    class="text-2xl font-semibold mb-6 border-b-4 border-purple-500 pb-2 text-center text-purple-700 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-700" fill="none"
+                    class="text-2xl font-semibold mb-6 border-b-4 border-black pb-2 text-center text-black flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-black" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />

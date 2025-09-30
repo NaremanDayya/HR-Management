@@ -280,4 +280,28 @@ class DashboardController extends Controller
             'role' => $role
         ]);
     }
+
+    public function destroy(Role $role)
+    {
+        try {
+            // Prevent deletion of essential roles
+            if (in_array($role->name, ['admin', 'super_admin'])) {
+                return response()->json([
+                    'message' => 'لا يمكن حذف هذا الدور الأساسي'
+                ], 422);
+            }
+
+            $roleName = $role->name;
+            $role->delete();
+
+            return response()->json([
+                'message' => 'تم حذف الدور "' . $roleName . '" بنجاح'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'حدث خطأ أثناء حذف الدور: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

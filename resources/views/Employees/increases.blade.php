@@ -15,7 +15,43 @@
             color: #374151;
             font-size: 13px;
         }
+        #pdfExportBtn {
+            background-color: #e74c3c;
+        }
 
+        #pdfExportBtn:hover {
+            background-color: #c0392b;
+        }
+
+        #excelExportBtn {
+            background-color: #2ecc71;
+        }
+
+        #excelExportBtn:hover {
+            background-color: #27ae60;
+        }
+        .search-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            border-color:mediumpurple;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
         /* Increase Specific Styles */
         .increase-gradient-bg {
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
@@ -121,7 +157,7 @@
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Header Section -->
         <div class="rounded-xl overflow-hidden mb-6 increase-shadow increase-gradient-bg">
-            <div class="bg-green-50 hover:bg-green-100 border-l-4 border-green-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
+            <div class="bg-gray-50 hover:bg-green-100 border-l-4 border-green-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
                     <div class="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
@@ -148,6 +184,30 @@
                         </svg>
                         <span>جميع الزيادات</span>
                     </a>
+                    <button onclick="exportToPDF()" id="pdfExportBtn"
+                            class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">PDF</span>
+                    </button>
+
+                    <button onclick="exportToExcel()" id="excelExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">Excel</span>
+                    </button>
+                    <button onclick="window.print()"
+                            class="bg-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                  clip-rule="evenodd" />
+                        </svg>
+                        <span>طباعة</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -305,6 +365,9 @@
                                 مدير المشروع</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                المشروع</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 المشرف</th>
                             <th scope="col"
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -373,6 +436,15 @@
                                     <div class="flex items-center justify-center">
                                         @if ($increase->manager)
                                             <span>{{ $increase->manager->name }}</span>
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <div class="flex items-center justify-center">
+                                        @if ($increase->employee->project)
+                                            <span>{{ $increase->employee->project->name }}</span>
                                         @else
                                             <span class="text-gray-400">-</span>
                                         @endif

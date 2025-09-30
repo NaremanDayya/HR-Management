@@ -38,6 +38,14 @@ Route::get('/employees/credentials', function () {
 
     return view('Employees.credentials', compact('credentials'));
 })->name('employees.credentials');
+Route::get('/whatsapp/chat/{phone}', function ($phone, Request $request) {
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    $defaultMessage = $request->get('text', 'السلام عليكم ورحمة الله وبركاته');
+    $url = "https://wa.me/{$phone}?text=" . urlencode($defaultMessage);
+
+    return redirect()->away($url);
+})->name('whatsapp.chat');
+
 Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess::class])
     ->prefix('employees')->name('employees.')->group(function () {
         // Route::middleware(['auth'])->prefix('employees')->name('employees.')->group(function () {
@@ -86,7 +94,7 @@ Route::middleware([
     'auth',
     App\Http\Middleware\AdminRoleMiddleware::class
 ])->group(function () {
-
+    Route::delete('/admin/roles/{role}', [DashboardController::class, 'destroy'])->name('roles.destroy');
     Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('roles/{role}/permissions', [DashboardController::class, 'edit'])->name('admin.roles.permissions.edit');
         Route::put('roles/{role}/permissions', [DashboardController::class, 'update'])->name('admin.roles.permissions.update');

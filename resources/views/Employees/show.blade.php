@@ -967,6 +967,56 @@
                         </div>
                     </div>
                 </div>
+                <!-- Financial Data Section -->
+                <div class="unified-section">
+                    <div class="section-header">
+                        <h2><i class="bi bi-bank2"></i>البيانات المالية</h2>
+                    </div>
+                    <div class="section-body">
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="bi bi-building" style="color: var(--primary)"></i>اسم البنك:
+                            </div>
+                            <div class="info-value">
+                                @if($emp->bank_name)
+                                    <span>{{ $emp->bank_name }}</span>
+                                @else
+                                    <span style="color: #64748b;">غير متوفر</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="bi bi-credit-card" style="color: var(--secondary)"></i>رقم الآيبان:
+                            </div>
+                            <div class="info-value">
+                                @if($emp->iban)
+                                    <span style="font-family: 'Courier New', monospace; font-weight: 600; color: var(--dark);">
+                        {{ $emp->iban }}
+                    </span>
+                                @else
+                                    <span style="color: #64748b;">غير متوفر</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">
+                                <i class="bi bi-person-badge" style="color: var(--success)"></i>اسم صاحب الحساب:
+                            </div>
+                            <div class="info-value">
+                                @if($emp->owner_account_name)
+                                    <span style="font-weight: 600; color: var(--dark);">
+                        {{ $emp->owner_account_name }}
+                    </span>
+                                @else
+                                    <span style="color: #64748b;">غير متوفر</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Vehicle Information Section -->
                 @if ($emp->vehicle_info['vehicle_type'] || $emp->vehicle_info['vehicle_model'] || $emp->vehicle_info['vehicle_ID'])
                     <div class="unified-section">

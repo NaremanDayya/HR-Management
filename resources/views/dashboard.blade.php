@@ -8,6 +8,15 @@
             display: inline-block;
             transition: transform 0.3s ease, filter 0.3s ease;
         }
+        .flex.gap-3 > button {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .flex.gap-3 > button:hover {
+            transform: translateY(-1px);
+        }
 
         .group:hover .flag-icon {
             transform: scale(1.1);

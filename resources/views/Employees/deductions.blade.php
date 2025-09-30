@@ -17,6 +17,43 @@
         .deduction-gradient-bg {
             background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
         }
+          #pdfExportBtn {
+              background-color: #e74c3c;
+          }
+
+          #pdfExportBtn:hover {
+              background-color: #c0392b;
+          }
+
+          #excelExportBtn {
+              background-color: #2ecc71;
+          }
+
+          #excelExportBtn:hover {
+              background-color: #27ae60;
+          }
+          .search-container {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 12px;
+              transition: all 0.3s ease;
+          }
+
+          .search-container:focus-within {
+              border-color:mediumpurple;
+              box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+          }
+
+          .search-input {
+              background: transparent;
+              border: none;
+              outline: none;
+              width: 100%;
+          }
+
+          .search-input::placeholder {
+              color: #9ca3af;
+          }
 /*
         .deduction-header-gradient {
             background: linear-gradient(135deg, #f5365c 0%, #c53030 100%);
@@ -135,7 +172,7 @@
 @section('content')
     <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="rounded-xl overflow-hidden mb-6 deduction-shadow deduction-gradient-bg">
-            <div class="bg-red-50 hover:bg-red-100 border-l-4 border-red-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
+            <div class="bg-gray-50 hover:bg-red-100 border-l-4 border-red-500 rounded-lg px-6 py-4 flex items-center justify-between text-black transition-all duration-300">
                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
                     <div class="bg-red-100 p-3 rounded-full group-hover:bg-red-200 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,10 +213,68 @@
                         </svg>
                         <span>جميع الخصومات</span>
                     </a>
+                    <button onclick="exportToPDF()" id="pdfExportBtn"
+                            class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">PDF</span>
+                    </button>
+
+                    <button onclick="exportToExcel()" id="excelExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white">Excel</span>
+                    </button>
+                    <button onclick="window.print()"
+                            class="bg-gray-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                  clip-rule="evenodd" />
+                        </svg>
+                        <span>طباعة</span>
+                    </button>
                 </div>
             </div>
         </div>
-
+        <div class="bg-white rounded-xl overflow-hidden alert-shadow mb-4 table-header-bg">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <!-- Search Bar - Right Side -->
+                    <div class="flex-1 flex justify-end">
+                        <form method="GET" action="{{ route('employees.deductions.all') }}" class="w-full max-w-md">
+                            <div class="search-container px-4 py-2 flex items-center gap-3">
+                                <button type="submit" class="text-red-600 hover:text-red-700 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </button>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    value="{{ request('search') }}"
+                                    placeholder="ابحث في الإنذارات..."
+                                    class="search-input text-sm text-gray-700 placeholder-gray-500"
+                                >
+                                @if(request('year'))
+                                    <input type="hidden" name="year" value="{{ request('year') }}">
+                                @endif
+                                @if(request('search'))
+                                    <a href="{{ route('employees.deductions.all') }}" class="text-gray-400 hover:text-red-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Deductions Table -->
         <div class="bg-white rounded-xl overflow-hidden deduction-shadow">
             <div class="overflow-x-auto">

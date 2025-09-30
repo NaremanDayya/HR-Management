@@ -53,6 +53,11 @@
                                         data-role-name="{{ __($role->name) }}">
                                         تعديل
                                     </button>
+                                    <button class="text-red-600 hover:text-red-900 delete-role-btn"
+                                            data-role-id="{{ $role->id }}"
+                                            data-role-name="{{ __($role->name) }}">
+                                        حذف
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -61,7 +66,37 @@
                 </div>
             </div>
         </div>
-
+  <div class="modal fade" id="deleteRoleModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog model-md" role="document">
+          <div class="modal-content">
+              <div class="modal-header bg-red-50">
+                  <h5 class="modal-title font-bold text-red-800">تأكيد الحذف</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <div class="flex items-center justify-center mb-4">
+                      <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
+                  </div>
+                  <p class="text-center text-gray-700 mb-4">
+                      هل أنت متأكد من أنك تريد حذف دور
+                      "<span id="deleteRoleName" class="font-bold"></span>"؟
+                  </p>
+                  <p class="text-center text-sm text-red-600 mb-4">
+                      ⚠️ سيتم فقدان جميع الصلاحيات المرتبطة بهذا الدور ولا يمكنك التراجع.
+                  </p>
+              </div>
+              <div class="modal-footer bg-gray-50">
+                  <button type="button" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" data-dismiss="modal">إلغاء</button>
+                  <button type="button" id="confirmDeleteBtn" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                      <span class="submit-text">نعم، احذف</span>
+                      <span class="spinner-border spinner-border-sm d-none ml-2" role="status"></span>
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
 <!-- Permissions Modal -->
  <div class="modal fade" id="permissionsModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -141,6 +176,59 @@
   </div>
 @push('scripts')
     <script>
+        let deleteRoleId = null;
+
+        // Open delete confirmation modal
+        $(document).on('click', '.delete-role-btn', function() {
+            deleteRoleId = $(this).data('role-id');
+            const roleName = $(this).data('role-name');
+
+            $('#deleteRoleName').text(roleName);
+            $('#deleteRoleModal').modal('show');
+        });
+
+        // Confirm delete action
+        $('#confirmDeleteBtn').click(function() {
+            const btn = $(this);
+            btn.prop('disabled', true);
+            btn.find('.submit-text').text('جاري الحذف...');
+            btn.find('.spinner-border').removeClass('d-none');
+
+            $.ajax({
+                url: `/admin/roles/${deleteRoleId}`,
+                type: 'DELETE',
+                data: {
+                    _token: $('input[name="_token"]').val(),
+                    _method: 'DELETE'
+                },
+                success: function(response) {
+                    toastr.success(response.message);
+                    $('#deleteRoleModal').modal('hide');
+                    // Remove the role from the table
+                    removeRoleFromTable(deleteRoleId);
+                },
+                error: function(xhr) {
+                    let errorMessage = 'حدث خطأ أثناء حذف الدور';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function() {
+                    btn.prop('disabled', false);
+                    btn.find('.submit-text').text('نعم، احذف');
+                    btn.find('.spinner-border').addClass('d-none');
+                    deleteRoleId = null;
+                }
+            });
+        });
+
+        // Function to remove role from table
+        function removeRoleFromTable(roleId) {
+            $(`button[data-role-id="${roleId}"]`).closest('tr').fadeOut(300, function() {
+                $(this).remove();
+            });
+        }
         $(document).ready(function() {
             let currentRoleId = null;
 
