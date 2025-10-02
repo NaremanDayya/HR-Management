@@ -223,6 +223,7 @@ class EmployeeService
 
         return $employee;
     }
+
     public function filterEmployees(array $filters)
     {
         $query = Employee::with(['user', 'project.manager', 'managedProjects', 'deductions', 'advanceDeductions']);
@@ -238,15 +239,24 @@ class EmployeeService
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
+            if ($search == 'اندرويد' || $search == 'أندرويد') {
+                $search = 'android';
+            } elseif ($search == 'ايفون' || $search == 'آيفون') {
+                $search = 'iphone';
+            }
             $query->where(function ($q) use ($search) {
                 $q->where('job', 'like', "%$search%")
                     ->orWhere('salary', 'like', "%$search%")
+                    ->orWhere('work_area', 'like', "%$search%")
                     ->orWhereHas('user', function ($q) use ($search) {
                         $q->where('name', 'like', "%$search%")
                             ->orWhere('email', 'like', "%$search%")
                             ->orWhere('id_card', 'like', "%$search%")
                             ->orWhere('nationality', 'like', "%$search%")
-                            ->orWhere('contact_info->phone_number', 'like', "%$search%");
+                            ->orWhere('contact_info->phone_number', 'like', "%$search%")
+                            ->orWhere('contact_info->phone_type', 'like', "%$search%")
+                            ->orWhere('contact_info->residence', 'like', "%$search%");
+
                     })
                     ->orWhereHas('project', function ($q) use ($search) {
                         $q->where('name', 'like', "%$search%");
@@ -293,11 +303,11 @@ class EmployeeService
                 });
             });
         }
-         if (!empty($filters['residence_neighborhood'])) {
+        if (!empty($filters['residence_neighborhood'])) {
             $query->whereHas('user', function ($q) use ($filters) {
                 $q->where(function ($subQuery) use ($filters) {
                     $subQuery->where('contact_info->residence_neighborhood', $filters['residence_neighborhood']);
-             });
+                });
             });
         }
 
@@ -365,6 +375,7 @@ class EmployeeService
             ], 500);
         }
     }
+
     public function getReplacementHistory($employeeId)
     {
         return Employee::with(['replacements.newEmployee.user', 'replacedBy.oldEmployee.user'])
