@@ -248,6 +248,9 @@ class EmployeeService
                 $q->where('job', 'like', "%$search%")
                     ->orWhere('salary', 'like', "%$search%")
                     ->orWhere('work_area', 'like', "%$search%")
+                    ->orWhere('vehicle_info->vehicle_type', 'like', "%$search%")
+                    ->orWhere('vehicle_info->vehicle_ID', 'like', "%$search%")
+                    ->orWhere('vehicle_info->vehicle_model', 'like', "%$search%")
                     ->orWhereHas('user', function ($q) use ($search) {
                         $q->where('name', 'like', "%$search%")
                             ->orWhere('email', 'like', "%$search%")
