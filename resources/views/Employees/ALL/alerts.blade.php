@@ -75,9 +75,40 @@
             outline: none;
             width: 100%;
         }
+        .search-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
 
+        /* If you're using Tailwind CSS, you can also add these utility classes */
+        .focus\:outline-none:focus {
+            outline: none !important;
+        }
+
+        .focus\:ring-0:focus {
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
         .search-input::placeholder {
             color: #9ca3af;
+        }
+        #liveSearch:focus {
+            outline: none;
+        }
+
+        #clearSearch {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
         }
 
         .alerts-cell {
@@ -160,32 +191,24 @@
                 <div class="flex items-center justify-between">
                     <!-- Search Bar - Right Side -->
                     <div class="flex-1 flex justify-end">
-                        <form method="GET" action="{{ route('employees.alerts.all') }}" class="w-full max-w-md">
+                        <div class="w-full max-w-md">
                             <div class="search-container px-4 py-2 flex items-center gap-3">
-                                <button type="submit" class="text-red-600 hover:text-red-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                                 <input
                                     type="text"
-                                    name="search"
-                                    value="{{ request('search') }}"
-                                    placeholder="ابحث في الإنذارات..."
-                                    class="search-input text-sm text-gray-700 placeholder-gray-500"
+                                    id="liveSearch"
+                                    placeholder="ابحث في الموظفين أو المشاريع..."
+                                    class="search-input text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-none"
                                 >
-                                @if(request('year'))
-                                    <input type="hidden" name="year" value="{{ request('year') }}">
-                                @endif
-                                @if(request('search'))
-                                    <a href="{{ route('employees.alerts.all') }}" class="text-gray-400 hover:text-red-600 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </a>
-                                @endif
+                                <button id="clearSearch" class="text-gray-400 hover:text-red-600 transition-colors hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -325,6 +348,92 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Live Search Variables
+                const liveSearch = document.getElementById('liveSearch');
+                const clearSearch = document.getElementById('clearSearch');
+                const tableRows = document.querySelectorAll('tbody tr');
+
+                // Live search functionality
+                liveSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.trim().toLowerCase();
+
+                    // Show/hide clear button
+                    if (searchTerm.length > 0) {
+                        clearSearch.classList.remove('hidden');
+                    } else {
+                        clearSearch.classList.add('hidden');
+                    }
+
+                    // Filter table rows
+                    tableRows.forEach(row => {
+                        // Skip the empty state row
+                        if (row.cells.length === 1) return;
+
+                        if (searchTerm === '') {
+                            row.style.display = '';
+                            return;
+                        }
+
+                        // Get employee name (2nd column) and project name (3rd column)
+                        const employeeCell = row.cells[1];
+                        const projectCell = row.cells[2];
+
+                        const employeeName = employeeCell?.textContent?.trim().toLowerCase() || '';
+                        const projectName = projectCell?.textContent?.trim().toLowerCase() || '';
+
+                        // Check if search term matches employee name OR project name
+                        const matchesEmployee = employeeName.includes(searchTerm);
+                        const matchesProject = projectName.includes(searchTerm);
+
+                        // Show row if either condition is true
+                        if (matchesEmployee || matchesProject) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Update empty state message
+                    updateEmptyState();
+                });
+
+                // Clear search functionality
+                clearSearch.addEventListener('click', function() {
+                    liveSearch.value = '';
+                    liveSearch.focus();
+                    this.classList.add('hidden');
+
+                    // Show all rows
+                    tableRows.forEach(row => {
+                        if (row.cells.length === 1) return; // Skip empty state row
+                        row.style.display = '';
+                    });
+
+                    updateEmptyState();
+                });
+
+                // Function to update empty state message
+                function updateEmptyState() {
+                    const visibleRows = Array.from(tableRows).filter(row => {
+                        // Skip the empty state row in the count
+                        if (row.cells.length === 1) return false;
+                        return row.style.display !== 'none';
+                    });
+
+                    const emptyStateRow = document.querySelector('tbody tr:last-child');
+
+                    // Check if the last row is the empty state row (has only 1 cell)
+                    const isEmptyState = emptyStateRow && emptyStateRow.cells.length === 1;
+
+                    if (isEmptyState) {
+                        if (visibleRows.length > 0) {
+                            emptyStateRow.style.display = 'none';
+                        } else {
+                            emptyStateRow.style.display = '';
+                        }
+                    }
+                }
+
                 // Export to Excel function with proper cell formatting
                 function exportToExcel() {
                     if (typeof XLSX === 'undefined') {
@@ -337,11 +446,32 @@
                         return;
                     }
 
+                    const visibleRows = Array.from(tableRows).filter(row => {
+                        if (row.cells.length === 1) return false; // Skip empty state row
+                        return row.style.display !== 'none';
+                    });
+
+                    if (visibleRows.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'لا توجد بيانات',
+                            text: 'لا توجد صفوف مرئية للتصدير',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return;
+                    }
+
                     try {
                         const table = document.querySelector('table.table');
                         if (!table) throw new Error('Table not found');
 
                         const tableClone = table.cloneNode(true);
+
+                        // Remove empty state row from export
+                        const emptyStateRow = tableClone.querySelector('tbody tr:last-child');
+                        if (emptyStateRow && emptyStateRow.cells.length === 1) {
+                            emptyStateRow.remove();
+                        }
 
                         // Prepare data with proper cell formatting
                         const headers = Array.from(tableClone.querySelectorAll('thead th'))
@@ -410,6 +540,21 @@
 
                 // Export to PDF function with proper Arabic text handling
                 async function exportToPDF() {
+                    const visibleRows = Array.from(tableRows).filter(row => {
+                        if (row.cells.length === 1) return false; // Skip empty state row
+                        return row.style.display !== 'none';
+                    });
+
+                    if (visibleRows.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'لا توجد بيانات',
+                            text: 'لا توجد صفوف مرئية للتصدير',
+                            confirmButtonText: 'حسناً'
+                        });
+                        return;
+                    }
+
                     if (typeof html2pdf === 'undefined') {
                         Swal.fire({
                             icon: 'error',
@@ -425,6 +570,12 @@
                         if (!table) throw new Error('Table not found');
 
                         const tableClone = table.cloneNode(true);
+
+                        // Remove empty state row from PDF
+                        const emptyStateRow = tableClone.querySelector('tbody tr:last-child');
+                        if (emptyStateRow && emptyStateRow.cells.length === 1) {
+                            emptyStateRow.remove();
+                        }
 
                         const pdfContainer = document.createElement('div');
                         pdfContainer.style.padding = '20px';

@@ -17,6 +17,15 @@
             transition: opacity 0.3s ease;
             z-index: 1000;
         }
+        .absence-days-warning {
+            color: #e67e22;
+            font-weight: 600;
+        }
+
+        .absence-days-high {
+            color: #e74c3c;
+            font-weight: 700;
+        }
 
         #salaryAdjustmentModal .modal-content {
             background: white;
@@ -327,6 +336,7 @@
                                             <th><i class="fas fa-plus-circle me-1 text-success"></i> المكافآت</th>
                                             <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
                                             <th><i class="fas fa-hand-holding-usd me-1 text-danger"></i> خصومات السلف</th>
+                                            <th><i class="fas fa-calendar-times me-1 text-warning"></i> أيام الغياب</th>
                                             <th><i class="fas fa-money-bill-wave me-1 text-success"></i> صافي الراتب</th>
                                             <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
                                             <th><i class="fas fa-user-circle me-1 text-purple"></i> اسم صاحب الحساب</th>
@@ -352,6 +362,9 @@
                                                 </td>
                                                 <td class="text-danger">
                                                     {{ number_format($employee['advance_deductions']) }} ر.س
+                                                </td>
+                                                <td class="text-warning font-weight-bold">
+                                                    {{ $employee['absence_days'] ?? 0 }} يوم
                                                 </td>
                                                 <td class="text-success font-weight-bold">
                                                     {{ number_format($employee['net_salary']) }} ر.س
@@ -504,8 +517,8 @@
                 const cells = rows[i].querySelectorAll('td');
 
                 for (let j = 0; j < colsToExport; j++) {
-                    // Handle bank logo cell - extract bank name
-                    if (j === 9) { // Bank column
+                    // Handle bank logo cell - extract bank name (Cell 10)
+                    if (j === 10) {
                         const bankDetails = cells[j].querySelector('.bank-details');
                         if (bankDetails) {
                             const bankNameSpan = bankDetails.querySelector('span');
@@ -523,18 +536,19 @@
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(data);
 
-            // Adjust column widths for new structure
+            // Adjust column widths for correct structure
             const wscols = [
-                { width: 10 }, // ID
-                { width: 25 }, // Name
-                { width: 15 }, // Base Salary
-                { width: 15 }, // Increases
-                { width: 15 }, // Current Deductions
-                { width: 15 }, // Advance Deductions
-                { width: 15 }, // Net Salary
-                { width: 25 }, // IBAN
-                { width: 20 }, // Owner Name
-                { width: 20 }  // Bank
+                { width: 10 },  // 0: ID
+                { width: 25 },  // 1: Name
+                { width: 15 },  // 2: Base Salary
+                { width: 15 },  // 3: Increases
+                { width: 15 },  // 4: Current Deductions
+                { width: 15 },  // 5: Advance Deductions
+                { width: 12 },  // 6: Absence Days
+                { width: 15 },  // 7: Net Salary
+                { width: 25 },  // 8: IBAN
+                { width: 20 },  // 9: Owner Name
+                { width: 20 }   // 10: Bank
             ];
             ws['!cols'] = wscols;
 
@@ -717,19 +731,31 @@
             currentEmployeeId = employeeId;
             originalSalary = parseFloat(baseSalary);
 
-            // Get current values from the table row with new column indices
-            // Cell indices: 0=ID, 1=Name, 2=Base Salary, 3=Increases, 4=Current Deductions, 5=Advance Deductions, 6=Net Salary, 7=IBAN, 8=Owner Name, 9=Bank, 10=Actions
+            // CORRECTED COLUMN INDICES based on debug output:
+            // Cell 0: ID
+            // Cell 1: Name
+            // Cell 2: Base Salary
+            // Cell 3: Increases
+            // Cell 4: Current Deductions
+            // Cell 5: Advance Deductions
+            // Cell 6: Absence Days
+            // Cell 7: Net Salary
+            // Cell 8: IBAN
+            // Cell 9: Owner Name
+            // Cell 10: Bank
+            // Cell 11: Actions
 
             const currentDeductions = parseFloat(rowElement.cells[4].textContent.replace(/[^\d.]/g, '')) || 0;
             const advanceDeductions = parseFloat(rowElement.cells[5].textContent.replace(/[^\d.]/g, '')) || 0;
-            const netSalary = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0;
+            const absenceDays = parseInt(rowElement.cells[6].textContent.replace(/[^\d]/g, '')) || 0;
+            const netSalary = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0;
 
             // Set values in the modal
             document.getElementById('employeeName').value = employeeName;
             document.getElementById('currentSalary').value = numberFormat(originalSalary) + ' ر.س';
             document.getElementById('currentDeductions').value = numberFormat(currentDeductions);
             document.getElementById('advanceDeductions').value = numberFormat(advanceDeductions);
-            document.getElementById('absenceDays').value = 0; // Reset absence days
+            document.getElementById('absenceDays').value = absenceDays;
             document.getElementById('adjustedSalary').value = numberFormat(netSalary) + ' ر.س';
 
             // Hide save button initially
@@ -739,6 +765,72 @@
             document.getElementById('salaryAdjustmentModal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
+
+        function saveAdjustedSalary() {
+            if (!currentEmployeeRow) return;
+
+            const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
+            const currentDeductions = parseFloat(
+                document.getElementById('currentDeductions').value.replace(/[^0-9.]/g, '')
+            ) || 0;
+            const advanceDeductions = parseFloat(
+                document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
+            ) || 0;
+
+            // Get previous values from the table row with CORRECT indices
+            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[4].textContent.replace(/[^\d.]/g, '')) || 0;
+            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[5].textContent.replace(/[^\d.]/g, '')) || 0;
+            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[6].textContent.replace(/[^\d]/g, '')) || 0;
+
+            // Get current increases value
+            const currentIncreasesText = currentEmployeeRow.cells[3].textContent;
+            const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
+
+            // Calculate new values
+            const dailyRate = (originalSalary + currentIncreases) / 26;
+            const absenceDeduction = absenceDays * dailyRate;
+            const netSalary = Math.max(0, (originalSalary + currentIncreases) - currentDeductions - advanceDeductions - absenceDeduction);
+
+            // CORRECTED: Update table cells with proper column assignments
+            // Cell 4: Current Deductions
+            currentEmployeeRow.cells[4].textContent = numberFormat(currentDeductions) + ' ر.س';
+            currentEmployeeRow.cells[4].className = 'text-danger';
+
+            // Cell 5: Advance Deductions
+            currentEmployeeRow.cells[5].textContent = numberFormat(advanceDeductions) + ' ر.س';
+            currentEmployeeRow.cells[5].className = 'text-danger';
+
+            // Cell 6: Absence Days (just the number of days)
+            currentEmployeeRow.cells[6].textContent = absenceDays + ' يوم';
+            currentEmployeeRow.cells[6].className = 'text-warning font-weight-bold';
+
+            // Cell 7: Net Salary (final calculated amount)
+            currentEmployeeRow.cells[7].textContent = numberFormat(netSalary) + ' ر.س';
+            currentEmployeeRow.cells[7].className = 'text-success font-weight-bold salary-updated';
+
+            // Show success message
+            showToast('تم تحديث الراتب بنجاح', 'success');
+
+            // Update summary cards
+            const currentDeductionsDiff = currentDeductions - prevCurrentDeductions;
+            const advanceDeductionsDiff = advanceDeductions - prevAdvanceDeductions;
+            const absenceDeductionDiff = absenceDeduction - (prevAbsenceDays * ((originalSalary + currentIncreases) / 26));
+
+            updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff);
+
+            closeSalaryModal();
+        }
+
+
+        function debugColumnIndices(rowElement) {
+            console.log('=== DEBUG COLUMN INDICES ===');
+            const cells = rowElement.cells;
+            for (let i = 0; i < cells.length; i++) {
+                console.log(`Cell ${i}:`, cells[i].textContent.trim());
+            }
+            console.log('=== END DEBUG ===');
+        }
+
 
         function closeSalaryModal() {
             document.getElementById('salaryAdjustmentModal').classList.remove('show');
@@ -785,7 +877,7 @@
             document.getElementById('saveSalaryBtn').classList.remove('hidden');
         }
 
-        function updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff) {
+            function updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff) {
             const totalDeductionsDiff = currentDeductionsDiff + advanceDeductionsDiff + absenceDeductionDiff;
 
             const totalDeductionsElement = document.getElementById('totalDeductionsCard');

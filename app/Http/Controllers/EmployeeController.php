@@ -22,9 +22,11 @@ use App\Services\EmployeeService;
 use App\Services\EmployeeViewDataService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 
 class EmployeeController extends Controller
@@ -161,7 +163,7 @@ class EmployeeController extends Controller
                     'iban' => $employee->iban,
                     'bank_name' => $employee->bank_name,
                 ],
-                'account_status' => $employee->account_status,
+                'account_status' => $employee->user->account_status,
             ];
         });
 
@@ -272,34 +274,34 @@ class EmployeeController extends Controller
         ], $this->dropdownService->getDropdownData()));
     }
 
-    public function update(UpdateEmployeeRequest $request, Employee $employee)
-    {
-        $data = $request->validated();
-        // dd('test');
-        $image = $request->file('personal_image');
-
-
-        try {
-            $this->employeeService->updateEmployee($employee, $data, $image);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'تمت تعديل بيانات الموظف بنجاح.',
-                'data' => $employee
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Employee edit failed: ' . $e->getMessage(), [
-                'exception' => $e,
-                'request' => $request->all()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage(),
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+//    public function update(UpdateEmployeeRequest $request, Employee $employee)
+//    {
+//        $data = $request->validated();
+//        // dd('test');
+//        $image = $request->file('personal_image');
+//
+//
+//        try {
+//            $this->employeeService->updateEmployee($employee, $data, $image);
+//
+//            return response()->json([
+//                'success' => true,
+//                'message' => 'تمت تعديل بيانات الموظف بنجاح.',
+//                'data' => $employee
+//            ]);
+//        } catch (\Exception $e) {
+//            Log::error('Employee edit failed: ' . $e->getMessage(), [
+//                'exception' => $e,
+//                'request' => $request->all()
+//            ]);
+//
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage(),
+//                'error' => $e->getMessage()
+//            ], 500);
+//        }
+//    }
     public function replace(ReplaceEmployeeRequest $request)
     {
         $data = $request->validated();
@@ -325,6 +327,98 @@ class EmployeeController extends Controller
                 'success' => false,
                 'message' => 'حدث خطأ أثناء عملية الاستبدال: ' . $e->getMessage(),
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function inlineUpdate(UpdateEmployeeRequest $request, Employee $employee)
+    {
+        try {
+            // Use your existing update method to avoid duplication
+            return $this->update($request, $employee);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل في تحديث بيانات الموظف: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
+    {
+        $data = $request->validated();
+        $image = $request->file('personal_image');
+
+        try {
+            $this->employeeService->updateEmployee($employee, $data, $image);
+
+            // Reload the employee with relationships for the response
+            $employee->load([
+                'user',
+                'alerts',
+                'deductions',
+                'advances',
+                'increases',
+                'project',
+                'supervisor',
+                'areaManager',
+                'replacements',
+                'temporaryAssignments',
+                'replacedBy.oldEmployee.replacements',
+                'managedProjects'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تمت تعديل بيانات الموظف بنجاح.',
+                'data' => new EmployeeResource($employee)
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Employee edit failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage(),
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get employee data for editing
+     */
+    public function edit(Employee $employee)
+    {
+        try {
+            // Load all necessary relationships for the resource
+            $employee->load([
+                'user',
+                'alerts',
+                'deductions',
+                'advances',
+                'increases',
+                'project',
+                'supervisor',
+                'areaManager',
+                'replacements',
+                'temporaryAssignments',
+                'replacedBy.oldEmployee.replacements',
+                'managedProjects'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'employee' => new EmployeeResource($employee)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل في تحميل بيانات الموظف: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -60,6 +60,7 @@ class EmployeeResource extends JsonResource
             'iban' => $emp->iban,
             'owner_account_name' => $emp->owner_account_name,
             'bank_name' => $emp->bank_name,
+            'email' => $emp->user->email
         ];
     }
 }

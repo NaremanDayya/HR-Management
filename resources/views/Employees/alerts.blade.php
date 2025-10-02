@@ -114,6 +114,21 @@
         .search-input::placeholder {
             color: #9ca3af;
         }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Ensure search input has no focus border */
+        .search-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        /* Smooth transitions */
+        tbody tr {
+            transition: all 0.3s ease;
+        }
 
         .title-section {
             background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
@@ -172,15 +187,15 @@
                         <span>جميع الإنذارات</span>
                     </a>
 
-                    <button onclick="exportToPDF()" id="pdfExportBtn"
-                            class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
+                    <button id="pdfExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span class="text-white">PDF</span>
                     </button>
 
-                    <button onclick="exportToExcel()" id="excelExportBtn"
+                    <button id="excelExportBtn"
                             class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -206,32 +221,24 @@
                 <div class="flex items-center justify-between">
                     <!-- Search Bar - Right Side -->
                     <div class="flex-1 flex justify-end">
-                        <form method="GET" action="{{ route('employees.alerts', $employee->id) }}" class="w-full max-w-md">
+                        <div class="w-full max-w-md">
                             <div class="search-container px-4 py-2 flex items-center gap-3">
-                                <button type="submit" class="text-red-600 hover:text-red-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                                 <input
                                     type="text"
-                                    name="search"
-                                    value="{{ request('search') }}"
-                                    placeholder="ابحث في الإنذارات..."
-                                    class="search-input text-sm text-gray-700 placeholder-gray-500"
+                                    id="liveSearch"
+                                    placeholder="ابحث في المشاريع أو عنوان الإنذار أو السبب..."
+                                    class="search-input text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-none"
                                 >
-                                @if(request('year'))
-                                    <input type="hidden" name="year" value="{{ request('year') }}">
-                                @endif
-                                @if(request('search'))
-                                    <a href="{{ route('employees.alerts', $employee->id) }}" class="text-gray-400 hover:text-red-600 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </a>
-                                @endif
+                                <button id="clearSearch" class="text-gray-400 hover:text-red-600 transition-colors hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -361,282 +368,424 @@
         </div>
     </div>
 @endsection
-    @push('scripts')
-        <script>
-            // Export to Excel function (defined globally)
-            function exportToExcel() {
-                if (typeof XLSX === 'undefined') {
-                    alert('مكتبة Excel غير محملة');
-                    return;
-                }
 
-                try {
-                    const table = document.querySelector('table.table');
-                    const tableClone = table.cloneNode(true);
+@push('scripts')
+    <script>
+        // Define global variables
+        let tableRows = [];
 
-                    // Prepare data
-                    const headers = Array.from(tableClone.querySelectorAll('thead th'))
-                        .map(th => th.textContent.trim());
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize table rows
+            tableRows = document.querySelectorAll('tbody tr');
 
-                    const data = [
-                        headers,
-                        ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
-                            return Array.from(row.querySelectorAll('td')).map(td => {
-                                // Remove any HTML content and get only text
-                                return td.textContent.trim();
-                            });
-                        })
-                    ];
+            // Live Search Variables
+            const liveSearch = document.getElementById('liveSearch');
+            const clearSearch = document.getElementById('clearSearch');
 
-                    // Create workbook
-                    const wb = XLSX.utils.book_new();
-                    const ws = XLSX.utils.aoa_to_sheet(data);
-                    XLSX.utils.book_append_sheet(wb, ws, "إنذارات الموظف");
-                    XLSX.writeFile(wb, `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            // Live search functionality
+            if (liveSearch) {
+                liveSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.trim().toLowerCase();
 
-                } catch (error) {
-                    console.error('Excel export error:', error);
-                    alert('حدث خطأ أثناء تصدير ملف Excel: ' + error.message);
-                }
-            }
+                    // Show/hide clear button
+                    if (searchTerm.length > 0) {
+                        clearSearch.classList.remove('hidden');
+                    } else {
+                        clearSearch.classList.add('hidden');
+                    }
 
-            // Export to PDF function (defined globally)
-            async function exportToPDF() {
-                if (typeof html2pdf === 'undefined') {
-                    alert('مكتبة PDF غير محملة');
-                    return;
-                }
+                    // Filter table rows
+                    tableRows.forEach(row => {
+                        // Skip the empty state row
+                        if (row.cells.length === 1) return;
 
-                try {
-                    // Create a new container for PDF content
-                    const pdfContainer = document.createElement('div');
-                    pdfContainer.style.padding = '20px';
-                    pdfContainer.style.direction = 'rtl';
-                    pdfContainer.style.fontFamily = 'Arial, sans-serif';
-                    pdfContainer.style.textAlign = 'right';
-                    pdfContainer.style.width = '100%';
+                        if (searchTerm === '') {
+                            row.style.display = '';
+                            return;
+                        }
 
-                    // Create header
-                    const header = document.createElement('div');
-                    header.style.marginBottom = '20px';
-                    header.style.borderBottom = '2px solid #dc2626';
-                    header.style.paddingBottom = '15px';
-                    header.style.textAlign = 'center';
+                        // Get project name (2nd column), alert title (6th column), and reason (7th column)
+                        const projectCell = row.cells[1];
+                        const titleCell = row.cells[5];
+                        const reasonCell = row.cells[6];
 
-                    const companyName = document.createElement('h1');
-                    companyName.textContent = 'شركة افاق الخليج';
-                    companyName.style.color = '#dc2626';
-                    companyName.style.margin = '0 0 10px 0';
-                    companyName.style.fontSize = '24px';
-                    companyName.style.fontWeight = 'bold';
-                    companyName.style.whiteSpace = 'nowrap';
+                        const projectName = projectCell?.textContent?.trim().toLowerCase() || '';
+                        const alertTitle = titleCell?.textContent?.trim().toLowerCase() || '';
+                        const alertReason = reasonCell?.textContent?.trim().toLowerCase() || '';
 
-                    const title = document.createElement('h2');
-                    title.textContent = 'تقرير إنذارات الموظف - {{ $employee->user->name }}';
-                    title.style.color = '#333';
-                    title.style.margin = '0 0 10px 0';
-                    title.style.fontSize = '18px';
-                    title.style.fontWeight = '600';
-                    title.style.whiteSpace = 'nowrap';
+                        // Check if search term matches project name OR alert title OR reason
+                        const matchesProject = projectName.includes(searchTerm);
+                        const matchesTitle = alertTitle.includes(searchTerm);
+                        const matchesReason = alertReason.includes(searchTerm);
 
-                    const reportDate = document.createElement('p');
-                    reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
-                    reportDate.style.color = '#666';
-                    reportDate.style.margin = '0';
-                    reportDate.style.fontSize = '14px';
-                    reportDate.style.whiteSpace = 'nowrap';
-
-                    header.appendChild(companyName);
-                    header.appendChild(title);
-                    header.appendChild(reportDate);
-                    pdfContainer.appendChild(header);
-
-                    // Create table for PDF
-                    const table = document.createElement('table');
-                    table.style.width = '100%';
-                    table.style.borderCollapse = 'collapse';
-                    table.style.marginTop = '20px';
-                    table.style.fontSize = '12px';
-                    table.style.fontFamily = 'Arial, sans-serif';
-                    table.style.direction = 'rtl';
-
-                    // Create table header
-                    const thead = document.createElement('thead');
-                    const headerRow = document.createElement('tr');
-
-                    // Define headers with proper RTL handling
-                    const headers = [
-                        '#',
-                        'المشروع',
-                        'مدير المشروع',
-                        'المشرف',
-                        'منطقة العمل',
-                        'عنوان الإنذار',
-                        'السبب',
-                        'تاريخ الإرسال'
-                    ];
-
-                    headers.forEach(headerText => {
-                        const th = document.createElement('th');
-                        th.textContent = headerText;
-                        th.style.backgroundColor = '#dc2626';
-                        th.style.color = 'white';
-                        th.style.padding = '12px 8px';
-                        th.style.border = '1px solid #ddd';
-                        th.style.textAlign = 'center';
-                        th.style.fontWeight = 'bold';
-                        th.style.fontSize = '13px';
-                        th.style.whiteSpace = 'nowrap';
-                        th.style.wordWrap = 'normal';
-                        th.style.letterSpacing = 'normal';
-
-                        headerRow.appendChild(th);
+                        // Show row if any condition is true
+                        if (matchesProject || matchesTitle || matchesReason) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     });
 
-                    thead.appendChild(headerRow);
-                    table.appendChild(thead);
-
-                    // Create table body
-                    const tbody = document.createElement('tbody');
-
-                    @forelse($employee->alerts as $index => $alert)
-                    const row = document.createElement('tr');
-
-                    // Serial number
-                    const serialCell = document.createElement('td');
-                    serialCell.textContent = '{{ $index + 1 }}';
-                    serialCell.style.padding = '10px 8px';
-                    serialCell.style.border = '1px solid #ddd';
-                    serialCell.style.textAlign = 'center';
-                    serialCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(serialCell);
-
-                    // Project
-                    const projectCell = document.createElement('td');
-                    projectCell.textContent = '{{ $employee->project ? addslashes($employee->project->name) : "-" }}';
-                    projectCell.style.padding = '10px 8px';
-                    projectCell.style.border = '1px solid #ddd';
-                    projectCell.style.textAlign = 'center';
-                    projectCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(projectCell);
-
-                    // Project Manager
-                    const managerCell = document.createElement('td');
-                    managerCell.textContent = '{{ $employee->project && $employee->project->manager ? addslashes($employee->project->manager->name) : "-" }}';
-                    managerCell.style.padding = '10px 8px';
-                    managerCell.style.border = '1px solid #ddd';
-                    managerCell.style.textAlign = 'center';
-                    managerCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(managerCell);
-
-                    // Supervisor
-                    const supervisorCell = document.createElement('td');
-                    supervisorCell.textContent = '{{ $employee?->supervisor?->name ? addslashes($employee->supervisor->name) : "-" }}';
-                    supervisorCell.style.padding = '10px 8px';
-                    supervisorCell.style.border = '1px solid #ddd';
-                    supervisorCell.style.textAlign = 'center';
-                    supervisorCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(supervisorCell);
-
-                    // Work Area
-                    const workAreaCell = document.createElement('td');
-                    workAreaCell.textContent = '{{ $employee?->work_area ? addslashes($employee->work_area) : "-" }}';
-                    workAreaCell.style.padding = '10px 8px';
-                    workAreaCell.style.border = '1px solid #ddd';
-                    workAreaCell.style.textAlign = 'center';
-                    workAreaCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(workAreaCell);
-
-                    // Alert Title
-                    const titleCell = document.createElement('td');
-                    titleCell.textContent = '{{ addslashes($alert->title) }}';
-                    titleCell.style.padding = '10px 8px';
-                    titleCell.style.border = '1px solid #ddd';
-                    titleCell.style.textAlign = 'center';
-                    titleCell.style.maxWidth = '200px';
-                    titleCell.style.wordWrap = 'break-word';
-                    row.appendChild(titleCell);
-
-                    // Alert Reason
-                    const reasonCell = document.createElement('td');
-                    reasonCell.textContent = '{{ addslashes($alert->reason) }}';
-                    reasonCell.style.padding = '10px 8px';
-                    reasonCell.style.border = '1px solid #ddd';
-                    reasonCell.style.textAlign = 'center';
-                    reasonCell.style.maxWidth = '250px';
-                    reasonCell.style.wordWrap = 'break-word';
-                    row.appendChild(reasonCell);
-
-                    // Date
-                    const dateCell = document.createElement('td');
-                    dateCell.textContent = '{{ $alert->created_at->format("Y-m-d") }}';
-                    dateCell.style.padding = '10px 8px';
-                    dateCell.style.border = '1px solid #ddd';
-                    dateCell.style.textAlign = 'center';
-                    dateCell.style.whiteSpace = 'nowrap';
-                    row.appendChild(dateCell);
-
-                    tbody.appendChild(row);
-                    @empty
-                    const emptyRow = document.createElement('tr');
-                    const emptyCell = document.createElement('td');
-                    emptyCell.colSpan = 8;
-                    emptyCell.textContent = 'لا يوجد إنذارات';
-                    emptyCell.style.padding = '20px';
-                    emptyCell.style.textAlign = 'center';
-                    emptyCell.style.color = '#666';
-                    emptyRow.appendChild(emptyCell);
-                    tbody.appendChild(emptyRow);
-                    @endforelse
-
-                    table.appendChild(tbody);
-                    pdfContainer.appendChild(table);
-
-                    // Add footer
-                    const footer = document.createElement('div');
-                    footer.style.marginTop = '20px';
-                    footer.style.paddingTop = '10px';
-                    footer.style.borderTop = '1px solid #eee';
-                    footer.style.textAlign = 'center';
-                    footer.style.color = '#666';
-                    footer.style.fontSize = '12px';
-
-                    const copyright = document.createElement('p');
-                    copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
-                    copyright.style.whiteSpace = 'nowrap';
-                    footer.appendChild(copyright);
-                    pdfContainer.appendChild(footer);
-
-                    // PDF options with better RTL support
-                    const options = {
-                        margin: [15, 15, 15, 15],
-                        filename: `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: {
-                            scale: 2,
-                            useCORS: true,
-                            logging: false,
-                            letterRendering: true
-                        },
-                        jsPDF: {
-                            unit: 'mm',
-                            format: 'a3',
-                            orientation: 'landscape',
-                            compress: true
-                        }
-                    };
-
-                    await html2pdf().set(options).from(pdfContainer).save();
-
-                } catch (error) {
-                    console.error('PDF export error:', error);
-                    alert('حدث خطأ أثناء تصدير ملف PDF: ' + error.message);
-                }
+                    // Update empty state message
+                    updateEmptyState();
+                });
             }
 
-            // DOMContentLoaded for any other initialization if needed
-            document.addEventListener('DOMContentLoaded', function() {
-                // Any other initialization code can go here
+            // Clear search functionality
+            if (clearSearch) {
+                clearSearch.addEventListener('click', function() {
+                    if (liveSearch) {
+                        liveSearch.value = '';
+                        liveSearch.focus();
+                    }
+                    this.classList.add('hidden');
+
+                    // Show all rows
+                    tableRows.forEach(row => {
+                        if (row.cells.length === 1) return; // Skip empty state row
+                        row.style.display = '';
+                    });
+
+                    updateEmptyState();
+                });
+            }
+
+            // Add event listeners for export buttons
+            document.getElementById('excelExportBtn')?.addEventListener('click', exportToExcel);
+            document.getElementById('pdfExportBtn')?.addEventListener('click', exportToPDF);
+        });
+
+        // Function to update empty state message
+        function updateEmptyState() {
+            const visibleRows = Array.from(tableRows).filter(row => {
+                // Skip the empty state row in the count
+                if (row.cells.length === 1) return false;
+                return row.style.display !== 'none';
             });
-        </script>
-    @endpush
+
+            const emptyStateRow = document.querySelector('tbody tr:last-child');
+
+            // Check if the last row is the empty state row (has only 1 cell)
+            const isEmptyState = emptyStateRow && emptyStateRow.cells.length === 1;
+
+            if (isEmptyState) {
+                if (visibleRows.length > 0) {
+                    emptyStateRow.style.display = 'none';
+                } else {
+                    emptyStateRow.style.display = '';
+                }
+            }
+        }
+
+        // Export to Excel function (defined globally)
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: 'مكتبة Excel غير محملة',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            const visibleRows = Array.from(tableRows).filter(row => {
+                if (row.cells.length === 1) return false; // Skip empty state row
+                return row.style.display !== 'none';
+            });
+
+            if (visibleRows.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'لا توجد بيانات',
+                    text: 'لا توجد صفوف مرئية للتصدير',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            try {
+                const table = document.querySelector('table.table');
+                if (!table) throw new Error('Table not found');
+
+                const tableClone = table.cloneNode(true);
+
+                // Remove empty state row from export
+                const emptyStateRow = tableClone.querySelector('tbody tr:last-child');
+                if (emptyStateRow && emptyStateRow.cells.length === 1) {
+                    emptyStateRow.remove();
+                }
+
+                // Prepare data with proper cell formatting
+                const headers = Array.from(tableClone.querySelectorAll('thead th'))
+                    .map(th => th.textContent.trim());
+
+                const data = [
+                    headers,
+                    ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
+                        return Array.from(row.querySelectorAll('td')).map(td => {
+                            // Get clean text content without HTML
+                            let text = td.textContent.trim();
+
+                            // Handle special cases for better formatting
+                            if (text.includes('ر.س') || text.includes('SAR')) {
+                                text = text.replace('ر.س', '').trim();
+                            }
+
+                            // Remove any extra spaces and normalize text
+                            text = text.replace(/\s+/g, ' ').trim();
+
+                            return text;
+                        });
+                    })
+                ];
+
+                // Create workbook with proper column widths
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Set column widths for better readability
+                const colWidths = headers.map((_, index) => {
+                    // Set different widths based on column content
+                    if (index === 0) return { wch: 5 };  // #
+                    if (index === 1) return { wch: 15 }; // المشروع
+                    if (index === 2) return { wch: 15 }; // مدير المشروع
+                    if (index === 3) return { wch: 15 }; // المشرف
+                    if (index === 4) return { wch: 15 }; // منطقة العمل
+                    if (index === 5) return { wch: 20 }; // عنوان الإنذار
+                    if (index === 6) return { wch: 30 }; // السبب
+                    if (index === 7) return { wch: 12 }; // تاريخ الإرسال
+                    return { wch: 15 }; // Default width
+                });
+
+                ws['!cols'] = colWidths;
+
+                // Add auto filter
+                ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+                        s: { r: 0, c: 0 },
+                        e: { r: data.length, c: headers.length - 1 }
+                    }) };
+
+                XLSX.utils.book_append_sheet(wb, ws, "إنذارات الموظف");
+                XLSX.writeFile(wb, `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+            } catch (error) {
+                console.error('Excel export error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: `حدث خطأ أثناء تصدير ملف Excel: ${error.message}`,
+                    confirmButtonText: 'حسناً'
+                });
+            }
+        }
+
+        // Export to PDF function with proper Arabic text handling
+        async function exportToPDF() {
+            const visibleRows = Array.from(tableRows).filter(row => {
+                if (row.cells.length === 1) return false; // Skip empty state row
+                return row.style.display !== 'none';
+            });
+
+            if (visibleRows.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'لا توجد بيانات',
+                    text: 'لا توجد صفوف مرئية للتصدير',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            if (typeof html2pdf === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: 'مكتبة PDF غير محملة',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            try {
+                const table = document.querySelector('table.table');
+                if (!table) throw new Error('Table not found');
+
+                const tableClone = table.cloneNode(true);
+
+                // Remove empty state row from PDF
+                const emptyStateRow = tableClone.querySelector('tbody tr:last-child');
+                if (emptyStateRow && emptyStateRow.cells.length === 1) {
+                    emptyStateRow.remove();
+                }
+
+                const pdfContainer = document.createElement('div');
+                pdfContainer.style.padding = '20px';
+                pdfContainer.style.direction = 'rtl';
+                pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                pdfContainer.style.textAlign = 'center';
+                pdfContainer.style.lineHeight = '1.6';
+
+                // Create header with proper Arabic text
+                const header = document.createElement('div');
+                header.style.marginBottom = '20px';
+                header.style.borderBottom = '2px solid #dc2626';
+                header.style.paddingBottom = '15px';
+                header.style.textAlign = 'center';
+
+                const companyName = document.createElement('h1');
+                companyName.textContent = 'شركة افاق الخليج';
+                companyName.style.color = '#dc2626';
+                companyName.style.margin = '0 0 10px 0';
+                companyName.style.fontSize = '24px';
+                companyName.style.fontWeight = 'bold';
+                companyName.style.letterSpacing = 'normal';
+                companyName.style.wordSpacing = 'normal';
+
+                const title = document.createElement('h2');
+                title.textContent = 'تقرير إنذارات الموظف - {{ $employee->user->name }}';
+                title.style.color = '#333';
+                title.style.margin = '0 0 10px 0';
+                title.style.fontSize = '18px';
+                title.style.fontWeight = '600';
+                title.style.letterSpacing = 'normal';
+                title.style.wordSpacing = 'normal';
+
+                const reportDate = document.createElement('p');
+                reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
+                reportDate.style.color = '#666';
+                reportDate.style.margin = '0';
+                reportDate.style.fontSize = '14px';
+                reportDate.style.letterSpacing = 'normal';
+                reportDate.style.wordSpacing = 'normal';
+
+                header.appendChild(companyName);
+                header.appendChild(title);
+                header.appendChild(reportDate);
+                pdfContainer.appendChild(header);
+
+                // Style table for PDF with proper text handling
+                tableClone.style.width = '100%';
+                tableClone.style.borderCollapse = 'collapse';
+                tableClone.style.marginTop = '20px';
+                tableClone.style.direction = 'rtl';
+                tableClone.style.fontSize = '9px';
+                tableClone.style.fontFamily = 'Arial, sans-serif';
+
+                // Style table headers
+                tableClone.querySelectorAll('th').forEach(th => {
+                    th.style.backgroundColor = '#dc2626';
+                    th.style.color = 'white';
+                    th.style.padding = '10px 6px';
+                    th.style.border = '1px solid #ddd';
+                    th.style.textAlign = 'center';
+                    th.style.fontWeight = 'bold';
+                    th.style.fontSize = '10px';
+                    th.style.letterSpacing = 'normal';
+                    th.style.wordSpacing = 'normal';
+                    th.style.whiteSpace = 'nowrap';
+                });
+
+                // Style table cells
+                tableClone.querySelectorAll('td').forEach(td => {
+                    td.style.padding = '8px 6px';
+                    td.style.border = '1px solid #ddd';
+                    td.style.textAlign = 'center';
+                    td.style.fontSize = '9px';
+                    td.style.letterSpacing = 'normal';
+                    td.style.wordSpacing = 'normal';
+                    td.style.whiteSpace = 'normal';
+                    td.style.wordBreak = 'break-word';
+                });
+
+                pdfContainer.appendChild(tableClone);
+
+                // Add footer
+                const footer = document.createElement('div');
+                footer.style.marginTop = '20px';
+                footer.style.paddingTop = '10px';
+                footer.style.borderTop = '1px solid #eee';
+                footer.style.textAlign = 'center';
+                footer.style.color = '#666';
+                footer.style.fontSize = '11px';
+
+                const copyright = document.createElement('p');
+                copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
+                copyright.style.margin = '5px 0';
+                copyright.style.letterSpacing = 'normal';
+                copyright.style.wordSpacing = 'normal';
+                footer.appendChild(copyright);
+                pdfContainer.appendChild(footer);
+
+                // PDF options with better Arabic text handling
+                const options = {
+                    margin: [15, 15, 20, 15],
+                    filename: `إنذارات_الموظف_{{ $employee->user->name }}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        onclone: function(clonedDoc) {
+                            clonedDoc.documentElement.dir = 'rtl';
+                            clonedDoc.body.style.direction = 'rtl';
+                            clonedDoc.body.style.textAlign = 'right';
+                            clonedDoc.body.style.fontFamily = 'Arial, sans-serif';
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a3',
+                        orientation: 'landscape'
+                    }
+                };
+
+                // Show loading
+                const btn = document.getElementById('pdfExportBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+                btn.disabled = true;
+
+                await html2pdf().set(options).from(pdfContainer).save();
+
+                // Restore button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error('PDF export error:', error);
+                // Restore button in case of error
+                const btn = document.getElementById('pdfExportBtn');
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> PDF';
+                btn.disabled = false;
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: `حدث خطأ أثناء تصدير ملف PDF: ${error.message}`,
+                    confirmButtonText: 'حسناً'
+                });
+            }
+        }
+
+        // Add event listeners with loading states
+        document.getElementById('excelExportBtn')?.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                exportToExcel();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 100);
+        });
+
+        document.getElementById('pdfExportBtn')?.addEventListener('click', exportToPDF);
+    </script>
+@endpush

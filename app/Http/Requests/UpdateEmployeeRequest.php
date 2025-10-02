@@ -33,10 +33,11 @@ class UpdateEmployeeRequest extends FormRequest
                 'max:255',
                 function ($attribute, $value, $fail) {
                     $blacklisted = Employee::where('name', $value)
-                        ->where('account_status', 'deactivated')
+                        ->whereHas('user', function ($query) {
+                            $query->where('account_status', 'inactive');
+                        })
                         ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
                         ->exists();
-
                     if ($blacklisted) {
                         $fail('blacklisted_employee');
                     }

@@ -3,7 +3,7 @@
 
 @push('styles')
     <style>
-          .table th {
+        .table th {
             font-weight: 600;
             color: #374151;
             font-size: 13px;
@@ -14,43 +14,54 @@
             color: #374151;
             font-size: 13px;
         }
-          #pdfExportBtn {
-              background-color: #e74c3c;
-          }
+        #pdfExportBtn {
+            background-color: #e74c3c;
+        }
 
-          #pdfExportBtn:hover {
-              background-color: #c0392b;
-          }
+        #pdfExportBtn:hover {
+            background-color: #c0392b;
+        }
 
-          #excelExportBtn {
-              background-color: #2ecc71;
-          }
+        #excelExportBtn {
+            background-color: #2ecc71;
+        }
 
-          #excelExportBtn:hover {
-              background-color: #27ae60;
-          }
-          .search-container {
-              background: #f8fafc;
-              border: 1px solid #e2e8f0;
-              border-radius: 12px;
-              transition: all 0.3s ease;
-          }
+        #excelExportBtn:hover {
+            background-color: #27ae60;
+        }
+        .search-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
 
-          .search-container:focus-within {
-              border-color:mediumpurple;
-              box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-          }
+        .search-container:focus-within {
+            border-color:mediumpurple;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
 
-          .search-input {
-              background: transparent;
-              border: none;
-              outline: none;
-              width: 100%;
-          }
+        .search-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+        }
 
-          .search-input::placeholder {
-              color: #9ca3af;
-          }
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+        .search-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .hidden {
+            display: none !important;
+        }
+        tbody tr {
+            transition: all 0.3s ease;
+        }
         .replacement-gradient-bg {
             background: linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 100%);
         }
@@ -226,8 +237,8 @@
         <span class="bg-purple-100 hover:bg-purple-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
             {{ $oldEmployee->replacements()->count() }} استبدالات
         </span>
-                    <button onclick="exportToPDF()" id="pdfExportBtn"
-                            class="  px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                    <button id="pdfExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -235,8 +246,8 @@
                     </button>
 
                     <!-- Export Excel Button -->
-                    <button onclick="exportToExcel()" id="excelExportBtn"
-                            class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
+                    <button id="excelExportBtn"
+                            class="px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-purple-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -268,32 +279,24 @@
                 <div class="flex items-center justify-between">
                     <!-- Search Bar - Right Side -->
                     <div class="flex-1 flex justify-end">
-                        <form method="GET" action="{{ route('employees.replacements', $oldEmployee->id) }}" class="w-full max-w-md">
+                        <div class="w-full max-w-md">
                             <div class="search-container px-4 py-2 flex items-center gap-3">
-                                <button type="submit" class="text-purple-600 hover:text-purple-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                                 <input
                                     type="text"
-                                    name="search"
-                                    value="{{ request('search') }}"
-                                    placeholder="ابحث في الاستبدالات..."
-                                    class="search-input text-sm text-gray-700 placeholder-gray-500"
+                                    id="liveSearch"
+                                    placeholder="ابحث في الموظف البديل أو سبب الاستبدال..."
+                                    class="search-input text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-none"
                                 >
-                                @if(request('year'))
-                                    <input type="hidden" name="year" value="{{ request('year') }}">
-                                @endif
-                                @if(request('search'))
-                                    <a href="{{ route('employees.replacements', $oldEmployee->id) }}" class="text-gray-400 hover:text-purple-600 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </a>
-                                @endif
+                                <button id="clearSearch" class="text-gray-400 hover:text-purple-600 transition-colors hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -304,9 +307,9 @@
             @if ($oldEmployee->replacements->isEmpty())
                 <div class="empty-state-replacement">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 empty-icon-replacement" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
+                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                     <h5 class="text-lg font-medium text-gray-700">لا يوجد بدائل</h5>
                     <p class="text-sm mt-1 text-gray-500">لم يتم تسجيل أي بدائل لهذا الموظف</p>
@@ -315,88 +318,88 @@
                 <div class="overflow-x-auto">
                     <table class="table min-w-full divide-y divide-gray-100">
                         <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    #</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    الموظف البديل</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    تاريخ التعيين</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    تاريخ آخر يوم عمل</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    سبب الاستبدال</th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    الحالة</th>
-                            </tr>
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                #</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الموظف البديل</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                تاريخ التعيين</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                تاريخ آخر يوم عمل</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                سبب الاستبدال</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الحالة</th>
+                        </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            @foreach ($oldEmployee->replacements as $index => $replacement)
-                                <tr class="replacement-row hover:bg-purple-50 transition-colors">
-                                    <td
-                                        class="replacement-cell px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-                                        {{ $index + 1 }}
-                                    </td>
+                        <tbody class="bg-white divide-y divide-gray-100" id="replacementsTableBody">
+                        @foreach ($oldEmployee->replacements as $index => $replacement)
+                            <tr class="replacement-row hover:bg-purple-50 transition-colors">
+                                <td
+                                    class="replacement-cell px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                    {{ $index + 1 }}
+                                </td>
 
-                                    <td class="replacement-cell px-6 py-4 whitespace-nowrap">
-                                        <a href="{{ route('employees.show', $replacement->newEmployee->id) }}"
-                                            class="employee-link">
-                                            <div class="employee-avatar">
-                                                {{ substr($replacement->newEmployee->name, 0, 1) }}
+                                <td class="replacement-cell px-6 py-4 whitespace-nowrap">
+                                    <a href="{{ route('employees.show', $replacement->newEmployee->id) }}"
+                                       class="employee-link">
+                                        <div class="employee-avatar">
+                                            {{ substr($replacement->newEmployee->name, 0, 1) }}
+                                        </div>
+                                        <div class="mr-3">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $replacement->newEmployee->name }}</div>
+                                            <div class="text-xs text-gray-500">#{{ $replacement->newEmployee->id }}
                                             </div>
-                                            <div class="mr-3">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    {{ $replacement->newEmployee->name }}</div>
-                                                <div class="text-xs text-gray-500">#{{ $replacement->newEmployee->id }}
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </td>
+                                        </div>
+                                    </a>
+                                </td>
 
-                                    <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
+                                <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
                                         <span class="date-badge">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             {{ $replacement->replacement_date->format('Y-m-d') }}
                                         </span>
-                                    </td>
+                                </td>
 
-                                    <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
+                                <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
                                         <span class="date-badge">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             {{ $replacement->last_working_date->format('Y-m-d') }}
                                         </span>
-                                    </td>
+                                </td>
 
-                                    <td class="replacement-cell px-6 py-4 text-sm text-gray-500 text-center">
-                                        <div class="reason-content mx-auto" style="max-width: 250px;">
-                                            {{ $replacement->reason }}
-                                        </div>
-                                    </td>
+                                <td class="replacement-cell px-6 py-4 text-sm text-gray-500 text-center">
+                                    <div class="reason-content mx-auto" style="max-width: 250px;">
+                                        {{ $replacement->reason }}
+                                    </div>
+                                </td>
 
-                                    <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
-                                        @php
-                                            $isActive = $replacement->newEmployee->account_status === 'active';
-                                        @endphp
-                                        <span class="status-badge {{ $isActive ? 'status-active' : 'status-inactive' }}">
+                                <td class="replacement-cell px-6 py-4 whitespace-nowrap text-center">
+                                    @php
+                                        $isActive = $replacement->newEmployee->account_status === 'active';
+                                    @endphp
+                                    <span class="status-badge {{ $isActive ? 'status-active' : 'status-inactive' }}">
                                             {{ $isActive ? 'نشط' : 'غير نشط' }}
                                         </span>
-                                    </td>
-                                </tr>
-                            @endforeach
+                                </td>
+                            </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -411,7 +414,7 @@
                 <div class="modal-header bg-purple-600 text-white">
                     <h5 class="modal-title">سبب الاستبدال الكامل</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                            aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p id="fullReasonText"></p>
@@ -426,7 +429,79 @@
 
 @push('scripts')
     <script>
+        // Define global variables
+        let tableRows = [];
+
+        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize table rows
+            tableRows = document.querySelectorAll('#replacementsTableBody tr');
+
+            // Live Search Variables
+            const liveSearch = document.getElementById('liveSearch');
+            const clearSearch = document.getElementById('clearSearch');
+
+            // Live search functionality
+            if (liveSearch) {
+                liveSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.trim().toLowerCase();
+
+                    // Show/hide clear button
+                    if (searchTerm.length > 0) {
+                        clearSearch.classList.remove('hidden');
+                    } else {
+                        clearSearch.classList.add('hidden');
+                    }
+
+                    // Filter table rows
+                    tableRows.forEach(row => {
+                        if (searchTerm === '') {
+                            row.style.display = '';
+                            return;
+                        }
+
+                        // Get new employee name (2nd column) and reason (5th column)
+                        const newEmployeeCell = row.cells[1];
+                        const reasonCell = row.cells[4];
+
+                        const newEmployeeName = newEmployeeCell?.textContent?.trim().toLowerCase() || '';
+                        const reasonText = reasonCell?.textContent?.trim().toLowerCase() || '';
+
+                        // Check if search term matches new employee OR reason
+                        const matchesNewEmployee = newEmployeeName.includes(searchTerm);
+                        const matchesReason = reasonText.includes(searchTerm);
+
+                        // Show row if any condition is true
+                        if (matchesNewEmployee || matchesReason) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Update empty state message
+                    updateEmptyState();
+                });
+            }
+
+            // Clear search functionality
+            if (clearSearch) {
+                clearSearch.addEventListener('click', function() {
+                    if (liveSearch) {
+                        liveSearch.value = '';
+                        liveSearch.focus();
+                    }
+                    this.classList.add('hidden');
+
+                    // Show all rows
+                    tableRows.forEach(row => {
+                        row.style.display = '';
+                    });
+
+                    updateEmptyState();
+                });
+            }
+
             // Reason modal handler
             const reasonModal = document.getElementById('reasonModal');
             if (reasonModal) {
@@ -436,313 +511,311 @@
                     document.getElementById('fullReasonText').textContent = reason;
                 });
             }
+
+            // Add event listeners for export buttons
+            document.getElementById('excelExportBtn')?.addEventListener('click', exportToExcel);
+            document.getElementById('pdfExportBtn')?.addEventListener('click', exportToPDF);
         });
 
-        // Export to PDF function
-        async function exportToPDF() {
-            const pdfBtn = event.target.closest('button');
-            const originalHTML = pdfBtn.innerHTML;
+        // Function to update empty state message
+        function updateEmptyState() {
+            const visibleRows = Array.from(tableRows).filter(row => {
+                return row.style.display !== 'none';
+            });
 
-            // Show loading
-            pdfBtn.innerHTML = `
-                <div class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #dc2626; border-radius: 50%;"></div>
-                <span>جاري التصدير...</span>
-            `;
-            pdfBtn.disabled = true;
-
-            try {
-                // Create a temporary div for PDF content
-                const pdfContent = document.createElement('div');
-                pdfContent.style.direction = 'rtl';
-                pdfContent.style.padding = '20px';
-                pdfContent.style.fontFamily = 'Arial, sans-serif';
-
-                // Get current date
-                const currentDate = new Date().toLocaleDateString('ar-SA');
-                const employeeName = "{{ $oldEmployee->name }}";
-
-                // Start building the HTML content
-                let htmlContent = `
-                    <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #6b46c1; padding-bottom: 10px;">
-                        <h1 style="color: #6b46c1; margin: 0;">تقرير بدائل الموظف</h1>
-                        <p style="color: #666; margin: 5px 0 0 0;">الموظف: ${employeeName}</p>
-                        <p style="color: #666; margin: 5px 0 0 0;">تاريخ التصدير: ${currentDate}</p>
-                        <p style="color: #666; margin: 0;">إجمالي البدائل: ${document.querySelectorAll('tbody tr').length}</p>
-                    </div>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;">
-                        <thead>
-                            <tr>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">#</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">الموظف البديل</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">رقم الموظف</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">تاريخ التعيين</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">تاريخ آخر يوم عمل</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">سبب الاستبدال</th>
-                                <th style="border: 1px solid #ddd; padding: 12px; text-align: center; background-color: #6b46c1; color: white; font-weight: bold;">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                // Get all table rows and build the content dynamically
-                const rows = document.querySelectorAll('tbody tr');
-                rows.forEach((row, index) => {
-                    const cells = row.querySelectorAll('td');
-
-                    // Extract data from each cell
-                    const employeeLink = cells[1].querySelector('.employee-link');
-                    const employeeName = employeeLink ? employeeLink.querySelector('.text-sm').textContent.trim() : '';
-                    const employeeId = employeeLink ? employeeLink.querySelector('.text-xs').textContent.replace('#', '').trim() : '';
-
-                    // Extract dates
-                    const replacementDate = cells[2].querySelector('.date-badge')?.textContent.replace(/[^0-9\-]/g, '').trim() || '';
-                    const lastWorkingDate = cells[3].querySelector('.date-badge')?.textContent.replace(/[^0-9\-]/g, '').trim() || '';
-
-                    // Extract reason
-                    const reasonContent = cells[4].querySelector('.reason-content');
-                    let reason = reasonContent ? reasonContent.textContent.trim() : '';
-
-                    // Extract status
-                    const statusBadge = cells[5].querySelector('.status-badge');
-                    const isActive = statusBadge?.classList.contains('status-active');
-                    const statusText = isActive ? 'نشط' : 'غير نشط';
-                    const statusColor = isActive ? '#d1fae5' : '#fee2e2';
-                    const statusTextColor = isActive ? '#065f46' : '#991b1b';
-
-                    htmlContent += `
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center; background-color: #f8fafc;">${index + 1}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${employeeName}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${employeeId}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${replacementDate}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${lastWorkingDate}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center; max-width: 300px; word-wrap: break-word; white-space: normal;">${reason}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                                <span style="padding: 4px 8px; border-radius: 12px; font-size: 10px; background-color: ${statusColor}; color: ${statusTextColor};">
-                                    ${statusText}
-                                </span>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                htmlContent += `
-                        </tbody>
-                    </table>
-                    <div style="margin-top: 20px; text-align: center; color: #666; font-size: 10px;">
-                        تم إنشاء هذا التقرير بواسطة النظام - ${document.querySelector('title')?.textContent || 'النظام'}
-                    </div>
-                `;
-
-                pdfContent.innerHTML = htmlContent;
-
-                // PDF options
-                const options = {
-                    margin: [10, 10, 10, 10],
-                    filename: `بدائل-الموظف-${employeeName}-${currentDate}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        logging: true,
-                        scrollY: -window.scrollY
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
-                        orientation: 'landscape'
-                    }
-                };
-
-                // Generate PDF
-                await html2pdf().set(options).from(pdfContent).save();
-
-            } catch (error) {
-                console.error('PDF export error:', error);
-                alert('حدث خطأ أثناء تصدير PDF: ' + error.message);
-            } finally {
-                // Restore button
-                pdfBtn.innerHTML = originalHTML;
-                pdfBtn.disabled = false;
+            // If no visible rows, you could show a message (though your view already has empty state)
+            if (visibleRows.length === 0) {
+                // Optional: Show a "no results" message
             }
         }
 
         // Export to Excel function
-        async function exportToExcel() {
-            const excelBtn = event.target.closest('button');
-            const originalHTML = excelBtn.innerHTML;
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: 'مكتبة Excel غير محملة',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
 
-            // Show loading
-            excelBtn.innerHTML = `
-                <div class="spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #16a34a; border-radius: 50%;"></div>
-                <span>جاري التصدير...</span>
-            `;
-            excelBtn.disabled = true;
+            const visibleRows = Array.from(tableRows).filter(row => {
+                return row.style.display !== 'none';
+            });
+
+            if (visibleRows.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'لا توجد بيانات',
+                    text: 'لا توجد صفوف مرئية للتصدير',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
 
             try {
-                // Get table data
-                const table = document.querySelector('table');
-                const rows = table.querySelectorAll('tbody tr');
+                const table = document.querySelector('table.table');
+                if (!table) throw new Error('Table not found');
 
-                // Prepare data for Excel
-                const data = [];
+                const tableClone = table.cloneNode(true);
 
-                // Add headers
-                const headers = [
-                    '#',
-                    'الموظف البديل',
-                    'رقم الموظف',
-                    'تاريخ التعيين',
-                    'تاريخ آخر يوم عمل',
-                    'سبب الاستبدال',
-                    'الحالة'
+                // Prepare data with proper cell formatting
+                const headers = Array.from(tableClone.querySelectorAll('thead th'))
+                    .map(th => th.textContent.trim());
+
+                const data = [
+                    headers,
+                    ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
+                        return Array.from(row.querySelectorAll('td')).map(td => {
+                            // Get clean text content without HTML
+                            let text = td.textContent.trim();
+
+                            // Remove any extra spaces and normalize text
+                            text = text.replace(/\s+/g, ' ').trim();
+
+                            return text;
+                        });
+                    })
                 ];
-                data.push(headers);
 
-                // Add rows data
-                rows.forEach(row => {
-                    const rowData = [];
-                    const cells = row.querySelectorAll('td');
-
-                    cells.forEach((cell, index) => {
-                        let cellText = cell.textContent.trim();
-
-                        // Handle special cases
-                        if (index === 1) { // Employee name and ID
-                            const employeeLink = cell.querySelector('.employee-link');
-                            if (employeeLink) {
-                                const name = employeeLink.querySelector('.text-sm')?.textContent.trim() || '';
-                                const id = employeeLink.querySelector('.text-xs')?.textContent.replace('#', '').trim() || '';
-                                if (index === 1) {
-                                    rowData.push(name); // Name
-                                    rowData.push(id);   // ID (will be in next column)
-                                }
-                            }
-                        } else if (index === 2 || index === 3) { // Date columns
-                            // Extract date from badge
-                            const dateSpan = cell.querySelector('.date-badge');
-                            if (dateSpan) {
-                                cellText = dateSpan.textContent.replace(/[^0-9\-]/g, '').trim();
-                            }
-                            rowData.push(cellText);
-                        } else if (index === 4) { // Reason column
-                            const reasonContent = cell.querySelector('.reason-content');
-                            cellText = reasonContent ? reasonContent.textContent.trim() : '';
-                            rowData.push(cellText);
-                        } else if (index === 5) { // Status column
-                            // Extract status text
-                            const statusSpan = cell.querySelector('.status-badge');
-                            if (statusSpan) {
-                                cellText = statusSpan.textContent.trim();
-                            }
-                            rowData.push(cellText);
-                        } else if (index === 0) { // Index column
-                            rowData.push(cellText);
-                        }
-                    });
-
-                    data.push(rowData);
-                });
-
-                // Create worksheet
+                // Create workbook with proper column widths
+                const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(data);
 
                 // Set column widths for better readability
-                const colWidths = [
-                    { wch: 5 },   // #
-                    { wch: 20 },  // الموظف البديل
-                    { wch: 12 },  // رقم الموظف
-                    { wch: 15 },  // تاريخ التعيين
-                    { wch: 15 },  // تاريخ آخر يوم عمل
-                    { wch: 50 },  // سبب الاستبدال (wider for long text)
-                    { wch: 12 }   // الحالة
-                ];
+                const colWidths = headers.map((_, index) => {
+                    // Set different widths based on column content
+                    if (index === 0) return { wch: 5 };   // #
+                    if (index === 1) return { wch: 25 };  // الموظف البديل
+                    if (index === 2) return { wch: 15 };  // تاريخ التعيين
+                    if (index === 3) return { wch: 15 };  // تاريخ آخر يوم عمل
+                    if (index === 4) return { wch: 40 };  // سبب الاستبدال
+                    if (index === 5) return { wch: 12 };  // الحالة
+                    return { wch: 15 }; // Default width
+                });
+
                 ws['!cols'] = colWidths;
 
-                // Style header row
-                const headerRange = XLSX.utils.decode_range(ws['!ref']);
-                for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
-                    if (!ws[cellAddress]) continue;
+                // Add auto filter
+                ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+                        s: { r: 0, c: 0 },
+                        e: { r: data.length, c: headers.length - 1 }
+                    }) };
 
-                    // Add header styling
-                    ws[cellAddress].s = {
-                        fill: {
-                            fgColor: { rgb: "6b46c1" } // Purple background
-                        },
-                        font: {
-                            color: { rgb: "FFFFFF" }, // White text
-                            bold: true,
-                            sz: 12
-                        },
-                        alignment: {
-                            horizontal: "center",
-                            vertical: "center"
-                        },
-                        border: {
-                            top: { style: "thin", color: { rgb: "000000" } },
-                            left: { style: "thin", color: { rgb: "000000" } },
-                            bottom: { style: "thin", color: { rgb: "000000" } },
-                            right: { style: "thin", color: { rgb: "000000" } }
-                        }
-                    };
-                }
-
-                // Style data rows
-                for (let R = 1; R <= headerRange.e.r; ++R) {
-                    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-                        const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-                        if (!ws[cellAddress]) continue;
-
-                        // Add data row styling
-                        ws[cellAddress].s = {
-                            font: {
-                                sz: 11
-                            },
-                            alignment: {
-                                horizontal: "center",
-                                vertical: "center",
-                                wrapText: true // Enable text wrapping
-                            },
-                            border: {
-                                top: { style: "thin", color: { rgb: "dddddd" } },
-                                left: { style: "thin", color: { rgb: "dddddd" } },
-                                bottom: { style: "thin", color: { rgb: "dddddd" } },
-                                right: { style: "thin", color: { rgb: "dddddd" } }
-                            }
-                        };
-
-                        // Add background color for first column
-                        if (C === 0) {
-                            ws[cellAddress].s.fill = {
-                                fgColor: { rgb: "f8fafc" } // Light gray background
-                            };
-                        }
-
-                        // Enable text wrapping for reason column
-                        if (C === 5) {
-                            ws[cellAddress].s.alignment.wrapText = true;
-                        }
-                    }
-                }
-
-                // Create workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'بدائل الموظف');
-
-                // Generate Excel file and download
-                const currentDate = new Date().toLocaleDateString('ar-SA');
-                const employeeName = "{{ $oldEmployee->name }}";
-                XLSX.writeFile(wb, `بدائل-الموظف-${employeeName}-${currentDate}.xlsx`);
+                XLSX.utils.book_append_sheet(wb, ws, "بدائل الموظف");
+                XLSX.writeFile(wb, `بدائل_الموظف_{{ $oldEmployee->name }}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 
             } catch (error) {
                 console.error('Excel export error:', error);
-                alert('حدث خطأ أثناء تصدير Excel');
-            } finally {
-                // Restore button
-                excelBtn.innerHTML = originalHTML;
-                excelBtn.disabled = false;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: `حدث خطأ أثناء تصدير ملف Excel: ${error.message}`,
+                    confirmButtonText: 'حسناً'
+                });
             }
         }
+
+        // Export to PDF function with proper styling
+        async function exportToPDF() {
+            const visibleRows = Array.from(tableRows).filter(row => {
+                return row.style.display !== 'none';
+            });
+
+            if (visibleRows.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'لا توجد بيانات',
+                    text: 'لا توجد صفوف مرئية للتصدير',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            if (typeof html2pdf === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: 'مكتبة PDF غير محملة',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+
+            try {
+                const table = document.querySelector('table.table');
+                if (!table) throw new Error('Table not found');
+
+                const tableClone = table.cloneNode(true);
+
+                const pdfContainer = document.createElement('div');
+                pdfContainer.style.padding = '20px';
+                pdfContainer.style.direction = 'rtl';
+                pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                pdfContainer.style.textAlign = 'center';
+                pdfContainer.style.lineHeight = '1.6';
+
+                // Create header with proper styling
+                const header = document.createElement('div');
+                header.style.marginBottom = '20px';
+                header.style.borderBottom = '2px solid #6b46c1';
+                header.style.paddingBottom = '15px';
+                header.style.textAlign = 'center';
+
+                const companyName = document.createElement('h1');
+                companyName.textContent = 'شركة افاق الخليج';
+                companyName.style.color = '#6b46c1';
+                companyName.style.margin = '0 0 10px 0';
+                companyName.style.fontSize = '24px';
+                companyName.style.fontWeight = 'bold';
+                companyName.style.letterSpacing = 'normal';
+                companyName.style.wordSpacing = 'normal';
+
+                const title = document.createElement('h2');
+                title.textContent = 'تقرير بدائل الموظف - {{ $oldEmployee->name }}';
+                title.style.color = '#333';
+                title.style.margin = '0 0 10px 0';
+                title.style.fontSize = '18px';
+                title.style.fontWeight = '600';
+                title.style.letterSpacing = 'normal';
+                title.style.wordSpacing = 'normal';
+
+                const reportDate = document.createElement('p');
+                reportDate.textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG');
+                reportDate.style.color = '#666';
+                reportDate.style.margin = '0';
+                reportDate.style.fontSize = '14px';
+                reportDate.style.letterSpacing = 'normal';
+                reportDate.style.wordSpacing = 'normal';
+
+                header.appendChild(companyName);
+                header.appendChild(title);
+                header.appendChild(reportDate);
+                pdfContainer.appendChild(header);
+
+                // Style table for PDF with proper text handling
+                tableClone.style.width = '100%';
+                tableClone.style.borderCollapse = 'collapse';
+                tableClone.style.marginTop = '20px';
+                tableClone.style.direction = 'rtl';
+                tableClone.style.fontSize = '9px';
+                tableClone.style.fontFamily = 'Arial, sans-serif';
+
+                // Style table headers
+                tableClone.querySelectorAll('th').forEach(th => {
+                    th.style.backgroundColor = '#6b46c1';
+                    th.style.color = 'white';
+                    th.style.padding = '10px 6px';
+                    th.style.border = '1px solid #ddd';
+                    th.style.textAlign = 'center';
+                    th.style.fontWeight = 'bold';
+                    th.style.fontSize = '10px';
+                    th.style.letterSpacing = 'normal';
+                    th.style.wordSpacing = 'normal';
+                    th.style.whiteSpace = 'nowrap';
+                });
+
+                // Style table cells
+                tableClone.querySelectorAll('td').forEach(td => {
+                    td.style.padding = '8px 6px';
+                    td.style.border = '1px solid #ddd';
+                    td.style.textAlign = 'center';
+                    td.style.fontSize = '9px';
+                    td.style.letterSpacing = 'normal';
+                    td.style.wordSpacing = 'normal';
+                    td.style.whiteSpace = 'normal';
+                    td.style.wordBreak = 'break-word';
+                });
+
+                pdfContainer.appendChild(tableClone);
+
+                // Add footer
+                const footer = document.createElement('div');
+                footer.style.marginTop = '20px';
+                footer.style.paddingTop = '10px';
+                footer.style.borderTop = '1px solid #eee';
+                footer.style.textAlign = 'center';
+                footer.style.color = '#666';
+                footer.style.fontSize = '11px';
+
+                const copyright = document.createElement('p');
+                copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة لشركة افاق الخليج`;
+                copyright.style.margin = '5px 0';
+                copyright.style.letterSpacing = 'normal';
+                copyright.style.wordSpacing = 'normal';
+                footer.appendChild(copyright);
+                pdfContainer.appendChild(footer);
+
+                // PDF options with better Arabic text handling
+                const options = {
+                    margin: [15, 15, 20, 15],
+                    filename: `بدائل_الموظف_{{ $oldEmployee->name }}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        onclone: function(clonedDoc) {
+                            clonedDoc.documentElement.dir = 'rtl';
+                            clonedDoc.body.style.direction = 'rtl';
+                            clonedDoc.body.style.textAlign = 'right';
+                            clonedDoc.body.style.fontFamily = 'Arial, sans-serif';
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a3',
+                        orientation: 'landscape'
+                    }
+                };
+
+                // Show loading
+                const btn = document.getElementById('pdfExportBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+                btn.disabled = true;
+
+                await html2pdf().set(options).from(pdfContainer).save();
+
+                // Restore button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+            } catch (error) {
+                console.error('PDF export error:', error);
+                // Restore button in case of error
+                const btn = document.getElementById('pdfExportBtn');
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> PDF';
+                btn.disabled = false;
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ!',
+                    text: `حدث خطأ أثناء تصدير ملف PDF: ${error.message}`,
+                    confirmButtonText: 'حسناً'
+                });
+            }
+        }
+
+        // Add event listeners with loading states
+        document.getElementById('excelExportBtn')?.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                exportToExcel();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 100);
+        });
+
+        document.getElementById('pdfExportBtn')?.addEventListener('click', exportToPDF);
     </script>
 @endpush

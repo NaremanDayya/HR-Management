@@ -193,6 +193,9 @@ class EmployeeService
             case 'bank_name':
                 $employee->bank_name = $data['bank_name'];
                 break;
+            case 'account_status':
+                $employee->user->account_status = $data['account_status'];
+                break;
 
             case 'vehicle_type':
             case 'vehicle_model':

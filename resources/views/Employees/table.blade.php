@@ -336,7 +336,7 @@
         transition: all 0.2s;
     }
 
-    .column-checkbox input:checked~.checkmark {
+    .column-checkbox input:checked ~ .checkmark {
         background-color: #6e48aa;
         border-color: #6e48aa;
     }
@@ -348,7 +348,7 @@
         display: none;
     }
 
-    .column-checkbox input:checked~.checkmark:after {
+    .column-checkbox input:checked ~ .checkmark:after {
         display: block;
     }
 
@@ -541,7 +541,6 @@
     }
 
 
-
     #bulkActionsBtn svg {
         transition: transform 0.2s;
     }
@@ -662,20 +661,21 @@
                         <div class="d-flex align-items-center gap-2">
                             @if (($role && $role->hasPermissionTo('view_credentials')) || Auth::user()->role === 'admin')
                                 <a href="{{ route('employees.credentials') }}" class="btn btn-icon-only"
-                                    title="بيانات دخول الموظفين">
+                                   title="بيانات دخول الموظفين">
                                     <i class="fas fa-user-lock feature-icon"></i>
                                 </a>
                             @endif
-                                @if (($role && $role->hasPermissionTo('view_financials')) || Auth::user()->role === 'admin')
-{{-- @if (Auth::user()->role === 'admin')--}}
-                                    <a href="{{ route('financials.all') }}" class="btn btn-icon-only"
-                                       title="السجل المالي الموظفين">
-                                        <i class="fas fa-coins feature-icon"></i>
+                            @if (($role && $role->hasPermissionTo('view_financials')) || Auth::user()->role === 'admin')
+                                {{-- @if (Auth::user()->role === 'admin')--}}
+                                <a href="{{ route('financials.all') }}" class="btn btn-icon-only"
+                                   title="السجل المالي الموظفين">
+                                    <i class="fas fa-coins feature-icon"></i>
 
-                                    </a>
-                                @endif
+                                </a>
+                            @endif
                             @if (($role && $role->hasPermissionTo('add_employee')) || Auth::user()->role === 'admin')
-                                <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#createEmployeeModal">
+                                <button class="btn btn-purple" data-bs-toggle="modal"
+                                        data-bs-target="#createEmployeeModal">
                                     <i class="fas fa-plus"></i> إضافة موظف
                                 </button>
                             @endif
@@ -700,13 +700,13 @@
                             <!-- Age Threshold Modal Button -->
                             <div x-data="{ open: false }">
                                 <button @click="open = true"
-                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow">
                                     تعديل العمر الأقصى
                                 </button>
                                 <div x-show="open" x-cloak
-                                    class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+                                     class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
                                     <div @click.away="open = false"
-                                        class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                                         class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
 
                                         <h3 class="text-lg font-bold mb-4">تعديل العمر الأقصى</h3>
 
@@ -716,14 +716,18 @@
                                                 <label for="max_age" class="block text-sm font-medium text-gray-700">
                                                     العمر</label>
                                                 <input type="number" name="max_age" id="max_age" min="1" required
-                                                    value="{{ old('max_age', \App\Models\Setting::where('key', 'age_alert_threshold ')->value('value') ?? 3) }}"
-                                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
+                                                       value="{{ old('max_age', \App\Models\Setting::where('key', 'age_alert_threshold ')->value('value') ?? 3) }}"
+                                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500">
                                             </div>
                                             <div class="flex justify-end space-x-2">
                                                 <button type="button" @click="open = false"
-                                                    class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">إلغاء</button>
+                                                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">
+                                                    إلغاء
+                                                </button>
                                                 <button type="submit"
-                                                    class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">حفظ</button>
+                                                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                                                    حفظ
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
@@ -732,13 +736,14 @@
                             <div x-data="{ bulkActionsOpen: false }" class="bulk-actions no-print ms-2" x-cloak>
                                 <div class="dropdown">
                                     <button @click="bulkActionsOpen = !bulkActionsOpen"
-                                        class="btn btn-outline-secondary dropdown-toggle" id="bulkActionsBtn" type="button"
-                                        :aria-expanded="bulkActionsOpen" disabled>
+                                            class="btn btn-outline-secondary dropdown-toggle" id="bulkActionsBtn"
+                                            type="button"
+                                            :aria-expanded="bulkActionsOpen" disabled>
                                         تنفيذ الإجراء
                                         <svg width="12" height="8" viewBox="0 0 12 8" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
+                                             xmlns="http://www.w3.org/2000/svg">
                                             <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" />
+                                                  stroke-linecap="round"/>
                                         </svg>
                                     </button>
 
@@ -747,32 +752,33 @@
                                         <li>
 
                                             <x-bulk-action-modal action="activate" modal-title="تأكيد تفعيل الحساب"
-                                                confirm-text="تفعيل الحساب" button-class="bg-green-600"
-                                                modal-id="activate" :has-form="true">
-                                            <div class="mb-4 text-right">
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 mb-1 text-right">تاريخ
-                                                الالتحاق بالعمل مجددا
-                                            </label>
-                                            <input type="text" id="start_date" name="start_date"
-                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                   placeholder="اختر التاريخ" required>
-                                            </div>
+                                                                 confirm-text="تفعيل الحساب" button-class="bg-green-600"
+                                                                 modal-id="activate" :has-form="true">
+                                                <div class="mb-4 text-right">
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1 text-right">تاريخ
+                                                        الالتحاق بالعمل مجددا
+                                                    </label>
+                                                    <input type="text" id="start_date" name="start_date"
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                           placeholder="اختر التاريخ" required>
+                                                </div>
                                             </x-bulk-action-modal>
                                         </li>
 
                                         <li>
                                             <x-bulk-action-modal action="deactivate" modal-title="تأكيد إيقاف الموظف"
-                                                confirm-text="إيقاف الموظف" button-class="bg-red-600" modal-id="deactivate"
-                                                :has-form="true">
+                                                                 confirm-text="إيقاف الموظف" button-class="bg-red-600"
+                                                                 modal-id="deactivate"
+                                                                 :has-form="true">
 
                                                 <div class="mb-4 text-right">
                                                     <label class="block mb-2 font-semibold text-gray-700">
                                                         سبب الإيقاف
                                                     </label>
                                                     <select name="stop_reason" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right mb-3"
-                                                        id="stop-reason-select">
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right mb-3"
+                                                            id="stop-reason-select">
                                                         <option value="" selected disabled>اختر سبب الإيقاف</option>
                                                         <option value="إنهاء خدمة">إنهاء خدمة</option>
                                                         <option value="استقالة">استقالة</option>
@@ -787,8 +793,8 @@
                                                             سبب آخر
                                                         </label>
                                                         <input type="text" name="other_stop_reason"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right"
-                                                            placeholder="حدد السبب...">
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right"
+                                                               placeholder="حدد السبب...">
                                                     </div>
                                                 </div>
 
@@ -798,8 +804,8 @@
                                                         تفاصيل إضافية
                                                     </label>
                                                     <textarea name="stop_description" rows="4"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right"
-                                                        placeholder="أضف أي تفاصيل إضافية هنا..."></textarea>
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 rtl text-right"
+                                                              placeholder="أضف أي تفاصيل إضافية هنا..."></textarea>
                                                 </div>
                                                 <div class="mb-4 text-right">
 
@@ -808,8 +814,8 @@
                                                         الإيقاف
                                                     </label>
                                                     <input type="text" id="stop_date" name="stop_date"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                        placeholder="اختر التاريخ" required>
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                           placeholder="اختر التاريخ" required>
                                                 </div>
 
                                             </x-bulk-action-modal>
@@ -817,17 +823,18 @@
                                         @if (($role && $role->hasPermissionTo('change_employees_password')) || Auth::user()->role === 'admin')
                                             <li>
                                                 <x-bulk-action-modal action="change-password"
-                                                    modal-title="تأكيد تغيير كلمة المرور"
-                                                    confirm-text="تغيير كلمة المرور " button-class="bg-red-600"
-                                                    modal-id="change-password">
+                                                                     modal-title="تأكيد تغيير كلمة المرور"
+                                                                     confirm-text="تغيير كلمة المرور "
+                                                                     button-class="bg-red-600"
+                                                                     modal-id="change-password">
 
                                                     <div>
                                                         <label
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">كلمة
                                                             المرور الجديدة</label>
                                                         <input type="password" id="employeePassword"
-                                                            name="employeePassword" required
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500">
+                                                               name="employeePassword" required
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500">
                                                     </div>
 
                                                     <div>
@@ -835,8 +842,8 @@
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">تأكيد
                                                             كلمة المرور</label>
                                                         <input type="password" id="employeePassword_confirmation"
-                                                            name="employeePassword_confirmation" required
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500">
+                                                               name="employeePassword_confirmation" required
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500">
                                                     </div>
 
                                                 </x-bulk-action-modal>
@@ -844,8 +851,8 @@
                                         @endif
                                         <li>
                                             <x-bulk-action-modal action="united_clothes" modal-title="طلب زي موحد"
-                                                confirm-text="ملابس موحدة" button-class="bg-blue-600"
-                                                modal-id="united-clothes" :has-form="true">
+                                                                 confirm-text="ملابس موحدة" button-class="bg-blue-600"
+                                                                 modal-id="united-clothes" :has-form="true">
                                                 <div class="space-y-4">
                                                     <!-- Header -->
                                                     <div class="text-right">
@@ -862,8 +869,8 @@
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
                                                                 <input type="checkbox" name="clothing_types[]"
-                                                                    value="tshirt"
-                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                                       value="tshirt"
+                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
@@ -877,8 +884,8 @@
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
                                                                 <input type="checkbox" name="clothing_types[]"
-                                                                    value="pants"
-                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                                       value="pants"
+                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
@@ -892,8 +899,8 @@
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
                                                                 <input type="checkbox" name="clothing_types[]"
-                                                                    value="cap"
-                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                                       value="cap"
+                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
@@ -907,13 +914,13 @@
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="tool_bag" modal-title="تأكيد طلب حقيبة أدوات"
-                                                confirm-text="حقيبة أدوات" button-class="bg-red-600"
-                                                modal-id="tool_bag" />
+                                                                 confirm-text="حقيبة أدوات" button-class="bg-red-600"
+                                                                 modal-id="tool_bag"/>
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="salary_advance" modal-title="طلب سلفة"
-                                                confirm-text="سلفة راتب" button-class="bg-yellow-600"
-                                                modal-id="salary-advance" :has-form="true">
+                                                                 confirm-text="سلفة راتب" button-class="bg-yellow-600"
+                                                                 modal-id="salary-advance" :has-form="true">
 
                                                 <!-- Hidden salary field -->
                                                 <input type="hidden" id="total_selected_salary_advance" value="0">
@@ -930,9 +937,9 @@
                                                         قيمة السلفة (ر.س)
                                                     </label>
                                                     <input type="number" name="advance_amount" id="advance_amount"
-                                                        min="100"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-right"
-                                                        required>
+                                                           min="100"
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-right"
+                                                           required>
                                                 </div>
 
                                                 <!-- Percentage Display -->
@@ -941,9 +948,9 @@
                                                         نسبة السلفة من الراتب
                                                     </label>
                                                     <input type="text" id="advance_percentage_display" readonly
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
                                                     <input type="hidden" name="advance_percentage"
-                                                        id="advance_percentage">
+                                                           id="advance_percentage">
                                                 </div>
 
                                                 <!-- Months to Repay -->
@@ -952,8 +959,8 @@
                                                         عدد الأشهر للسداد
                                                     </label>
                                                     <input type="number" name="months_to_repay" min="1"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-right"
-                                                        required>
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-right"
+                                                           required>
                                                 </div>
 
                                                 <!-- Start Deduction Date -->
@@ -962,9 +969,10 @@
                                                         تاريخ بدء استرداد السلفة
                                                     </label>
                                                     <input type="text" id="start_deduction_at"
-                                                        name="start_deduction_at"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('start_deduction_at') border-red-500 @enderror"
-                                                        placeholder="اختر تاريخ بداية استرداد السلفة من الراتب" required>
+                                                           name="start_deduction_at"
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('start_deduction_at') border-red-500 @enderror"
+                                                           placeholder="اختر تاريخ بداية استرداد السلفة من الراتب"
+                                                           required>
                                                 </div>
                                             </x-bulk-action-modal>
                                         </li>
@@ -972,15 +980,17 @@
 
                                         <li>
                                             <x-bulk-action-modal action="generate_health_card"
-                                                modal-title="تأكيد طلب بطاقة صحية" confirm-text="طلب بطاقة صحية"
-                                                button-class="bg-green-600" modal-id="generate_health_card" />
+                                                                 modal-title="تأكيد طلب بطاقة صحية"
+                                                                 confirm-text="طلب بطاقة صحية"
+                                                                 button-class="bg-green-600"
+                                                                 modal-id="generate_health_card"/>
 
                                         </li>
                                         <li>
 
                                             <x-bulk-action-modal action="salary_increase" modal-title="طلب زيادة راتب"
-                                                confirm-text="زيادة راتب" button-class="bg-yellow-600"
-                                                modal-id="salary-increase" :has-form="true">
+                                                                 confirm-text="زيادة راتب" button-class="bg-yellow-600"
+                                                                 modal-id="salary-increase" :has-form="true">
                                                 <!-- Hidden salary field (you'll populate this dynamically) -->
                                                 <input type="hidden" id="total_selected_salary" value="0">
 
@@ -1000,14 +1010,14 @@
                                                             class="flex items-center space-x-4 space-x-reverse text-right">
                                                             <label class="inline-flex items-center">
                                                                 <input type="radio" name="increase_type" value="static"
-                                                                    checked onchange="toggleRewardMonthField()"
-                                                                    class="form-radio text-blue-600">
+                                                                       checked onchange="toggleRewardMonthField()"
+                                                                       class="form-radio text-blue-600">
                                                                 <span class="mr-2">زيادة ثابتة</span>
                                                             </label>
                                                             <label class="inline-flex items-center">
                                                                 <input type="radio" name="increase_type" value="reward"
-                                                                    onchange="toggleRewardMonthField()"
-                                                                    class="form-radio text-blue-600">
+                                                                       onchange="toggleRewardMonthField()"
+                                                                       class="form-radio text-blue-600">
                                                                 <span class="mr-2">مكافأة لمرة واحدة</span>
                                                             </label>
                                                         </div>
@@ -1019,10 +1029,10 @@
                                                             class="block mb-2 font-semibold text-gray-700 text-right">شهر
                                                             المكافأة</label>
                                                         <select name="reward_month" id="reward_month"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right">
+                                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right">
                                                             @foreach (range(1, 12) as $month)
                                                                 <option value="{{ $month }}"
-                                                                    @if ($month == date('n')) selected @endif>
+                                                                        @if ($month == date('n')) selected @endif>
                                                                     {{ DateTime::createFromFormat('!m', $month)->format('F') }}
                                                                 </option>
                                                             @endforeach
@@ -1035,9 +1045,9 @@
                                                             class="block mb-2 font-semibold text-gray-700 text-right">مبلغ
                                                             الزيادة (ر.س)</label>
                                                         <input type="number" name="increase_amount" id="increase_amount"
-                                                            min="100" oninput="calculatePercentage()"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
-                                                            required>
+                                                               min="100" oninput="calculatePercentage()"
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"
+                                                               required>
                                                     </div>
 
                                                     <!-- Percentage Display (readonly) -->
@@ -1046,9 +1056,9 @@
                                                             class="block mb-2 font-semibold text-gray-700 text-right">نسبة
                                                             الزيادة</label>
                                                         <input type="text" id="increase_percentage_display" readonly
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
                                                         <input type="hidden" name="increase_percentage"
-                                                            id="increase_percentage">
+                                                               id="increase_percentage">
                                                     </div>
 
                                                     <!-- Reason -->
@@ -1057,15 +1067,16 @@
                                                             class="block mb-2 font-semibold text-gray-700 text-right">سبب
                                                             الزيادة</label>
                                                         <textarea name="reason" rows="3" required
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"></textarea>
+                                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-right"></textarea>
                                                     </div>
                                                 </div>
                                             </x-bulk-action-modal>
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="add_alert" modal-title="إرسال إنذار"
-                                                confirm-text="إرسال إنذار" button-class="bg-red-600" modal-id="add-alert"
-                                                :has-form="true">
+                                                                 confirm-text="إرسال إنذار" button-class="bg-red-600"
+                                                                 modal-id="add-alert"
+                                                                 :has-form="true">
                                                 <div class="bg-gray-100 p-3 rounded-lg text-right mb-4">
                                                     <p class="text-sm text-gray-600">رقم الإنذار الجديد</p>
                                                     <p class="text-lg font-bold" id="alert_number_display">0</p>
@@ -1076,8 +1087,8 @@
                                                         عنوان الإنذار
                                                     </label>
                                                     <input type="text" name="alert_title"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
-                                                        placeholder="مثال: تأخير متكرر" required>
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
+                                                           placeholder="مثال: تأخير متكرر" required>
                                                 </div>
 
                                                 <!-- Alert Reason -->
@@ -1086,25 +1097,27 @@
                                                         سبب الإنذار
                                                     </label>
                                                     <textarea name="alert_reason" rows="3" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
-                                                        placeholder="اكتب تفاصيل الإنذار هنا..."></textarea>
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
+                                                              placeholder="اكتب تفاصيل الإنذار هنا..."></textarea>
                                                 </div>
                                             </x-bulk-action-modal>
 
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="replacement_request"
-                                                modal-title="طلب استبدال موظف" confirm-text="استبدال موظف"
-                                                button-class="bg-blue-600" modal-id="replacement-request"
-                                                :has-form="true">
+                                                                 modal-title="طلب استبدال موظف"
+                                                                 confirm-text="استبدال موظف"
+                                                                 button-class="bg-blue-600"
+                                                                 modal-id="replacement-request"
+                                                                 :has-form="true">
 
                                                 <div class="mb-4 text-right">
                                                     <label class="block mb-2 font-semibold text-gray-700">
                                                         سبب طلب الاستبدال
                                                     </label>
                                                     <select name="replacement_reason" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right mb-3"
-                                                        id="replacement-reason-select">
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right mb-3"
+                                                            id="replacement-reason-select">
                                                         <option value="" selected disabled>اختر سبب الاستبدال
                                                         </option>
                                                         <option value="إنهاء خدمة">إنهاء خدمة</option>
@@ -1120,8 +1133,8 @@
                                                             سبب آخر
                                                         </label>
                                                         <input type="text" name="other_reason"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right"
-                                                            placeholder="حدد السبب...">
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right"
+                                                               placeholder="حدد السبب...">
                                                     </div>
                                                 </div>
 
@@ -1130,19 +1143,19 @@
                                                         تفاصيل إضافية
                                                     </label>
                                                     <textarea name="replacement_description" rows="4"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right"
-                                                        placeholder="أضف أي تفاصيل إضافية هنا..."></textarea>
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 rtl text-right"
+                                                              placeholder="أضف أي تفاصيل إضافية هنا..."></textarea>
                                                 </div>
 
                                             </x-bulk-action-modal>
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="add_deduction" modal-title="إضافة خصم"
-                                                confirm-text="تطبيق الخصم" button-class="bg-red-700"
-                                                modal-id="add-deduction" :has-form="true">
+                                                                 confirm-text="تطبيق الخصم" button-class="bg-red-700"
+                                                                 modal-id="add-deduction" :has-form="true">
 
                                                 <input type="hidden" id="total_selected_salary_deduction"
-                                                    value="0">
+                                                       value="0">
                                                 <div class="bg-gray-100 p-3 rounded-lg text-right mb-4">
                                                     <p class="text-sm text-gray-600">رقم الخصم الجديد</p>
                                                     <p class="text-lg font-bold" id="deduction_number_display">0</p>
@@ -1158,10 +1171,10 @@
                                                         قيمة الخصم (ر.س)
                                                     </label>
                                                     <input type="number" name="deduction_amount" id="deduction_amount"
-                                                        min="1" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
-                                                        placeholder="أدخل مبلغ الخصم"
-                                                        oninput="calculateDeductionPercentage()">
+                                                           min="1" required
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
+                                                           placeholder="أدخل مبلغ الخصم"
+                                                           oninput="calculateDeductionPercentage()">
                                                 </div>
 
                                                 <div class="mb-4">
@@ -1169,9 +1182,9 @@
                                                         نسبة الخصم من الراتب
                                                     </label>
                                                     <input type="text" id="deduction_percentage_display" readonly
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-right">
                                                     <input type="hidden" name="deduction_percentage"
-                                                        id="deduction_percentage">
+                                                           id="deduction_percentage">
                                                 </div>
 
                                                 <div>
@@ -1179,17 +1192,19 @@
                                                         سبب الخصم
                                                     </label>
                                                     <textarea name="deduction_reason" rows="3" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
-                                                        placeholder="اكتب سبب الخصم هنا..."></textarea>
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
+                                                              placeholder="اكتب سبب الخصم هنا..."></textarea>
                                                 </div>
 
                                             </x-bulk-action-modal>
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="temporary_assignment"
-                                                modal-title="تكليف مؤقت في مشروع آخر" confirm-text="تكليف في مشروع مؤقتا"
-                                                button-class="bg-yellow-500" modal-id="temporary-assignment"
-                                                :has-form="true">
+                                                                 modal-title="تكليف مؤقت في مشروع آخر"
+                                                                 confirm-text="تكليف في مشروع مؤقتا"
+                                                                 button-class="bg-yellow-500"
+                                                                 modal-id="temporary-assignment"
+                                                                 :has-form="true">
 
                                                 <!-- المشروع الحالي -->
                                                 <div class="mb-4">
@@ -1197,8 +1212,8 @@
                                                         المشروع الحالي
                                                     </label>
                                                     <input type="text" name="current_project_name"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl bg-gray-100"
-                                                        value="" readonly>
+                                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl bg-gray-100"
+                                                           value="" readonly>
                                                 </div>
 
                                                 <!-- المشروع الجديد -->
@@ -1207,8 +1222,8 @@
                                                         المشروع المطلوب العمل به مؤقتًا
                                                     </label>
                                                     <select name="target_project_id"
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                        required>
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                            required>
                                                         <option value="">اختر المشروع</option>
                                                         @foreach ($projectsObjects as $project)
                                                             <option value="{{ $project->id }}"
@@ -1226,16 +1241,16 @@
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">من
                                                             تاريخ</label>
                                                         <input type="text" id="start_date" name="start_date"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                            placeholder="اختر التاريخ" required>
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                               placeholder="اختر التاريخ" required>
                                                     </div>
                                                     <div>
                                                         <label
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">إلى
                                                             تاريخ</label>
                                                         <input type="text" id="end_date" name="end_date"
-                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                            placeholder="اختر التاريخ" required>
+                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                               placeholder="اختر التاريخ" required>
                                                     </div>
                                                 </div>
 
@@ -1245,13 +1260,12 @@
                                                         سبب التكليف المؤقت
                                                     </label>
                                                     <textarea name="reason" rows="3" required
-                                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
-                                                        placeholder="اكتب سبب التكليف المؤقت هنا..."></textarea>
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
+                                                              placeholder="اكتب سبب التكليف المؤقت هنا..."></textarea>
                                                 </div>
 
                                             </x-bulk-action-modal>
                                         </li>
-
 
 
                                     </ul>
@@ -1445,16 +1459,17 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="createEmployeeForm" action="{{ route('employees.store') }}" method="POST"
-                        enctype="multipart/form-data" class="space-y-6">
+                          enctype="multipart/form-data" class="space-y-6">
                         @csrf
                         @include('Employees.employee-form-fields')
-                        <div class="modal-footer bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                        <div
+                            class="modal-footer bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                             <button type="button"
-                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 إلغاء
                             </button>
                             <button type="submit"
-                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 إضافة الموظف
                             </button>
                         </div>
@@ -1469,20 +1484,21 @@
                     <div class="relative flex items-center">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
+                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </span>
                         <input type="text" id="globalSearch"
-                            class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
-                            placeholder="ابحث في جميع الحقول..." value="{{ request('search') ?? '' }}">
-                        <button class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                               class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                               placeholder="ابحث في جميع الحقول..." value="{{ request('search') ?? '' }}">
+                        <button
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                             type="button" id="clearSearch">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
+                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
+                                      d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                     </div>
@@ -1504,10 +1520,10 @@
                     }
                 }" x-cloak class="relative min-w-[200px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected || 'جميع المشاريع'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1519,7 +1535,8 @@
                         </li>
                         <template x-for="(label, value) in options" :key="value">
                             <li @click="selected = label; open = false; applyFilter(value, 'project')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1553,10 +1570,10 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="getSelectedLabel()"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1595,20 +1612,22 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected ? (options[selected] ?? '') : 'حالة حساب الموظف'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
                     <ul x-show="open" @click.away="open = false"
                         class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg">
                         <li @click="selected = ''; open = false; applyFilter('', 'account_status')"
-                            class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium">جميع الحالات</li>
+                            class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium">جميع الحالات
+                        </li>
                         <template x-for="(label, value) in options" :key="value">
                             <li @click="selected = value; open = false; applyFilter(value, 'account_status')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1630,10 +1649,10 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected || 'جميع الحالات الاجتماعية'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1645,7 +1664,8 @@
                         </li>
                         <template x-for="(label, value) in options" :key="value">
                             <li @click="selected = label; open = false; applyFilter(value, 'marital_status')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1667,10 +1687,10 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected || 'جميع مستويات الإنجليزية'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1682,7 +1702,8 @@
                         </li>
                         <template x-for="(label, value) in options" :key="value">
                             <li @click="selected = label; open = false; applyFilter(value, 'english_level')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1705,10 +1726,10 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected || 'جميع مناطق الإقامة'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1720,7 +1741,8 @@
                         </li>
                         <template x-for="label in options" :key="label">
                             <li @click="selected = label; open = false; applyFilter(label, 'residence')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1742,10 +1764,10 @@
                     }
                 }" x-cloak class="relative min-w-[180px] text-right" style="direction: rtl;">
                     <button @click="open = !open"
-                        class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
+                            class="custom-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center">
                         <span x-text="selected || 'جميع الأحياء السكنية'"></span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
 
@@ -1757,7 +1779,8 @@
                         </li>
                         <template x-for="label in options" :key="label">
                             <li @click="selected = label; open = false; applyFilter(label, 'residence_neighborhood')"
-                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium" x-text="label">
+                                class="px-3 py-2 cursor-pointer hover:bg-blue-100 text-[15px] font-medium"
+                                x-text="label">
                             </li>
                         </template>
                     </ul>
@@ -1766,11 +1789,11 @@
 
                 <!-- Reset Button -->
                 <button id="resetFilters"
-                    class="flex items-center justify-center px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors duration-200">
+                        class="flex items-center justify-center px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     إعادة تعيين
                 </button>
@@ -1857,123 +1880,144 @@
                 @if (count($employees) > 0)
                     <table id="employeesTable" class="table align-items-center mb-0">
                         <thead class="thead" style="font-weight:800;color: #000;">
-                            <tr>
-                                <th class="no-print w-8 text-center align-middle">
-                                    <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllEmps()"
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                </th>
-                                <th class="text-center text-uppercase">
-                                    ID</th>
-                                <th style="font-size:16px; font-weight:600; padding-right:25px;"
-                                    class="text-right text-uppercase ">
-                                    الصورة</th>
-                                <th class="text-center text-uppercase">
-                                    الاسم</th>
-                                <th class="text-center text-uppercase"> الدور الوظيفي</th>
+                        <tr>
+                            <th class="no-print w-8 text-center align-middle">
+                                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllEmps()"
+                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                            </th>
+                            <th class="text-center text-uppercase">
+                                ID
+                            </th>
+                            <th style="font-size:16px; font-weight:600; padding-right:25px;"
+                                class="text-right text-uppercase ">
+                                الصورة
+                            </th>
+                            <th class="text-center text-uppercase">
+                                الاسم
+                            </th>
+                            <th class="text-center text-uppercase"> الدور الوظيفي</th>
 
-                                <th class="text-center text-uppercase ">
-                                    رقم الهوية</th>
-                                <th class="text-center text-uppercase ">
-                                    تاريخ الميلاد</th>
-                                <th class="text-center text-uppercase ">
-                                    المشروع</th>
+                            <th class="text-center text-uppercase ">
+                                رقم الهوية
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                تاريخ الميلاد
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                المشروع
+                            </th>
 
-                                <th class="text-center text-uppercase">الراتب</th>
-                                <th class="text-center text-uppercase">التعليم </th>
-                                <th class="text-center text-uppercase">العائلة</th>
-                                <th class="text-center text-uppercase">العقوبات</th>
+                            <th class="text-center text-uppercase">الراتب</th>
+                            <th class="text-center text-uppercase">التعليم</th>
+                            <th class="text-center text-uppercase">العائلة</th>
+                            <th class="text-center text-uppercase">العقوبات</th>
 
-                                <th class="text-center text-uppercase ">
-                                    الهاتف</th>
-                                <th class="text-center text-uppercase ">
-                                    مقر الإقامة</th>
-                                <th class="text-center text-uppercase ">
-                                    مقاسات الملابس</th>
-                                <th class="text-center text-uppercase ">
-                                    بيانات المركبة</th>
+                            <th class="text-center text-uppercase ">
+                                الهاتف
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                مقر الإقامة
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                مقاسات الملابس
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                بيانات المركبة
+                            </th>
 
-                                <th class="text-center text-uppercase ">
-                                    تاريخ الالتحاق</th>
-                                <th class="text-center text-uppercase ">
-                                    سبب التوقف</th>
+                            <th class="text-center text-uppercase ">
+                                تاريخ الالتحاق
+                            </th>
+                            <th class="text-center text-uppercase ">
+                                سبب التوقف
+                            </th>
 
-                            </tr>
+                        </tr>
                         </thead>
                         <tbody class="tbody" style="font-weight:500;color: #000;">
-                            @foreach ($employees as $employee)
-                                {{-- @php
-                    $firstEmployee = $employees[0] ?? null; // Array access
-                    dump($firstEmployee['id_card'] ?? null);
-                    dump(gettype($firstEmployee));
-                    @endphp --}}
+                        @foreach ($employees as $employee)
+                            {{-- @php
+                $firstEmployee = $employees[0] ?? null; // Array access
+                dump($firstEmployee['id_card'] ?? null);
+                dump(gettype($firstEmployee));
+                @endphp --}}
 
-                                <tr class="@if ($employee['alerts_number'] > 0) has-alerts @endif">
+                            <tr class="@if ($employee['alerts_number'] > 0) has-alerts @endif">
 
-                                    <td class="no-print w-8 text-center align-middle">
-                                        <input type="checkbox"
-                                            class="emp-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                            value="{{ $employee['id'] }}"
-                                            data-status="{{ $employee['account_status'] }}"
-                                            data-project="{{ $employee['project'] }}"
-                                            data-salary="{{ $employee['salary'] }}"
-                                            data-alert-number="{{ $employee['alerts_number'] }}"
-                                            data-deduction-number="{{ $employee['deductions_number'] }}"
-                                            onchange="updateSalaryDisplay(this); updateBulkActionsButton()">
-                                    </td>
-                                    <td class="align-middle text-center">
-                                        <div class="d-flex align-items-center justify-content-center text-center gap-2">
+                                <td class="no-print w-8 text-center align-middle">
+                                    <input type="checkbox"
+                                           class="emp-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                           value="{{ $employee['id'] }}"
+                                           data-status="{{ $employee['account_status'] }}"
+                                           data-project="{{ $employee['project'] }}"
+                                           data-salary="{{ $employee['salary'] }}"
+                                           data-alert-number="{{ $employee['alerts_number'] }}"
+                                           data-deduction-number="{{ $employee['deductions_number'] }}"
+                                           onchange="updateSalaryDisplay(this); updateBulkActionsButton()">
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div class="d-flex align-items-center justify-content-center text-center gap-2">
 
 
-                                            <a href="{{ route('employees.show', $employee['id']) }}"
-                                                class="text-decoration-none text-dark text-sm fw-bold mb-0">
-                                                {{ $employee['replaced_old_employee_id'] ?: $employee['id'] }}
-                                            </a>
+                                        <a href="{{ route('employees.show', $employee['id']) }}"
+                                           class="text-decoration-none text-dark text-sm fw-bold mb-0">
+                                            {{ $employee['replaced_old_employee_id'] ?: $employee['id'] }}
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex px-2 py-1 no-print">
+                                        <div>
+                                            {{--                                                @php--}}
+                                            {{--                                                dd($employee['personal_image']);--}}
+                                            {{--                                                @endphp--}}
+                                            <img src="{{ $employee['personal_image'] }}"
+                                                 style="width: 60px; height: 60px; object-fit: cover;"
+                                                 class="h-16 w-16 mx-auto rounded-full border object-cover rounded-5"
+                                                 alt="user image">
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex px-2 py-1 no-print">
-                                            <div>
-{{--                                                @php--}}
-{{--                                                dd($employee['personal_image']);--}}
-{{--                                                @endphp--}}
-                                                <img src="{{ $employee['personal_image'] }}"
-                                                    style="width: 60px; height: 60px; object-fit: cover;"
-                                                    class="h-16 w-16 mx-auto rounded-full border object-cover rounded-5"
-                                                    alt="user image">
-                                            </div>
-                                        </div>
-                                    </td>
-                                    @php
-                                        $stopReason = trim($employee['stop_reason']);
-                                        $isBadPerformance = in_array($stopReason, ['سوء اداء', 'سوء أداء']);
-                                        $replacementCount = $employee['replacements_count'] ?? 0;
-                                        $new_emp_replacements_count = $employee['new_emp_replacements_count'] ?? 0;
-                                    @endphp
-                                    @php
-                                        $baseNationality = preg_replace('/(ة|ه)$/u', '', $employee['nationality']);
-                                        $flagCode = null;
+                                    </div>
+                                </td>
+                                @php
+                                    $stopReason = trim($employee['stop_reason']);
+                                    $isBadPerformance = in_array($stopReason, ['سوء اداء', 'سوء أداء']);
+                                    $replacementCount = $employee['replacements_count'] ?? 0;
+                                    $new_emp_replacements_count = $employee['new_emp_replacements_count'] ?? 0;
+                                @endphp
+                                @php
+                                    $baseNationality = preg_replace('/(ة|ه)$/u', '', $employee['nationality']);
+                                    $flagCode = null;
 
-                                        if (isset($nationalityFlags[$employee['nationality']])) {
-                                            $flagCode = $nationalityFlags[$employee['nationality']];
-                                        } elseif (isset($nationalityFlags[$baseNationality])) {
-                                            $flagCode = $nationalityFlags[$baseNationality];
-                                        }
-                                    @endphp
+                                    if (isset($nationalityFlags[$employee['nationality']])) {
+                                        $flagCode = $nationalityFlags[$employee['nationality']];
+                                    } elseif (isset($nationalityFlags[$baseNationality])) {
+                                        $flagCode = $nationalityFlags[$baseNationality];
+                                    }
+                                @endphp
 
-                                    <td class="align-middle text-center">
-                                        <div class="d-flex align-items-center justify-content-center text-center gap-2">
-                                            <div class="status-indicator {{ $employee['account_status'] }}"></div>
+                                <td class="align-middle text-center">
+                                    <div class="d-flex align-items-center justify-content-center text-center gap-2">
+                                        <div class="status-indicator {{ $employee['account_status'] }}"></div>
 
-                                            <a href="{{ route('employees.show', $employee['id']) }}"
-                                                class="text-decoration-none text-sm fw-bold mb-0"
-                                                style="color: {{ $isBadPerformance ? '#dc3545' : ($employee['replaced_old_employee_id'] ? '#6f40c1' : '#212529') }};">
+                                        <a href="{{ route('employees.show', $employee['id']) }}"
+                                           class="text-decoration-none text-sm fw-bold mb-0"
+                                           style="color: {{ $isBadPerformance ? '#dc3545' : ($employee['replaced_old_employee_id'] ? '#6f40c1' : '#212529') }};">
 
-                                                {{ $employee['name'] }}
-                                            </a>
+                                            {{ $employee['name'] }}
+                                        </a>
+                                        @if(Auth::user()->role === 'admin')
+                                            <button class="btn btn-sm btn-outline-primary edit-employee-btn"
+                                                    data-employee-id="{{ $employee['id'] }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editEmployeeModal"
+                                                    title="تعديل الموظف">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        @endif
 
-                                            @if ($replacementCount > 0)
-                                                <span class="badge bg-primary rounded-pill ms-1"
-                                                    style="font-size: 0.75rem;">
+                                        @if ($replacementCount > 0)
+                                            <span class="badge bg-primary rounded-pill ms-1"
+                                                  style="font-size: 0.75rem;">
                                                     <a
                                                         href="{{ route('employees.replacements', ['employee' => $employee['id']]) }}">
 
@@ -1981,293 +2025,316 @@
                                                     </a>
 
                                                 </span>
-                                            @elseif ($new_emp_replacements_count > 0)
-                                                <span class="badge bg-primary rounded-pill ms-1"
-                                                    style="font-size: 0.75rem;">
+                                        @elseif ($new_emp_replacements_count > 0)
+                                            <span class="badge bg-primary rounded-pill ms-1"
+                                                  style="font-size: 0.75rem;">
                                                     <a
                                                         href="{{ route('employees.show', ['employee' => $employee['replaced_old_employee_id']]) }}">
                                                         {{ $new_emp_replacements_count }}
                                                     </a>
                                                 </span>
-                                            @endif
-                                        </div>
-                                        <span class="text-secondary d-flex align-items-center justify-content-center mt-1"
-                                            style="color: #000;">
+                                        @endif
+                                    </div>
+                                    <span class="text-secondary d-flex align-items-center justify-content-center mt-1"
+                                          style="color: #000;">
                                             @if ($flagCode)
-                                                <img src="https://flagcdn.com/24x18/{{ $flagCode }}.png"
-                                                    alt="{{ $employee['nationality'] }}" class="me-1"
-                                                    style="width: 20px; height: 15px;">
-                                            @endif
-                                            {{ $employee['job'] }}
+                                            <img src="https://flagcdn.com/24x18/{{ $flagCode }}.png"
+                                                 alt="{{ $employee['nationality'] }}" class="me-1"
+                                                 style="width: 20px; height: 15px;">
+                                        @endif
+                                        {{ $employee['job'] }}
                                         </span>
-                                    </td>
-                                    <td class="align-middle text-center min-w-[120px] max-w-[200px]">
-                                        <div class="whitespace-normal break-words px-2">
-                                            {{ __($employee['role']) ?? '-' }}
-                                        </div>
-                                    </td>
+                                </td>
+                                <td class="align-middle text-center min-w-[120px] max-w-[200px]">
+                                    <div class="whitespace-normal break-words px-2">
+                                        {{ __($employee['role']) ?? '-' }}
+                                    </div>
+                                </td>
 
 
-
-                                    <td class="align-middle text-center">
+                                <td class="align-middle text-center">
                                         <span class="text-secondary "
-                                            style="color: #000;">{{ $employee['id_card'] }}</span>
-                                        <div style="font-size: 13px; font-weight: 600; margin-top: 5px;">
-                                            🏥
-                                            @if ($employee['health_card'])
-                                                <span class="badge bg-success" style="font-size: 12px;">
+                                              style="color: #000;">{{ $employee['id_card'] }}</span>
+                                    <div style="font-size: 13px; font-weight: 600; margin-top: 5px;">
+                                        🏥
+                                        @if ($employee['health_card'])
+                                            <span class="badge bg-success" style="font-size: 12px;">
                                                     لديه بطاقة صحية
                                                 </span>
-                                            @else
-                                                <span class="badge bg-danger" style="font-size: 12px;">
+                                        @else
+                                            <span class="badge bg-danger" style="font-size: 12px;">
                                                     لا يملك بطاقة صحية
                                                 </span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td class="align-middle text-center">
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
 
-                                        <div>
-                                            <span class="text-secondary ">{{ $employee['birthday'] }}</span>
-                                        </div>
-                                        <div>
-                                            @php
-                                                $ageThreshold = \App\Models\Setting::get('age_alert_threshold', 30);
-                                            @endphp
+                                    <div>
+                                        <span class="text-secondary ">{{ $employee['birthday'] }}</span>
+                                    </div>
+                                    <div>
+                                        @php
+                                            $ageThreshold = \App\Models\Setting::get('age_alert_threshold', 30);
+                                        @endphp
 
-                                            <span class=""
-                                                style="font-size: 0.9rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px; color: {{ $employee['age'] >= $ageThreshold ? 'red' : '#000' }};">
+                                        <span class=""
+                                              style="font-size: 0.9rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px; color: {{ $employee['age'] >= $ageThreshold ? 'red' : '#000' }};">
                                                 {{ $employee['age'] }} عامًا
                                             </span>
-                                        </div>
-                                    </td>
+                                    </div>
+                                </td>
 
-                                    <td class="align-middle text-center">
-                                        @if (!empty($employee['project']) || (!empty($employee['managed_projects']) && count($employee['managed_projects']) > 0))
-                                            <div class="d-flex flex-column align-items-center gap-1">
+                                <td class="align-middle text-center">
+                                    @if (!empty($employee['project']) || (!empty($employee['managed_projects']) && count($employee['managed_projects']) > 0))
+                                        <div class="d-flex flex-column align-items-center gap-1">
 
-                                                @if (
-                                                    $employee['role'] === 'project_manager' &&
-                                                        !empty($employee['managed_projects']) &&
-                                                        count($employee['managed_projects']) > 0)
-                                                    <div
-                                                        class="d-flex align-items-center justify-content-center gap-1 small">
+                                            @if (
+                                                $employee['role'] === 'project_manager' &&
+                                                    !empty($employee['managed_projects']) &&
+                                                    count($employee['managed_projects']) > 0)
+                                                <div
+                                                    class="d-flex align-items-center justify-content-center gap-1 small">
                                                         <span class="arabic-text"
-                                                            style="font-family: 'Tahoma', sans-serif">
+                                                              style="font-family: 'Tahoma', sans-serif">
                                                             {{ implode('، ', $employee['managed_projects']) }}
                                                         </span>
-                                                    </div>
-                                                @endif
-                                                <div class="d-flex flex-column align-items-center">
-                                                    <div>{{ $employee['project'] }}</div>
-                                                    <div class="text-muted small" style="color: #000;">
+                                                </div>
+                                            @endif
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div>{{ $employee['project'] }}</div>
+                                                <div class="text-muted small" style="color: #000;">
 
-                                                        <a href="{{ route('employees.assignments', ['employee' => $employee['id']]) }}"
-                                                            class="text-decoration-none">
+                                                    <a href="{{ route('employees.assignments', ['employee' => $employee['id']]) }}"
+                                                       class="text-decoration-none">
                                                             <span
                                                                 class="badge bg-white text-info border border-info rounded-pill"
                                                                 style="font-size: 11px;">
                                                                 🧳 {{ $employee['temporary_assignments'] }}
                                                             </span>
-                                                        </a>
-                                                        @if (!empty($employee['supervisor_name']))
-                                                            {{ $employee['supervisor_name'] }}
-                                                    </div>
-                                        @endif
-                                                    @if (!empty($employee['area_manager_name']))
-                                                        {{ $employee['area_manager_name'] }}
+                                                    </a>
+                                                    @if (!empty($employee['supervisor_name']))
+                                                        {{ $employee['supervisor_name'] }}
                                                 </div>
-                                                    @endif
+                                                @endif
+                                                @if (!empty($employee['area_manager_name']))
+                                                    {{ $employee['area_manager_name'] }}
+                                            </div>
+                                            @endif
 
-            </div>
-        @else
-            <span class="text-danger">-</span>
-            @endif
-            </td>
-
-
-            <td class="align-middle text-start">
-                <div style="font-size: 16px; font-weight: 500; color: #000;">
-                    {{ number_format($employee['salary']) }} ر.س
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 4px;">
-                    <a href="{{ route('employees.increases', ['employee' => $employee['id']]) }}"
-                        style="text-decoration: none;">
-                        <div style="font-size: 14px; color: #28a745;">
-                            ⬆️ {{ number_format($employee['increases_number'] ?? 0) }}
-                        </div>
-                    </a>
-
-                    <a href="{{ route('employees.advances', ['employee' => $employee['id']]) }}"
-                        style="text-decoration: none;">
-                        <div style="font-size: 14px; color: #dc3545;">
-                            ⬇️ {{ number_format($employee['deductions_number'] ?? 0) }}
-                        </div>
-                    </a>
-                </div>
-            </td>
+                                        </div>
+                                    @else
+                                        <span class="text-danger">-</span>
+                                    @endif
+                                </td>
 
 
+                                <td class="align-middle text-start">
+                                    <div style="font-size: 16px; font-weight: 500; color: #000;">
+                                        {{ number_format($employee['salary']) }} ر.س
+                                    </div>
 
-            <td class="align-middle text-start">
-                <div style="font-size: 15px; font-weight: 500; color: #000;">
-                    <i class="fas fa-language me-1"></i>{{ $employee['english_level'] }}
-                </div>
-                <div style="font-size: 13px; font-weight: 500; color: #000;">
-                    🎓 {{ $employee['certificate_type'] }}
-                </div>
+                                    <div style="display: flex; gap: 10px; margin-top: 4px;">
+                                        <a href="{{ route('employees.increases', ['employee' => $employee['id']]) }}"
+                                           style="text-decoration: none;">
+                                            <div style="font-size: 14px; color: #28a745;">
+                                                ⬆️ {{ number_format($employee['increases_number'] ?? 0) }}
+                                            </div>
+                                        </a>
 
-            </td>
+                                        <a href="{{ route('employees.advances', ['employee' => $employee['id']]) }}"
+                                           style="text-decoration: none;">
+                                            <div style="font-size: 14px; color: #dc3545;">
+                                                ⬇️ {{ number_format($employee['deductions_number'] ?? 0) }}
+                                            </div>
+                                        </a>
+                                    </div>
+                                </td>
 
-            <td class="align-middle text-start">
-                <div style="font-size: 15px; font-weight: 500; color: #000;">
-                    💍 {{ $employee['marital_status'] }}
-                </div>
-                <div style="font-size: 15px; font-weight: 500; color: #000;">
-                    👨‍👩‍👧 {{ $employee['members_number'] }}
-                </div>
-            </td>
 
-            <td class="align-middle text-start">
-                <div style="font-size: 15px; font-weight: 500; color: #000;">
-                    <a href="{{ route('employees.alerts', ['employee' => $employee['id']]) }}"
-                        style="color: inherit; text-decoration: none;">
-                        ⚠️ {{ $employee['alerts_number'] }}
-                    </a>
-                </div>
-                <div style="font-size: 15px; font-weight: 500; color: #000;">
-                    <a href="{{ route('employees.deductions', ['employee' => $employee['id']]) }}"
-                        style="color: inherit; text-decoration: none;">
-                        💸 {{ $employee['deductions_number'] }}
-                    </a>
-                </div>
-            </td>
+                                <td class="align-middle text-start">
+                                    <div style="font-size: 15px; font-weight: 500; color: #000;">
+                                        <i class="fas fa-language me-1"></i>{{ $employee['english_level'] }}
+                                    </div>
+                                    <div style="font-size: 13px; font-weight: 500; color: #000;">
+                                        🎓 {{ $employee['certificate_type'] }}
+                                    </div>
 
-            <td class="align-middle text-center">
-                <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                                </td>
+
+                                <td class="align-middle text-start">
+                                    <div style="font-size: 15px; font-weight: 500; color: #000;">
+                                        💍 {{ $employee['marital_status'] }}
+                                    </div>
+                                    <div style="font-size: 15px; font-weight: 500; color: #000;">
+                                        👨‍👩‍👧 {{ $employee['members_number'] }}
+                                    </div>
+                                </td>
+
+                                <td class="align-middle text-start">
+                                    <div style="font-size: 15px; font-weight: 500; color: #000;">
+                                        <a href="{{ route('employees.alerts', ['employee' => $employee['id']]) }}"
+                                           style="color: inherit; text-decoration: none;">
+                                            ⚠️ {{ $employee['alerts_number'] }}
+                                        </a>
+                                    </div>
+                                    <div style="font-size: 15px; font-weight: 500; color: #000;">
+                                        <a href="{{ route('employees.deductions', ['employee' => $employee['id']]) }}"
+                                           style="color: inherit; text-decoration: none;">
+                                            💸 {{ $employee['deductions_number'] }}
+                                        </a>
+                                    </div>
+                                </td>
+
+                                <td class="align-middle text-center">
+                                    <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                     <span class="text-secondary " style="display: flex; align-items: center; gap: 8px;">
                         {{ $employee['phone_number'] }}
                         @if (!empty($employee['whats_app_link']))
                             <a href="{{ $employee['whats_app_link'] }}" target="_blank" style="color: #25D366;"
-                                title="Chat on WhatsApp">
+                               title="Chat on WhatsApp">
                                 <i class="fab fa-whatsapp" style="font-size: 18px;"></i>
                             </a>
                         @endif
                     </span>
-                    <span class="text-secondary " style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="text-secondary "
+                                              style="display: flex; align-items: center; gap: 6px;">
                         @if (strtolower($employee['phone_type']) === 'android')
-                            <img src="{{ asset('build/assets/img/android.png') }}" alt="Android"
-                                style="width: 30px; height: 30px;">
-                        @elseif(strtolower($employee['phone_type']) === 'iphone')
-                            <img src="{{ asset('build/assets/img/iphone.png') }}" alt="iPhone"
-                                style="width: 20px; height: 20px;">
-                        @endif
+                                                <img src="{{ asset('build/assets/img/android.png') }}" alt="Android"
+                                                     style="width: 30px; height: 30px;">
+                                            @elseif(strtolower($employee['phone_type']) === 'iphone')
+                                                <img src="{{ asset('build/assets/img/iphone.png') }}" alt="iPhone"
+                                                     style="width: 20px; height: 20px;">
+                                            @endif
                     </span>
-                </div>
-            </td>
+                                    </div>
+                                </td>
 
-            <td class="align-middle text-center">
-                <div>
-                    <span class="text-secondary ">{{ $employee['residence'] }}</span>
-                </div>
-                <div>
+                                <td class="align-middle text-center">
+                                    <div>
+                                        <span class="text-secondary ">{{ $employee['residence'] }}</span>
+                                    </div>
+                                    <div>
                     <span class="text-secondary ">
                         {{ $employee['residence_neighborhood'] }}
                     </span>
-                </div>
-            </td>
-            <td class="align-middle text-center">
-                <div>
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div>
                     <span class="badge bg-success mb-1"
-                        style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
+                          style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
                         تي شيرت: {{ $employee['Tshirt_size'] }}
                     </span>
-                </div>
-                <div>
+                                    </div>
+                                    <div>
                     <span class="badge bg-primary mb-1"
-                        style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
+                          style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
                         بنطال: {{ $employee['pants_size'] }}
                     </span>
-                </div>
-                <div>
+                                    </div>
+                                    <div>
                     <span class="badge bg-info"
-                        style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
+                          style="font-size: 0.75rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
                         حذاء: {{ $employee['Shoes_size'] }}
                     </span>
-                </div>
-            </td>
-            <td class="align-middle text-center">
-                <div>
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div>
                     <span class="text-secondary ">
                         {{ $employee['vehicle_model'] }}
                     </span>
-                </div>
-                <div class="d-flex align-items-center justify-content-center gap-1">
-                    @if ($employee['vehicle_type'] === 'دراجة نارية')
-                        <i class="fas fa-motorcycle text-primary" title="دراجة نارية"></i>
-                    @else
-                        <i class="fas fa-car text-success" title="سيارة"></i>
-                    @endif
-                    <span class="text-secondary ">
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-center gap-1">
+                                        @if ($employee['vehicle_type'] === 'دراجة نارية')
+                                            <i class="fas fa-motorcycle text-primary" title="دراجة نارية"></i>
+                                        @else
+                                            <i class="fas fa-car text-success" title="سيارة"></i>
+                                        @endif
+                                        <span class="text-secondary ">
                         {{ $employee['vehicle_ID'] }}
                     </span>
-                </div>
-            </td>
+                                    </div>
+                                </td>
 
-            <td class="align-middle text-center">
-                <div>
+                                <td class="align-middle text-center">
+                                    <div>
                     <span class="text-secondary ">
                         {{ $employee['joining_date'] }}
                     </span>
-                </div>
-                <div>
+                                    </div>
+                                    <div>
                     <span class="text-secondary "
-                        style="font-size: 0.9rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
+                          style="font-size: 0.9rem; font-weight: 600; padding: 0.25em 0.5em; display: inline-block; min-width: 40px;">
                         {{ $employee['work_duration'] }}
                     </span>
-                </div>
-            </td>
-            <td class="align-middle text-center">
-                @if ($employee['stop_reason'])
-                    @php
-                        $stopReason = trim($employee['stop_reason']);
-                        $isBadPerformance = in_array($stopReason, ['سوء اداء', 'سوء أداء']);
-                    @endphp
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    @if ($employee['stop_reason'])
+                                        @php
+                                            $stopReason = trim($employee['stop_reason']);
+                                            $isBadPerformance = in_array($stopReason, ['سوء اداء', 'سوء أداء']);
+                                        @endphp
 
-                    <span class="{{ $isBadPerformance ? 'text-danger' : 'text-secondary' }}">
+                                        <span class="{{ $isBadPerformance ? 'text-danger' : 'text-secondary' }}">
                         {{ $employee['stop_reason'] }}
                     </span>
-                @else
-                    <span class="text-success">
+                                    @else
+                                        <span class="text-success">
                         -
                     </span>
+                                    @endif
+                                </td>
+
+
+                            </tr>
+                        @endforeach
+                    </table>
+                    </tbody>
+                @else
+                    <div class="text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4 h-16 w-16 text-gray-400" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2a4 4 0 118 0v2m-4 4v-4"/>
+                        </svg>
+                        <p class="text-gray-500 text-lg font-semibold">عذرًا، لا توجد بيانات مطابقة للفلاتر
+                            المحددة.</p>
+                        <p class="text-gray-400 mt-2">حاول تعديل الفلاتر أو مسحها لعرض جميع البيانات.</p>
+                    </div>
                 @endif
-            </td>
 
 
-            </tr>
-            @endforeach
-            </table>
-            </tbody>
-        @else
-            <div class="text-center py-12">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4 h-16 w-16 text-gray-400" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2a4 4 0 118 0v2m-4 4v-4" />
-                </svg>
-                <p class="text-gray-500 text-lg font-semibold">عذرًا، لا توجد بيانات مطابقة للفلاتر
-                    المحددة.</p>
-                <p class="text-gray-400 mt-2">حاول تعديل الفلاتر أو مسحها لعرض جميع البيانات.</p>
             </div>
-            @endif
-
-
         </div>
-    </div>
 
     </div>
-
+    <!-- Edit Employee Modal -->
+    <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تعديل بيانات الموظف</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editEmployeeForm" method="POST" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+                    @include('Employees.employee-form-fields')
+                    <div class="modal-footer bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                        <button type="button"
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            إلغاء
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            تعديل الموظف
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 @endsection
@@ -2275,10 +2342,336 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize edit buttons
+            document.querySelectorAll('.edit-employee-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const employeeId = this.getAttribute('data-employee-id');
+                    loadEmployeeData(employeeId);
+                });
+            });
+
+            // Handle edit form submission
+            document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitEmployeeUpdate();
+            });
+        });
+
+        function loadEmployeeData(employeeId) {
+            console.log('Loading employee data for ID:', employeeId); // Debug log
+
+            // Show loading state
+            const submitButton = document.querySelector('#editEmployeeForm button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> جاري التحميل...';
+
+            // Fetch employee data
+            fetch(`/employees/${employeeId}/edit`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Response status:', response.status); // Debug log
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data); // Debug log
+                    if (data.success) {
+                        populateEditForm(data.employee);
+                    } else {
+                        throw new Error(data.message || 'Failed to load employee data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading employee data:', error);
+                    showErrorAlert('فشل في تحميل بيانات الموظف: ' + error.message);
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+        }
+
+        function populateEditForm(employee) {
+            console.log('Populating form with employee data:', employee); // Debug log
+
+            const form = document.getElementById('editEmployeeForm');
+
+            // Set form action
+            form.action = `/employees/${employee.id}`;
+            console.log('Form action set to:', form.action); // Debug log
+
+            // Basic field mapping
+            const fieldMappings = {
+                // Direct field mappings
+                'name': employee.name,
+                'owner_account_name': employee.owner_account_name,
+                'bank_name': employee.bank_name,
+                'job': employee.job,
+                'id_card': employee.id_card,
+                'nationality': employee.nationality,
+                'email': employee.email,
+                'iban': employee.iban,
+                'phone_number': employee.phone_number,
+                'work_area': employee.work_area,
+                'salary': employee.salary,
+                'residence': employee.residence,
+                'residence_neighborhood': employee.residence_neighborhood,
+                'vehicle_type': employee.vehicle_type,
+                'vehicle_model': employee.vehicle_model,
+                'vehicle_ID': employee.vehicle_ID,
+                'members_number': employee.members_number,
+            };
+
+            // Populate basic fields
+            Object.entries(fieldMappings).forEach(([fieldName, value]) => {
+                const input = form.querySelector(`[name="${fieldName}"]`);
+                if (input && value !== undefined && value !== null) {
+                    input.value = value;
+                    console.log(`Set ${fieldName} to:`, value); // Debug log
+                }
+            });
+
+            // Select field mappings
+            const selectMappings = {
+                'gender': employee.gender,
+                'phone_type': employee.phone_type,
+                'role': employee.role,
+                'certificate_type': employee.certificate_type,
+                'marital_status': employee.marital_status,
+                'Tshirt_size': employee.Tshirt_size,
+                'pants_size': employee.pants_size,
+                'Shoes_size': employee.Shoes_size,
+                'english_level': employee.english_level,
+                'health_card': employee.health_card ? '1' : '0' // Convert boolean to string
+            };
+
+            // Populate select fields
+            Object.entries(selectMappings).forEach(([fieldName, value]) => {
+                const select = form.querySelector(`[name="${fieldName}"]`);
+                if (select && value !== undefined && value !== null) {
+                    const stringValue = value.toString();
+                    const option = select.querySelector(`option[value="${stringValue}"]`);
+
+                    if (option) {
+                        option.selected = true;
+                        console.log(`Set select ${fieldName} to:`, stringValue); // Debug log
+                    } else {
+                        console.warn(`Option not found for ${fieldName} with value:`, stringValue);
+                        // Select first option as fallback
+                        if (select.options.length > 0) {
+                            select.options[0].selected = true;
+                        }
+                    }
+                }
+            });
+
+            // Handle date fields
+            if (employee.birthday) {
+                const birthdayInput = form.querySelector('#birthday');
+                if (birthdayInput) {
+                    birthdayInput.value = employee.birthday;
+                    console.log('Set birthday to:', employee.birthday); // Debug log
+                    // Trigger age calculation if function exists
+                    if (typeof calculateAge === 'function') {
+                        calculateAge();
+                    }
+                }
+            }
+
+            if (employee.joining_date) {
+                const joiningDateInput = form.querySelector('#joining_date');
+                if (joiningDateInput) {
+                    joiningDateInput.value = employee.joining_date;
+                    console.log('Set joining_date to:', employee.joining_date); // Debug log
+                }
+            }
+
+            // Handle project selection
+            if (employee.project) {
+                const projectSelect = form.querySelector('#project-select');
+                if (projectSelect) {
+                    // Find option by text content (project name)
+                    const options = Array.from(projectSelect.options);
+                    const projectOption = options.find(opt =>
+                        opt.textContent.trim() === employee.project
+                    );
+
+                    if (projectOption) {
+                        projectOption.selected = true;
+                        console.log('Set project to:', employee.project); // Debug log
+
+                        // Trigger change event to load supervisors/area managers
+                        projectSelect.dispatchEvent(new Event('change'));
+
+                        // Set supervisor and area manager after project change
+                        setTimeout(() => setManagers(employee), 300);
+                    }
+                }
+            } else {
+                // If no project, still try to set managers
+                setTimeout(() => setManagers(employee), 300);
+            }
+
+            console.log('Form population completed'); // Debug log
+        }
+
+        function setManagers(employee) {
+            console.log('Setting managers for employee:', employee); // Debug log
+
+            // Set supervisor
+            if (employee.supervisor_name) {
+                const supervisorSelect = document.querySelector('#supervisor-select');
+                if (supervisorSelect && !supervisorSelect.disabled) {
+                    const options = Array.from(supervisorSelect.options);
+                    const supervisorOption = options.find(opt =>
+                        opt.textContent.trim() === employee.supervisor_name
+                    );
+                    if (supervisorOption) {
+                        supervisorOption.selected = true;
+                        console.log('Set supervisor to:', employee.supervisor_name); // Debug log
+                    }
+                }
+            }
+
+            // Set area manager
+            if (employee.area_manager_name) {
+                const areaManagerSelect = document.querySelector('#area-manager-select');
+                if (areaManagerSelect && !areaManagerSelect.disabled) {
+                    const options = Array.from(areaManagerSelect.options);
+                    const areaManagerOption = options.find(opt =>
+                        opt.textContent.trim() === employee.area_manager_name
+                    );
+                    if (areaManagerOption) {
+                        areaManagerOption.selected = true;
+                        console.log('Set area manager to:', employee.area_manager_name); // Debug log
+                    }
+                }
+            }
+        }
+
+        function submitEmployeeUpdate() {
+            const form = document.getElementById('editEmployeeForm');
+            const employeeId = form.action.split('/').pop();
+
+            console.log('Submitting update for employee ID:', employeeId); // Debug log
+
+            // Show loading state
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> جاري الحفظ...';
+
+            // Create FormData from the form
+            const formData = new FormData(form);
+
+            // Add method spoofing for PATCH
+            formData.append('_method', 'PUT');
+
+            // Send request to update route
+            fetch(`/employees/${employeeId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+                .then(response => {
+                    console.log('Update response status:', response.status); // Debug log
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Update response data:', data); // Debug log
+                    if (data.success) {
+                        showSuccessAlert(data.message, {
+                            reload: true
+                        });
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                    } else {
+                        throw new Error(data.message || 'Failed to update employee');
+                    }
+                })
+                .catch(error => {
+                    console.error('Update error:', error);
+                    if (error.errors) {
+                        showValidationErrors(error.errors);
+                    } else {
+                        showErrorAlert(error.message || 'فشل في تحديث بيانات الموظف');
+                    }
+                })
+                .finally(() => {
+                    // Restore button state
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+        }
+
+        // Helper functions
+        function showSuccessAlert(message, options = {}) {
+            Swal.fire({
+                icon: 'success',
+                title: 'نجاح!',
+                text: message,
+                confirmButtonText: 'حسناً',
+                customClass: { confirmButton: 'btn btn-success' },
+                timer: options.timer || 2000,
+                willClose: () => {
+                    if (options.reload) window.location.reload();
+                    if (options.redirect) window.location.href = options.redirect;
+                }
+            });
+        }
+
+        function showErrorAlert(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ!',
+                text: message,
+                confirmButtonText: 'حسناً',
+                customClass: { confirmButton: 'btn btn-danger' }
+            });
+        }
+
+        function showValidationErrors(errors) {
+            let errorMessages = [];
+            for (const field in errors) {
+                if (Array.isArray(errors[field])) {
+                    errorMessages.push(...errors[field]);
+                } else {
+                    errorMessages.push(errors[field]);
+                }
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ في التحقق',
+                html: errorMessages.join('<br>'),
+                confirmButtonText: 'حسناً',
+                customClass: { confirmButton: 'btn btn-danger' }
+            });
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize tooltips
             if (document.querySelector('[data-toggle="tooltip"]')) {
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
-                var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                     return new bootstrap.Tooltip(tooltipTriggerEl);
                 });
             }
@@ -2297,7 +2690,7 @@
                 });
             }
         });
-        document.getElementById('createEmployeeForm').addEventListener('submit', async function(e) {
+        document.getElementById('createEmployeeForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const form = e.target;
@@ -2354,14 +2747,14 @@
         });
     </script>
     <script>
-        document.getElementById('clearSearch').addEventListener('click', function() {
+        document.getElementById('clearSearch').addEventListener('click', function () {
             document.getElementById('globalSearch').value = '';
             const url = new URL(window.location.href);
             url.searchParams.delete('search');
             window.location.href = url.toString();
         });
 
-        document.getElementById('globalSearch').addEventListener('keydown', function(e) {
+        document.getElementById('globalSearch').addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 const url = new URL(window.location.href);
                 if (this.value.trim() !== '') {
@@ -2373,7 +2766,7 @@
             }
         });
 
-        document.getElementById('resetFilters').addEventListener('click', function() {
+        document.getElementById('resetFilters').addEventListener('click', function () {
             const url = new URL(window.location.href);
             url.search = '';
             window.location.href = url.toString();
@@ -2551,14 +2944,14 @@
             const dropdown = document.querySelector('.dropdown');
             const bulkActionsBtn = document.getElementById('bulkActionsBtn');
 
-            bulkActionsBtn.addEventListener('click', function(e) {
+            bulkActionsBtn.addEventListener('click', function (e) {
                 if (this.disabled) return;
                 e.stopPropagation();
                 dropdown.classList.toggle('active');
             });
 
             // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (!dropdown.contains(e.target)) {
                     dropdown.classList.remove('active');
                 }
@@ -2688,7 +3081,7 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setupBulkActions();
             updateColumnsBadge();
         });
@@ -2823,7 +3216,7 @@
         }
 
         // Initialize with first selected employee's salary
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const firstSelected = document.querySelector('.emp-checkbox:checked');
             if (firstSelected) {
                 const salary = firstSelected.dataset.salary || '5000';
@@ -2835,7 +3228,7 @@
     </script>
     <script>
         // Export to Excel function
-        document.getElementById('excelExportBtn').addEventListener('click', function() {
+        document.getElementById('excelExportBtn').addEventListener('click', function () {
             const selectedColumns = getSelectedColumns().filter(col => col !== 'image');
 
             const {
@@ -2860,7 +3253,7 @@
             XLSX.writeFile(wb, 'الموظفين_' + new Date().toISOString().slice(0, 10) + '.xlsx');
         });
 
-        document.getElementById('pdfExportBtn').addEventListener('click', function() {
+        document.getElementById('pdfExportBtn').addEventListener('click', function () {
             // Get the original table
             const originalTable = document.getElementById('employeesTable');
 
@@ -2933,7 +3326,7 @@
             logo.alt = 'شعار الشركة';
 
             // Fallback if logo fails to load
-            logo.onerror = function() {
+            logo.onerror = function () {
                 this.style.display = 'none';
                 const fallbackText = document.createElement('div');
                 fallbackText.textContent = 'الشعار';
@@ -3005,7 +3398,7 @@
                 }
 
                 // Add error handling
-                img.onerror = function() {
+                img.onerror = function () {
                     this.style.display = 'none';
                     const errorSpan = document.createElement('span');
                     errorSpan.textContent = '(صورة غير متوفرة)';
@@ -3055,7 +3448,7 @@
                     scrollX: 0,
                     scrollY: 0,
                     letterRendering: true,
-                    onclone: function(clonedDoc) {
+                    onclone: function (clonedDoc) {
                         clonedDoc.documentElement.dir = 'rtl';
                         clonedDoc.body.style.direction = 'rtl';
                         clonedDoc.body.style.textAlign = 'right';
@@ -3094,7 +3487,7 @@
                 .from(pdfContainer)
                 .toPdf()
                 .get('pdf')
-                .then(function(pdf) {
+                .then(function (pdf) {
                     const totalPages = pdf.internal.getNumberOfPages();
                     for (let i = 1; i <= totalPages; i++) {
                         pdf.setPage(i);
@@ -3226,15 +3619,16 @@
                 document.getElementById('deduction_percentage').value = 0;
             }
         }
+
         document.getElementById('advance_amount').addEventListener('input', calculateAdvancePercentage);
         document.getElementById('deduction_amount').addEventListener('input', calculateDeductionPercentage);
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const reasonSelect = document.getElementById('replacement-reason-select');
             const otherReasonContainer = document.getElementById('other-reason-container');
 
-            reasonSelect.addEventListener('change', function() {
+            reasonSelect.addEventListener('change', function () {
                 if (this.value === 'آخر') {
                     otherReasonContainer.classList.remove('hidden');
                     otherReasonContainer.querySelector('input').setAttribute('required', 'true');
@@ -3246,11 +3640,11 @@
         });
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const stopReasonSelect = document.getElementById('stop-reason-select');
             const otherStopReasonContainer = document.getElementById('other-stop-reason-container');
 
-            stopReasonSelect.addEventListener('change', function() {
+            stopReasonSelect.addEventListener('change', function () {
                 if (this.value === 'آخر') {
                     otherStopReasonContainer.classList.remove('hidden');
                     otherStopReasonContainer.querySelector('input').setAttribute('required', 'true');
