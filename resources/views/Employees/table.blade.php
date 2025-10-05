@@ -673,6 +673,11 @@
 
                                 </a>
                             @endif
+                                <a href="{{ route('employees.histories.all') }}" class="btn btn-icon-only"
+                                   title="السجل الزمني الموظفين">
+                                    <i class="fas fa-calendar feature-icon"></i>
+
+                                </a>
                             @if (($role && $role->hasPermissionTo('add_employee')) || Auth::user()->role === 'admin')
                                 <button class="btn btn-purple" data-bs-toggle="modal"
                                         data-bs-target="#createEmployeeModal">
