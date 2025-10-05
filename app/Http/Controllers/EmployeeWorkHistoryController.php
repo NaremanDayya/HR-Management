@@ -67,7 +67,7 @@ class EmployeeWorkHistoryController extends Controller
             ]);
         }
 
-        return view('employees.histories', [
+        return view('Employees.histories', [
             'success' => true,
             'histories' => $histories,
             'summary' => $summary,
