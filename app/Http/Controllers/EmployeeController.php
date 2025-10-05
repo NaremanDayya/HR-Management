@@ -147,13 +147,18 @@ class EmployeeController extends Controller
             $advanceDeductions = $employee->advanceDeductions->sum('amount');
             $currentMonthIncreases = $employee->increases->sum('increase_amount');
 
+            $dailyRate = $employee->salary / 26;
+            $absenceDeduction = ($employee->absence_days ?? 0) * $dailyRate;
+
             $grossSalary = $employee->salary + $currentMonthIncreases;
-            $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions;
+            $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
 
             return [
                 'id' => $employee->id,
                 'name' => $employee->name,
                 'base_salary' => $employee->salary,
+                'absence_days' => $employee->absence_days,
+                'absence_deduction' => $absenceDeduction, // الجديد
                 'current_month_increases' => $currentMonthIncreases,
                 'current_month_deductions' => $currentMonthDeductions,
                 'advance_deductions' => $advanceDeductions,

@@ -18,7 +18,7 @@
             z-index: 1000;
         }
         .absence-days-warning {
-            color: #e67e22;
+            color: #e3342f;
             font-weight: 600;
         }
 
@@ -62,6 +62,20 @@
         }
 
         .salary-updated::after {
+            content: "🔄";
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        .absence-days-updated {
+            color: #e67e22;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .absence-days-updated::after {
             content: "🔄";
             position: absolute;
             top: 50%;
@@ -363,7 +377,7 @@
                                                 <td class="text-danger">
                                                     {{ number_format($employee['advance_deductions']) }} ر.س
                                                 </td>
-                                                <td class="text-warning font-weight-bold">
+                                                <td class="text-black font-weight-bold">
                                                     {{ $employee['absence_days'] ?? 0 }} يوم
                                                 </td>
                                                 <td class="text-success font-weight-bold">
@@ -766,61 +780,6 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function saveAdjustedSalary() {
-            if (!currentEmployeeRow) return;
-
-            const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
-            const currentDeductions = parseFloat(
-                document.getElementById('currentDeductions').value.replace(/[^0-9.]/g, '')
-            ) || 0;
-            const advanceDeductions = parseFloat(
-                document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
-            ) || 0;
-
-            // Get previous values from the table row with CORRECT indices
-            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[4].textContent.replace(/[^\d.]/g, '')) || 0;
-            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[5].textContent.replace(/[^\d.]/g, '')) || 0;
-            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[6].textContent.replace(/[^\d]/g, '')) || 0;
-
-            // Get current increases value
-            const currentIncreasesText = currentEmployeeRow.cells[3].textContent;
-            const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
-
-            // Calculate new values
-            const dailyRate = (originalSalary + currentIncreases) / 26;
-            const absenceDeduction = absenceDays * dailyRate;
-            const netSalary = Math.max(0, (originalSalary + currentIncreases) - currentDeductions - advanceDeductions - absenceDeduction);
-
-            // CORRECTED: Update table cells with proper column assignments
-            // Cell 4: Current Deductions
-            currentEmployeeRow.cells[4].textContent = numberFormat(currentDeductions) + ' ر.س';
-            currentEmployeeRow.cells[4].className = 'text-danger';
-
-            // Cell 5: Advance Deductions
-            currentEmployeeRow.cells[5].textContent = numberFormat(advanceDeductions) + ' ر.س';
-            currentEmployeeRow.cells[5].className = 'text-danger';
-
-            // Cell 6: Absence Days (just the number of days)
-            currentEmployeeRow.cells[6].textContent = absenceDays + ' يوم';
-            currentEmployeeRow.cells[6].className = 'text-warning font-weight-bold';
-
-            // Cell 7: Net Salary (final calculated amount)
-            currentEmployeeRow.cells[7].textContent = numberFormat(netSalary) + ' ر.س';
-            currentEmployeeRow.cells[7].className = 'text-success font-weight-bold salary-updated';
-
-            // Show success message
-            showToast('تم تحديث الراتب بنجاح', 'success');
-
-            // Update summary cards
-            const currentDeductionsDiff = currentDeductions - prevCurrentDeductions;
-            const advanceDeductionsDiff = advanceDeductions - prevAdvanceDeductions;
-            const absenceDeductionDiff = absenceDeduction - (prevAbsenceDays * ((originalSalary + currentIncreases) / 26));
-
-            updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff);
-
-            closeSalaryModal();
-        }
-
 
         function debugColumnIndices(rowElement) {
             console.log('=== DEBUG COLUMN INDICES ===');
@@ -937,9 +896,13 @@
             currentEmployeeRow.cells[5].textContent = numberFormat(advanceDeductions) + ' ر.س';
             currentEmployeeRow.cells[5].className = 'text-danger';
 
+            // Update absence days (cell 6)
+            currentEmployeeRow.cells[6].textContent = numberFormat(absenceDays) + ' يوم';
+            currentEmployeeRow.cells[6].className = 'text-warning font-weight-bold absence-days-updated';
+
             // Update net salary (cell 6)
-            currentEmployeeRow.cells[6].textContent = numberFormat(netSalary) + ' ر.س';
-            currentEmployeeRow.cells[6].className = 'text-success font-weight-bold salary-updated';
+            currentEmployeeRow.cells[7].textContent = numberFormat(netSalary) + ' ر.س';
+            currentEmployeeRow.cells[7].className = 'text-success font-weight-bold salary-updated';
 
             // Show success message
             showToast('تم تحديث الراتب بنجاح', 'success');

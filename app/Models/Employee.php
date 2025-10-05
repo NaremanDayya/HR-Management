@@ -40,7 +40,8 @@ class Employee extends Model
         'iban',
         'bank_name',
         'last_working_date',
-        'payload'
+        'payload',
+        'absence_days',
     ];
     protected $casts = [
         'joining_date' => 'date',
