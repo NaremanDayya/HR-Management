@@ -3,9 +3,7 @@
 @push('styles')
 {{--    test--}}
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #740e0e 0%, #ed5565 100%);
-        }
+
         .hover-lift {
             transition: all 0.3s ease;
         }
@@ -45,6 +43,50 @@
             color: white;
             text-align: center;
         }
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background-color: #6e48aa;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background-color: #5a3a8a;
+            transform: translateY(-1px);
+        }
+
+        .export-btn .btn-icon {
+            font-size: 14px;
+        }
+
+        .export-btn .btn-text {
+            margin-right: 5px;
+        }
+
+        /* Specific colors for different export types */
+        #pdfExportBtn {
+            background-color: #e74c3c;
+        }
+
+        #pdfExportBtn:hover {
+            background-color: #c0392b;
+        }
+
+        #excelExportBtn {
+            background-color: #2ecc71;
+        }
+
+        #excelExportBtn:hover {
+            background-color: #27ae60;
+        }
     </style>
 @endpush
 
@@ -59,7 +101,7 @@
 
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="gradient-bg text-white shadow-lg">
+        <header class="bg-gray-50 text-black shadow-lg">
             <div class="container mx-auto px-4 py-6">
                 <div class="flex justify-between items-center">
                     <h1 class="text-2xl font-bold">
@@ -67,14 +109,17 @@
                         سجل عمل الموظفين
                     </h1>
                     <div class="flex space-x-3 space-x-reverse">
-                        <button onclick="exportToExcel()" class="bg-white text-[#740e0e] px-4 py-2 rounded-lg hover:bg-gray-100 transition flex items-center">
-                            <i class="fas fa-file-excel ml-2"></i>
-                            تصدير Excel
+                        <button id="pdfExportBtn" onclick="exportToPDF()" class="export-btn">
+                            <span class="btn-icon"><i class="fas fa-file-pdf"></i></span>
+                            <span class="btn-text">تصدير PDF</span>
                         </button>
-                        <button onclick="exportToPDF()" class="bg-white text-[#740e0e] px-4 py-2 rounded-lg hover:bg-gray-100 transition flex items-center">
-                            <i class="fas fa-file-pdf ml-2"></i>
-                            تصدير PDF
+
+                        <!-- Excel Export Button -->
+                        <button id="excelExportBtn" onclick="exportToExcel()" class="export-btn">
+                            <span class="btn-icon"><i class="fas fa-file-excel"></i></span>
+                            <span class="btn-text">تصدير Excel</span>
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -152,7 +197,7 @@
                             <th class="px-6 py-4 text-right font-semibold text-gray-700">المدة</th>
                             <th class="px-6 py-4 text-right font-semibold text-gray-700">الحالة</th>
                             <th class="px-6 py-4 text-right font-semibold text-gray-700">سبب الإيقاف</th>
-                            <th class="px-6 py-4 text-right font-semibold text-gray-700">التفاصيل</th>
+{{--                            <th class="px-6 py-4 text-right font-semibold text-gray-700">التفاصيل</th>--}}
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -164,8 +209,10 @@
                                             <i class="fas fa-user"></i>
                                         </div>
                                         <div class="mr-3">
+                                            <a href="{{route('employees.histories',$history->employee->id)}}" >
                                             <div class="font-medium text-gray-900">{{ $history->employee->user->name ?? 'غير محدد' }}</div>
                                             <div class="text-sm text-gray-500">{{ $history->employee->user->email ?? 'غير محدد' }}</div>
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
@@ -187,13 +234,13 @@
                                 <td class="px-6 py-4">
                                     <span class="text-sm text-gray-600">{{ $history->stop_reason ?? '---' }}</span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <button onclick="showDetails({{ $history->id }})"
-                                            class="text-[#740e0e] hover:text-[#5d0a0a] transition">
-                                        <i class="fas fa-eye"></i>
-                                        عرض
-                                    </button>
-                                </td>
+{{--                                <td class="px-6 py-4">--}}
+{{--                                    <button onclick="showDetails({{ $history->id }})"--}}
+{{--                                            class="text-[#740e0e] hover:text-[#5d0a0a] transition">--}}
+{{--                                        <i class="fas fa-eye"></i>--}}
+{{--                                        عرض--}}
+{{--                                    </button>--}}
+{{--                                </td>--}}
                             </tr>
                         @endforeach
                         </tbody>
