@@ -1,6 +1,7 @@
 @extends('layouts.master')
 @section('title', 'سجل عمل الموظفين')
 @push('styles')
+{{--    test--}}
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #740e0e 0%, #ed5565 100%);
