@@ -739,7 +739,13 @@ class EmployeeTemplateController extends Controller
         $projectId = $this->getProjectIdByName($data['project_name'] ?? $data['project']);
         $supervisorId = $this->getSupervisorIdByName($data['supervisor_name'] ?? $data['supervisor']);
         $areaManagerId = $this->getAreaManagerIdByName($data['area_manager_name'] ?? $data['area_manager']);
-
+        $managerId = null;
+        if ($projectId) {
+            $project = \App\Models\Project::find($projectId);
+            if ($project && $project->manager_id) {
+                $managerId = $project->manager_id;
+            }
+        }
         $employee = Employee::create([
             'user_id' => $user->id,
             'name' => $data['name'],
@@ -763,6 +769,7 @@ class EmployeeTemplateController extends Controller
             'project_id' => $projectId,
             'supervisor_id' => $supervisorId,
             'area_manager_id' => $areaManagerId,
+            'manager_id' => $managerId,
         ]);
         EmployeeWorkHistory::create([
             'employee_id' => $employee->id,
@@ -866,18 +873,13 @@ class EmployeeTemplateController extends Controller
             'password' => $data['password'],
         ];
 
-        $csvPath = storage_path('app/exports/employees_credentials.csv');
-        $directory = dirname($csvPath);
+        $csvPath = 'exports/employees_credentials.csv';
 
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        if (!Storage::exists($csvPath)) {
+            Storage::put($csvPath, "\xEF\xBB\xBF" . "إسم الموظف,البريد الإلكتروني,كلمة المرور\n");
         }
 
-        if (!file_exists($csvPath)) {
-            file_put_contents($csvPath, "\xEF\xBB\xBF" . "إسم الموظف,البريد الإلكتروني,كلمة المرور\n");
-        }
-
-        file_put_contents($csvPath, implode(',', $credentials) . "\n", FILE_APPEND | LOCK_EX);
+        Storage::append($csvPath, implode(',', $credentials) . "\n");
     }
 
     // Mapping helper methods (keep these as they are correct)
