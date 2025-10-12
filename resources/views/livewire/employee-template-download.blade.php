@@ -120,12 +120,8 @@
                     <h4 class="font-medium text-gray-800 mb-2">ملاحظات هامة:</h4>
                     <ul class="list-disc list-inside space-y-1">
                         <li><strong>صيغة التواريخ:</strong> YYYY-MM-DD (مثال: 2024-01-15)</li>
-                        <li><strong>قيم الجنس:</strong> male أو female</li>
-                        <li><strong>نوع الجوال:</strong> android أو iphone</li>
-                        <li><strong>الشهادة الصحية:</strong> 1 (نعم) أو 0 (لا)</li>
-                        <li><strong>الحالة الاجتماعية:</strong> single, married, divorced, widowed</li>
                         <li><strong>إذا لم تقم بإدخال كلمة مرور:</strong> سيتم استخدام كلمة مرور افتراضية</li>
-                        <li class="text-red-500"><strong>ملاحظة:</strong> إذا كان البريد الإلكتروني موجود مسبقاً، سيتم تحديث بيانات الموظف</li>
+                        <li class="text-red-500"><strong>ملاحظة:</strong> إذا كان البريد الإلكتروني موجود مسبقاً، لن يتم إضافة الموظف</li>
                     </ul>
                 </div>
             </div>
