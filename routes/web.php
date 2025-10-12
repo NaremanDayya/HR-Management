@@ -13,11 +13,17 @@ use App\Services\ImageMessageService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Http\Controllers\EmployeeTemplateController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/employees/template', [EmployeeTemplateController::class, 'showTemplatePage'])->name('employees.template');
+Route::get('/employees/template/download', [EmployeeTemplateController::class, 'downloadCsv'])->name('employees.template.download');
+Route::post('/employees/import', [EmployeeTemplateController::class, 'import'])->name('employees.import');
+
 Route::get('/employees/credentials', function () {
     $csvPath = 'exports/employees_credentials.csv';
 
@@ -115,6 +121,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/employee-ips/{employeeLoginIp}/block', [EmployeeLoginIpController::class, 'block'])->name('admin.employee-ips.block');
     Route::post('/admin/employee-ips/{employeeLoginIp}/unblock', [EmployeeLoginIpController::class, 'unblock'])->name('admin.employee-ips.unblock');
     Route::post('/admin/employee-ips/{employee}/add-temp-ip', [EmployeeLoginIpController::class, 'addTemporaryIp'])->name('admin.employee-ips.add-temp-ip');
+
+
 });
 
 
