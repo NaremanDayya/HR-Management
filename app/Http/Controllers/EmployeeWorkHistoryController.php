@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\EmployeeWorkHistory;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Exports\EmployeeWorkHistoryExport;
@@ -17,7 +18,7 @@ class EmployeeWorkHistoryController extends Controller
      */
     public function getWorkHistory(Request $request, $employeeId = null)
     {
-        $query = EmployeeWorkHistory::with('employee.user');
+        $query = EmployeeWorkHistory::with('employee.user','employee.project');
 
         if ($employeeId) {
             $query->where('employee_id', $employeeId);
@@ -34,7 +35,11 @@ class EmployeeWorkHistoryController extends Controller
         if ($request->has('start_date') && !empty($request->start_date)) {
             $query->whereDate('start_date', '>=', $request->start_date);
         }
-
+        if ($request->has('project') && $request->project != '') {
+            $query->whereHas('employee.project', function($query) use ($request) {
+                $query->where('id', $request->project);
+            });
+        }
         if ($request->has('end_date') && !empty($request->end_date)) {
             $query->whereDate('end_date', '<=', $request->end_date);
         }
@@ -52,8 +57,7 @@ class EmployeeWorkHistoryController extends Controller
 
         // Get summary from the paginated results, not a new query
         $summary = $this->getSummary($histories->items());
-
-        // Return JSON if AJAX request (for filters)
+    $projects = Project::all();
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -71,6 +75,7 @@ class EmployeeWorkHistoryController extends Controller
             'success' => true,
             'histories' => $histories,
             'summary' => $summary,
+            'projects' => $projects,
         ]);
     }
 

@@ -310,6 +310,49 @@
                         </div>
                     </div>
 
+                    <!-- Filters Section -->
+                    <div class="card-body border-bottom">
+                        <form id="filterForm" method="GET" action="{{ route('financials.all') }}">
+                            <div class="row g-3 align-items-end">
+                                <!-- Search Input -->
+                                <div class="col-md-4">
+                                    <label for="search" class="form-label">بحث بالاسم</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="search"
+                                           name="search"
+                                           value="{{ request('search') }}"
+                                           placeholder="ابحث باسم الموظف...">
+                                </div>
+
+                                <!-- Project Filter -->
+                                <div class="col-md-4">
+                                    <label for="project" class="form-label">المشروع</label>
+                                    <select class="form-select" id="project" name="project">
+                                        <option value="">جميع المشاريع</option>
+                                        @foreach($projectsObjects as $project)
+                                            <option value="{{ $project->id }}"
+                                                {{ request('project') == $project->id ? 'selected' : '' }}>
+                                                {{ $project->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-filter"></i> تطبيق الفلتر
+                                        </button>
+                                        <a href="{{ route('financials.all') }}" class="btn btn-secondary">
+                                            <i class="fas fa-redo"></i> إعادة تعيين
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                     <!-- Financial Summary Cards -->
                     <div class="financial-summary">
                         <div class="summary-card">
@@ -346,6 +389,7 @@
                                         <tr>
                                             <th><i class="fas fa-id-card-alt me-1 text-primary"></i> ID</th>
                                             <th><i class="fas fa-user-tie me-1 text-info"></i> اسم الموظف</th>
+                                            <th><i class="fas fa-project-tie me-1 text-info"></i> المشروع </th>
                                             <th><i class="fas fa-coins me-1 text-warning"></i> الراتب الأساسي</th>
                                             <th><i class="fas fa-plus-circle me-1 text-success"></i> المكافآت</th>
                                             <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
@@ -363,6 +407,7 @@
                                             <tr>
                                                 <td>{{ $employee['id'] }}</td>
                                                 <td class="font-weight-600">{{ $employee['name'] }}</td>
+                                                <td class="font-weight-600">{{ $employee['project'] }}</td>
                                                 <td>{{ number_format($employee['base_salary']) }} ر.س</td>
                                                 <td class="text-success">
                                                     @if ($employee['current_month_increases'] > 0)
@@ -512,7 +557,189 @@
 
 @push('scripts')
     <script>
-        document.getElementById('excelExportBtn').addEventListener('click', function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search');
+            const projectSelect = document.getElementById('project');
+            let filterTimeout;
+
+            // Function to update URL without page reload
+            function updateURL(params) {
+                const url = new URL(window.location);
+                Object.keys(params).forEach(key => {
+                    if (params[key]) {
+                        url.searchParams.set(key, params[key]);
+                    } else {
+                        url.searchParams.delete(key);
+                    }
+                });
+                window.history.replaceState({}, '', url);
+            }
+
+            // Function to perform live filtering
+            function performLiveFiltering() {
+                const searchValue = searchInput.value;
+                const projectValue = projectSelect.value;
+
+                const filters = {
+                    search: searchValue,
+                    project: projectValue,
+                    live_filter: true // Add this to identify live filter requests
+                };
+
+                // Update URL
+                updateURL(filters);
+
+                // Show loading state
+                const tableBody = document.querySelector('.financial-table tbody');
+                const originalContent = tableBody.innerHTML;
+
+                // Make AJAX request
+                fetch(window.location.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateTableAndSummary(data.data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = originalContent;
+                    });
+            }
+            function updateTableAndSummary(data) {
+                // Update summary cards
+                document.getElementById('totalSalariesCard').textContent =
+                    numberFormat(data.summary.totalSalaries) + ' ر.س';
+                document.getElementById('totalIncreasesCard').textContent =
+                    numberFormat(data.summary.totalIncreases) + ' ر.س';
+                document.getElementById('totalDeductionsCard').textContent =
+                    numberFormat(data.summary.totalDeductions) + ' ر.س';
+                document.getElementById('totalNetSalariesCard').textContent =
+                    numberFormat(data.summary.totalNetSalaries) + ' ر.س';
+
+                // Update table
+                const tableBody = document.querySelector('.financial-table tbody');
+
+                if (data.employees.length === 0) {
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="13" class="text-center py-4">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <h3 class="text-gray-500">لا توجد نتائج</h3>
+                            <p class="text-gray-400 mt-2">لم يتم العثور على موظفين مطابقين للبحث</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    return;
+                }
+
+                let tableHTML = '';
+                data.employees.forEach(employee => {
+                    tableHTML += `
+                <tr>
+                    <td>${employee.id}</td>
+                    <td class="font-weight-600">${employee.name}</td>
+                    <td class="font-weight-600">${employee.project || '-'}</td>
+                    <td>${numberFormat(employee.base_salary)} ر.س</td>
+                    <td class="text-success">
+                        ${employee.current_month_increases > 0 ?
+                        '+' + numberFormat(employee.current_month_increases) + ' ر.س' :
+                        '-'}
+                    </td>
+                    <td class="text-danger">
+                        ${numberFormat(employee.current_month_deductions)} ر.س
+                    </td>
+                    <td class="text-danger">
+                        ${numberFormat(employee.advance_deductions)} ر.س
+                    </td>
+                    <td class="text-black font-weight-bold">
+                        ${employee.absence_days || 0} يوم
+                    </td>
+                    <td class="text-success font-weight-bold">
+                        ${numberFormat(employee.net_salary)} ر.س
+                    </td>
+                    <td class="text-success font-weight-bold">
+                        ${employee.bank_details.iban || '-'}
+                    </td>
+                    <td class="text-success font-weight-bold">
+                        ${employee.bank_details.owner_account_name || '-'}
+                    </td>
+                    <td>
+                        <div class="bank-details">
+                            ${getBankLogoHTML(employee.bank_details.bank_name)}
+                        </div>
+                    </td>
+                    <td>
+                        <button onclick="openSalaryModal(
+                            '${employee.id}',
+                            '${employee.name}',
+                            '${employee.base_salary}',
+                            this.parentNode.parentNode
+                        )" class="action-btn view-btn">
+                            <i class="fas fa-edit"></i> تعديل
+                        </button>
+                    </td>
+                </tr>
+            `;
+                });
+
+                tableBody.innerHTML = tableHTML;
+            }
+            // Helper function to get bank logo HTML
+            function getBankLogoHTML(bankName) {
+                if (!bankName) return 'غير محدد';
+
+                const bankFileBase = 'build/assets/img/' + bankName.toLowerCase().replace(/ /g, '-');
+                const extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+
+                // Create base URL for assets
+                const baseUrl = '{{ asset("") }}';
+
+                for (let ext of extensions) {
+                    const logoPath = baseUrl + bankFileBase + '.' + ext;
+
+                    // In a real implementation, you might want to check if the image exists
+                    // For now, we'll return the first possible path
+                    return `
+            <img src="${logoPath}"
+                 alt="${bankName}"
+                 class="h-12 w-12"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+            <span style="display: none;">${bankName}</span>
+        `;
+                }
+
+                return bankName;
+            }
+
+            // Event listeners for live filtering
+            searchInput.addEventListener('input', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(performLiveFiltering, 500);
+            });
+
+            projectSelect.addEventListener('change', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(performLiveFiltering, 300);
+            });
+
+            // Prevent form submission for live filtering (we handle via AJAX)
+            document.getElementById('filterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                performLiveFiltering();
+            });
+        });
+
+            document.getElementById('excelExportBtn').addEventListener('click', function() {
             const table = document.querySelector('.financial-table');
             const rows = table.querySelectorAll('tr');
             const data = [];

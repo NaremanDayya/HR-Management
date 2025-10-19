@@ -157,8 +157,9 @@ class EmployeeController extends Controller
                 'id' => $employee->id,
                 'name' => $employee->name,
                 'base_salary' => $employee->salary,
+                'project' => $employee?->project?->name,
                 'absence_days' => $employee->absence_days,
-                'absence_deduction' => $absenceDeduction, // الجديد
+                'absence_deduction' => $absenceDeduction,
                 'current_month_increases' => $currentMonthIncreases,
                 'current_month_deductions' => $currentMonthDeductions,
                 'advance_deductions' => $advanceDeductions,
@@ -187,7 +188,8 @@ class EmployeeController extends Controller
             ->select('id', 'name', 'project_id')
             ->get();
 
-        return view('Employees.financials', array_merge([
+        // Prepare response data
+        $responseData = array_merge([
             'employees' => $employees,
             'projectsObjects' => $projectsObjects,
             'supervisors' => $supervisors,
@@ -204,9 +206,35 @@ class EmployeeController extends Controller
             'minSalaries' => $employees->min('base_salary'),
             'maxSalaries' => $employees->max('base_salary'),
             'currentMonth' => now()->format('F Y'),
-            'authRole' => $user->role, // Added this like in your index method
-            'role' => Role::where('name', $user->role)->first(), // Added this like in your index method
-        ], $this->dropdownService->getDropdownData()));
+            'authRole' => $user->role,
+            'role' => Role::where('name', $user->role)->first(),
+            'currentFilters' => $filters, // Pass current filters to view
+        ], $this->dropdownService->getDropdownData());
+
+        // Handle AJAX requests for live filtering - check for specific header or parameter
+        if ($request->ajax() && $request->has('live_filter')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'employees' => $employees,
+                    'summary' => [
+                        'totalSalaries' => $responseData['totalSalaries'],
+                        'totalIncreases' => $responseData['totalIncreases'],
+                        'totalNetSalaries' => $responseData['totalNetSalaries'],
+                        'totalDeductions' => $responseData['totalDeductions'],
+                        'employeesCount' => $responseData['employeesCount'],
+                        'avgSalaries' => $responseData['avgSalaries'],
+                        'avgNetSalaries' => $responseData['avgNetSalaries'],
+                        'minSalaries' => $responseData['minSalaries'],
+                        'maxSalaries' => $responseData['maxSalaries'],
+                    ],
+                    'currentMonth' => $responseData['currentMonth'],
+                ],
+                'filters' => $filters
+            ]);
+        }
+
+        return view('Employees.financials', $responseData);
     }
     public function store(StoreEmployeeRequest $request)
     {
