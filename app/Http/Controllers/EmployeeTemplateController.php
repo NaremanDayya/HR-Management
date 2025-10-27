@@ -714,6 +714,7 @@ class EmployeeTemplateController extends Controller
 
         return Validator::make($data, $rules, $messages);
     }
+//    test
 
     private function createEmployee($data)
     {
