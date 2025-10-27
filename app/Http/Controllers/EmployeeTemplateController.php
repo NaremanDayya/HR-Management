@@ -9,7 +9,6 @@ use App\Models\EmployeeWorkHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\FacadesLog;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,8 @@ class EmployeeTemplateController extends Controller
         $supervisors = User::where('role', 'supervisor')->pluck('name')->toArray();
         $areaManagers = User::where('role', 'area_manager')->pluck('name')->toArray();
         $projects = \App\Models\Project::pluck('name')->toArray();
-        // Set headers
+
+        // Set headers (age column removed)
         $headers = [
             'A1' => 'الاسم الكامل',
             'B1' => 'اسم صاحب الحساب',
@@ -36,33 +36,32 @@ class EmployeeTemplateController extends Controller
             'E1' => 'رقم الهوية',
             'F1' => 'الجنسية',
             'G1' => 'تاريخ الميلاد',
-            'H1' => 'العمر',
-            'I1' => 'الجنس',
-            'J1' => 'مقر الإقامة',
-            'K1' => 'الحي السكني',
-            'L1' => 'نوع المركبة',
-            'M1' => 'موديل المركبة',
-            'N1' => 'رقم لوحة المركبة',
-            'O1' => 'نوع الشهادة',
-            'P1' => 'الحالة الاجتماعية',
-            'Q1' => 'عدد أفراد الأسرة',
-            'R1' => 'البريد الإلكتروني',
-            'S1' => 'رقم الآيبان',
-            'T1' => 'رقم الجوال',
-            'U1' => 'نوع الجوال',
-            'V1' => 'الدور الوظيفي',
-            'W1' => 'كلمة المرور',
-            'X1' => 'منطقة العمل',
-            'Y1' => 'تاريخ الإنضمام',
-            'Z1' => 'مقاس التي شيرت',
-            'AA1' => 'مقاس البنطال',
-            'AB1' => 'مقاس الحذاء',
-            'AC1' => 'هل لدى الموظف شهادة صحية',
-            'AD1' => 'المشروع',
-            'AE1' => 'المشرف',
-            'AF1' => 'مدير المنطقة',
-            'AG1' => 'الراتب',
-            'AH1' => 'مستوى اللغة الإنجليزية',
+            'H1' => 'الجنس',
+            'I1' => 'مقر الإقامة',
+            'J1' => 'الحي السكني',
+            'K1' => 'نوع المركبة',
+            'L1' => 'موديل المركبة',
+            'M1' => 'رقم لوحة المركبة',
+            'N1' => 'نوع الشهادة',
+            'O1' => 'الحالة الاجتماعية',
+            'P1' => 'عدد أفراد الأسرة',
+            'Q1' => 'البريد الإلكتروني',
+            'R1' => 'رقم الآيبان',
+            'S1' => 'رقم الجوال',
+            'T1' => 'نوع الجوال',
+            'U1' => 'الدور الوظيفي',
+            'V1' => 'كلمة المرور',
+            'W1' => 'منطقة العمل',
+            'X1' => 'تاريخ الإنضمام',
+            'Y1' => 'مقاس التي شيرت',
+            'Z1' => 'مقاس البنطال',
+            'AA1' => 'مقاس الحذاء',
+            'AB1' => 'هل لدى الموظف شهادة صحية',
+            'AC1' => 'المشروع',
+            'AD1' => 'المشرف',
+            'AE1' => 'مدير المنطقة',
+            'AF1' => 'الراتب',
+            'AG1' => 'مستوى اللغة الإنجليزية',
         ];
 
         foreach ($headers as $cell => $header) {
@@ -70,21 +69,22 @@ class EmployeeTemplateController extends Controller
         }
 
         // Add dropdown validations
-        $this->addDropdownValidation($sheet, 'I', 'الجنس', ['ذكر', 'أنثى']);
-        $this->addDropdownValidation($sheet, 'U', 'نوع الجوال', ['أندرويد', 'ايفون']);
-        $this->addDropdownValidation($sheet, 'V', 'الدور الوظيفي', ['مشرف', 'مدير مشروع', 'مصفف أرفف', 'مدير منطقة']);
-        $this->addDropdownValidation($sheet, 'O', 'نوع الشهادة', ['الثانوية العامة', 'دبلوم', 'بكالوريوس', 'ماجستير', 'دكتوراة']);
-        $this->addDropdownValidation($sheet, 'P', 'الحالة الاجتماعية', ['أعزب', 'متزوج', 'مطلق', 'أرمل']);
-        $this->addDropdownValidation($sheet, 'AH', 'مستوى اللغة الإنجليزية', ['أساسي', 'متوسط', 'متقدم']);
-        $this->addDropdownValidation($sheet, 'AC', 'هل لدى الموظف شهادة صحية', ['نعم', 'لا']);
-        $this->addDropdownValidation($sheet, 'AD', 'المشروع', $projects);
-        $this->addDropdownValidation($sheet, 'AE', 'المشرف', $supervisors);
-        $this->addDropdownValidation($sheet, 'AF', 'مدير المنطقة', $areaManagers);
+        $this->addDropdownValidation($sheet, 'H', 'الجنس', ['ذكر', 'أنثى']);
+        $this->addDropdownValidation($sheet, 'T', 'نوع الجوال', ['أندرويد', 'ايفون']);
+        $this->addDropdownValidation($sheet, 'U', 'الدور الوظيفي', ['مشرف', 'مدير مشروع', 'مصفف أرفف', 'مدير منطقة']);
+        $this->addDropdownValidation($sheet, 'N', 'نوع الشهادة', ['الثانوية العامة', 'دبلوم', 'بكالوريوس', 'ماجستير', 'دكتوراة']);
+        $this->addDropdownValidation($sheet, 'O', 'الحالة الاجتماعية', ['أعزب', 'متزوج', 'مطلق', 'أرمل']);
+        $this->addDropdownValidation($sheet, 'AG', 'مستوى اللغة الإنجليزية', ['أساسي', 'متوسط', 'متقدم']);
+        $this->addDropdownValidation($sheet, 'AB', 'هل لدى الموظف شهادة صحية', ['نعم', 'لا']);
+        $this->addDropdownValidation($sheet, 'AC', 'المشروع', $projects);
+        $this->addDropdownValidation($sheet, 'AD', 'المشرف', $supervisors);
+        $this->addDropdownValidation($sheet, 'AE', 'مدير المنطقة', $areaManagers);
+
         $exampleProject = !empty($projects) ? $projects[0] : 'مشروع تجريبي';
         $exampleSupervisor = !empty($supervisors) ? $supervisors[0] : 'مشرف تجريبي';
         $exampleAreaManager = !empty($areaManagers) ? $areaManagers[0] : 'مدير منطقة تجريبي';
 
-        // Add example data
+        // Add example data (age values removed)
         $examples = [
             [
                 'A2' => 'أحمد محمد',
@@ -94,33 +94,32 @@ class EmployeeTemplateController extends Controller
                 'E2' => '1234567890',
                 'F2' => 'سعودي',
                 'G2' => '1990-05-15',
-                'H2' => '34',
-                'I2' => 'male',
-                'J2' => 'الرياض',
-                'K2' => 'الملز',
-                'L2' => 'سيارة',
-                'M2' => '2020',
-                'N2' => 'أ ب ج 1234',
-                'O2' => 'bachelor',
-                'P2' => 'married',
-                'Q2' => '4',
-                'R2' => 'ahmed@example.com',
-                'S2' => 'SA0380000000608010167519',
-                'T2' => '0551234567',
-                'U2' => 'android',
-                'V2' => 'shelf_stacker',
-                'W2' => 'password123',
-                'X2' => 'المنطقة الشرقية',
-                'Y2' => '2024-01-15',
-                'Z2' => 'L',
-                'AA2' => '32',
-                'AB2' => '42',
-                'AC2' => '1',
-                'AD2' => $exampleProject,
-                'AE2' => $exampleSupervisor,
-                'AF2' => $exampleAreaManager,
-                'AG2' => '5000',
-                'AH2' => 'intermediate'
+                'H2' => 'ذكر',
+                'I2' => 'الرياض',
+                'J2' => 'الملز',
+                'K2' => 'سيارة',
+                'L2' => '2020',
+                'M2' => 'أ ب ج 1234',
+                'N2' => 'بكالوريوس',
+                'O2' => 'متزوج',
+                'P2' => '4',
+                'Q2' => 'ahmed@example.com',
+                'R2' => 'SA0380000000608010167519',
+                'S2' => '0551234567',
+                'T2' => 'أندرويد',
+                'U2' => 'مصفف أرفف',
+                'V2' => 'password123',
+                'W2' => 'المنطقة الشرقية',
+                'X2' => '2024-01-15',
+                'Y2' => 'L',
+                'Z2' => '32',
+                'AA2' => '42',
+                'AB2' => 'نعم',
+                'AC2' => $exampleProject,
+                'AD2' => $exampleSupervisor,
+                'AE2' => $exampleAreaManager,
+                'AF2' => '5000',
+                'AG2' => 'متوسط'
             ],
             [
                 'A3' => 'فاطمة أحمد',
@@ -130,33 +129,32 @@ class EmployeeTemplateController extends Controller
                 'E3' => '2345678901',
                 'F3' => 'سعودية',
                 'G3' => '1992-03-10',
-                'H3' => '32',
-                'I3' => 'أنثى',
-                'J3' => 'جدة',
-                'K3' => 'الصفا',
+                'H3' => 'أنثى',
+                'I3' => 'جدة',
+                'J3' => 'الصفا',
+                'K3' => '-',
                 'L3' => '-',
                 'M3' => '-',
-                'N3' => '-',
-                'O3' => 'ماجستير',
-                'P3' => 'أعزب',
-                'Q3' => '1',
-                'R3' => 'fatima@example.com',
-                'S3' => 'SA0380000000608010167520',
-                'T3' => '0552345678',
-                'U3' => 'iphone',
-                'V3' => 'supervisor',
-                'W3' => 'password123',
-                'X3' => 'المنطقة الغربية',
-                'Y3' => '2024-02-01',
-                'Z3' => 'M',
-                'AA3' => '30',
-                'AB3' => '38',
-                'AC3' => '0',
-                'AD3' => !empty($projects[1] ?? null) ? $projects[1] : $exampleProject,
-                'AE3' => !empty($supervisors[1] ?? null) ? $supervisors[1] : $exampleSupervisor,
-                'AF3' => !empty($areaManagers[1] ?? null) ? $areaManagers[1] : $exampleAreaManager,
-                'AG3' => '6000',
-                'AH3' => 'متقدم'
+                'N3' => 'ماجستير',
+                'O3' => 'أعزب',
+                'P3' => '1',
+                'Q3' => 'fatima@example.com',
+                'R3' => 'SA0380000000608010167520',
+                'S3' => '0552345678',
+                'T3' => 'ايفون',
+                'U3' => 'مشرف',
+                'V3' => 'password123',
+                'W3' => 'المنطقة الغربية',
+                'X3' => '2024-02-01',
+                'Y3' => 'M',
+                'Z3' => '30',
+                'AA3' => '38',
+                'AB3' => 'لا',
+                'AC3' => !empty($projects[1] ?? null) ? $projects[1] : $exampleProject,
+                'AD3' => !empty($supervisors[1] ?? null) ? $supervisors[1] : $exampleSupervisor,
+                'AE3' => !empty($areaManagers[1] ?? null) ? $areaManagers[1] : $exampleAreaManager,
+                'AF3' => '6000',
+                'AG3' => 'متقدم'
             ]
         ];
 
@@ -206,10 +204,12 @@ class EmployeeTemplateController extends Controller
             $validation->setFormula1('"' . implode(',', $options) . '"');
         }
     }
+
     public function showTemplatePage()
     {
         return view('livewire.employee-template-download');
     }
+
     public function import(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -348,9 +348,12 @@ class EmployeeTemplateController extends Controller
             'birthday_type' => gettype($csvData['تاريخ الميلاد'] ?? 'null'),
             'joining_date_type' => gettype($csvData['تاريخ الإنضمام'] ?? 'null'),
         ]);
+
         // Handle date formats properly
         $birthday = $this->parseDate($csvData['تاريخ الميلاد'] ?? '');
         $joiningDate = $this->parseDate($csvData['تاريخ الإنضمام'] ?? '');
+
+        // Calculate age from birthday (no validation needed)
         $age = $birthday ? $birthday->age : 0;
 
         if (!$birthday) {
@@ -367,6 +370,22 @@ class EmployeeTemplateController extends Controller
             $vehicleModel = 'غير محدد';
         } else {
             $vehicleModel = (string)$vehicleModel;
+        }
+
+        // Handle vehicle ID - treat "-", empty, or null as 'غير محدد'
+        $vehicleID = $csvData['رقم لوحة المركبة'] ?? '';
+        if ($vehicleID === null || $vehicleID === '' || $vehicleID === '-') {
+            $vehicleID = 'غير محدد';
+        } else {
+            $vehicleID = (string)$vehicleID;
+        }
+
+        // Handle vehicle type - treat "-", empty, or null as 'غير محدد'
+        $vehicleType = $csvData['نوع المركبة'] ?? '';
+        if ($vehicleType === null || $vehicleType === '' || $vehicleType === '-') {
+            $vehicleType = 'غير محدد';
+        } else {
+            $vehicleType = (string)$vehicleType;
         }
 
         // Handle IBAN - clean it properly
@@ -424,11 +443,11 @@ class EmployeeTemplateController extends Controller
             'joining_date' => $joiningDate ? $joiningDate->format('Y-m-d') : '2000-01-01',
             'birthday' => $birthday ? $birthday->format('Y-m-d') : '2000-01-01',
             'bank_name' => $csvData['اسم البنك'] ?? '',
-            'age' => $age,
+            'age' => $age, // This is now automatically calculated from birthday only
             'owner_account_name' => $csvData['اسم صاحب الحساب'] ?? '',
             'iban' => $iban,
-            'vehicle_ID' => $csvData['رقم لوحة المركبة'] ?? 'غير محدد',
-            'vehicle_type' => $csvData['نوع المركبة'] ?? 'غير محدد',
+            'vehicle_ID' => $vehicleID, // Use the cleaned vehicle ID
+            'vehicle_type' => $vehicleType, // Use the cleaned vehicle type
             'vehicle_model' => $vehicleModel,
             'residence' => $csvData['مقر الإقامة'] ?? '',
             'residence_neighborhood' => $csvData['الحي السكني'] ?? '',
@@ -456,7 +475,6 @@ class EmployeeTemplateController extends Controller
             'area_manager' => $csvData['مدير المنطقة'] ?? null,
         ];
     }
-
     private function cleanNumericField($value, $isFloat = false)
     {
         if ($value === null || $value === '' || $value === '-') {
@@ -516,6 +534,7 @@ class EmployeeTemplateController extends Controller
             return null;
         }
     }
+
     private function extractHealthCardValue($value)
     {
         if ($value === '1' || $value === 1 || $value === 'نعم' || $value === 'yes' || $value === 'true') {
@@ -550,7 +569,6 @@ class EmployeeTemplateController extends Controller
             'joining_date' => 'required|date',
             'birthday' => 'required|date',
             'bank_name' => 'required|string|max:255',
-            'age' => 'required|integer|min:10|max:100',
             'owner_account_name' => 'required|string|max:255',
             'iban' => [
                 'required',
@@ -563,6 +581,10 @@ class EmployeeTemplateController extends Controller
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
+                    if ($value === 'غير محدد') {
+                        return;
+                    }
+
                     $exists = Employee::where('vehicle_info->vehicle_ID', $value)->exists();
                     if ($exists) {
                         $fail('رقم اللوحة مستخدم مسبقاً');
@@ -656,9 +678,6 @@ class EmployeeTemplateController extends Controller
             'birthday.required' => 'حقل تاريخ الميلاد مطلوب',
             'birthday.date' => 'صيغة تاريخ الميلاد غير صحيحة',
             'bank_name.required' => 'حقل اسم البنك مطلوب',
-            'age.required' => 'حقل العمر مطلوب',
-            'age.min' => 'العمر يجب أن يكون 10 سنوات على الأقل',
-            'age.max' => 'العمر يجب أن يكون 100 سنة على الأكثر',
             'owner_account_name.required' => 'حقل اسم صاحب الحساب مطلوب',
             'iban.required' => 'حقل رقم الآيبان مطلوب',
             'iban.digits' => 'رقم الآيبان يجب أن يكون 22 رقماً',
@@ -690,6 +709,7 @@ class EmployeeTemplateController extends Controller
             'members_number.integer' => 'عدد أفراد الأسرة يجب أن يكون رقماً صحيحاً',
             'members_number.min' => 'عدد أفراد الأسرة لا يمكن أن يكون أقل من 0',
             'members_number.max' => 'عدد أفراد الأسرة لا يمكن أن يتجاوز 20',
+
         ];
 
         return Validator::make($data, $rules, $messages);
@@ -736,6 +756,7 @@ class EmployeeTemplateController extends Controller
                 'Shoes_size' => $data['Shoes_size'],
             ],
         ]);
+
         $projectId = $this->getProjectIdByName($data['project_name'] ?? $data['project']);
         $supervisorId = $this->getSupervisorIdByName($data['supervisor_name'] ?? $data['supervisor']);
         $areaManagerId = $this->getAreaManagerIdByName($data['area_manager_name'] ?? $data['area_manager']);
@@ -746,6 +767,7 @@ class EmployeeTemplateController extends Controller
                 $managerId = $project->manager_id;
             }
         }
+
         $employee = Employee::create([
             'user_id' => $user->id,
             'name' => $data['name'],
@@ -771,6 +793,7 @@ class EmployeeTemplateController extends Controller
             'area_manager_id' => $areaManagerId,
             'manager_id' => $managerId,
         ]);
+
         EmployeeWorkHistory::create([
             'employee_id' => $employee->id,
             'start_date' => $employee->joining_date,
@@ -778,12 +801,12 @@ class EmployeeTemplateController extends Controller
             'status' => 'active',
         ]);
 
-
         // Add to credentials CSV
         $this->addToCredentialsCSV($data);
 
         return $employee;
     }
+
     private function getSupervisorIdByName($supervisorName)
     {
         if (empty($supervisorName)) {
@@ -791,7 +814,6 @@ class EmployeeTemplateController extends Controller
         }
 
         try {
-            // Assuming supervisors are also in the User table with role 'supervisor'
             $supervisor = \App\Models\User::where('name', $supervisorName)
                 ->where('role', 'supervisor')
                 ->first();
@@ -811,7 +833,6 @@ class EmployeeTemplateController extends Controller
         }
 
         try {
-            // Assuming area managers are in the User table with role 'area_manager'
             $areaManager = \App\Models\User::where('name', $areaManagerName)
                 ->where('role', 'area_manager')
                 ->first();
@@ -822,6 +843,7 @@ class EmployeeTemplateController extends Controller
             return null;
         }
     }
+
     private function getProjectIdByName($projectName)
     {
         if (empty($projectName)) {
@@ -829,19 +851,12 @@ class EmployeeTemplateController extends Controller
         }
 
         try {
-            // Assuming you have a Project model
             $project = \App\Models\Project::where('name', $projectName)->first();
 
             if ($project) {
                 return $project->id;
             }
 
-            // If project not found, you can either:
-            // Option 1: Create a new project automatically
-            // $newProject = \App\Models\Project::create(['name' => $projectName]);
-            // return $newProject->id;
-
-            // Option 2: Log warning and return null (safer)
             Log::warning("Project not found: {$projectName}");
             return null;
 
@@ -850,13 +865,13 @@ class EmployeeTemplateController extends Controller
             return null;
         }
     }
+
     private function getValidForeignKey($value)
     {
         if (empty($value) || $value === null || $value === '') {
             return null;
         }
 
-        // Convert to integer and ensure it's positive
         $id = (int)$value;
 
         if ($id <= 0) {
@@ -865,6 +880,7 @@ class EmployeeTemplateController extends Controller
 
         return $id;
     }
+
     private function addToCredentialsCSV($data)
     {
         $credentials = [
@@ -882,7 +898,7 @@ class EmployeeTemplateController extends Controller
         Storage::append($csvPath, implode(',', $credentials) . "\n");
     }
 
-    // Mapping helper methods (keep these as they are correct)
+    // Mapping helper methods
     private function mapGender($gender)
     {
         $genderMap = [
@@ -897,6 +913,7 @@ class EmployeeTemplateController extends Controller
         $cleanValue = trim(strtolower($gender));
         return $genderMap[$cleanValue] ?? 'male';
     }
+
     private function mapHealthStatus($healthStatus)
     {
         $healthStatusMap = [
@@ -904,7 +921,6 @@ class EmployeeTemplateController extends Controller
             'نعم' => '1',
             '0' => '0',
             'لا' => '0',
-
         ];
 
         $cleanValue = trim(strtolower($healthStatus));
@@ -997,4 +1013,3 @@ class EmployeeTemplateController extends Controller
         return $statusMap[$cleanValue] ?? 'single';
     }
 }
-
