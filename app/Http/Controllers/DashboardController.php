@@ -260,7 +260,7 @@ class DashboardController extends Controller
         $path = $request->file('personal_image')->store('employees/images', 'public');
 
         $user->personal_image = $path;
-        dd($user->personla_image);
+        dd($user->personal_image);
         $user->save();
 
         return back()->with('success', 'تم تغيير الصورة الشخصية بنجاح.');
