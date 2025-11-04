@@ -84,12 +84,32 @@ class User extends Authenticatable
     }
     public function getPersonalImageAttribute()
     {
-        if (!empty($this->attributes['personal_image'])) {
-            return Storage::disk('s3')->temporaryUrl($this->attributes['personal_image'], Carbon::now()->addMinutes(5) );
+        $path = $this->attributes['personal_image'] ?? null;
+
+        if (!$path) {
+            return asset('images/default-avatar.png');
         }
-//test
-        $name = $this->attributes['name'] ?? 'User';
-        return 'https://avatar.oxro.io/avatar.svg?name=' . urlencode($name) . '&background=random';
+
+        // If already a full URL, just return it
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        try {
+            // Check LOCAL storage FIRST
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::url($path);
+            }
+
+            // Then check S3 as fallback
+            if (Storage::disk('s3')->exists($path)) {
+                return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error accessing storage for image: ' . $e->getMessage());
+        }
+
+        return asset('images/default-avatar.png');
     }
     public function getGender()
     {
