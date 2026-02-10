@@ -46,7 +46,46 @@ class AdvancePaymentController extends Controller
             $query->orderBy('payment_number');
         }, 'employee']);
 
-        return view('advances.payments.show', compact('advance'));
+        $payments = $advance->payments;
+
+        return view('advances.payments.show', compact('advance', 'payments'));
+    }
+
+    public function allPayments(Request $request)
+    {
+        $query = AdvancePayment::with(['advance', 'employee.user'])->latest('scheduled_date');
+
+        if (Auth::user()->role === 'project_manager') {
+            $managedProjectIds = Auth::user()->employee->managedProjects->pluck('id');
+            $query->whereHas('employee', function ($q) use ($managedProjectIds) {
+                $q->whereIn('project_id', $managedProjectIds);
+            });
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $payments = $query->get();
+
+        return view('advances.payments.index', compact('payments'));
+    }
+
+    public function employeePayments(Employee $employee)
+    {
+        if (Auth::user()->role === 'project_manager') {
+            $managedProjectIds = Auth::user()->employee->managedProjects->pluck('id');
+            if (!$managedProjectIds->contains($employee->project_id)) {
+                abort(403, 'Unauthorized access');
+            }
+        }
+
+        $payments = AdvancePayment::with(['advance'])
+            ->where('employee_id', $employee->id)
+            ->orderBy('scheduled_date')
+            ->get();
+
+        return view('advances.payments.index', compact('payments', 'employee'));
     }
 
     public function postpone(Request $request, AdvancePayment $payment)

@@ -238,14 +238,14 @@
                         </svg>
                         <span>جميع السلف</span>
                     </a>
-                    <a href="{{ route('employees.advances_deductions', $employee->id) }}"
+                    <a href="{{ route('advances.payments.employee', $employee->id) }}"
                        class="bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all text-gray-800 border border-blue-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v8m0 0H6m6 0h6M4 6h16M4 6v12a2 2 0 002 2h12a2 2 0 002-2V6M4 6l8 6 8-6" />
+                                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <span>خصومات السلف</span>
+                        <span>دفعات السلف</span>
                     </a>
                     <span class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-sm font-medium text-gray-800 transition-all">
                         {{ number_format($employee->advances->where('status', 'approved')->sum('amount')) }} ر.س إجمالي السلف
