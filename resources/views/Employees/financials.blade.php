@@ -444,25 +444,42 @@
                                             <td>
                                                 <div class="bank-details">
                                                     @php
-                                                        $bankFileBase = 'build/assets/img/' . strtolower(str_replace(' ', '-', $employee['bank_details']['bank_name']));
-                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+                                                        $bankName = $employee['bank_details']['bank_name'] ?? '';
+                                                        echo "<!-- Debug: Bank Name: $bankName -->";
 
+                                                        $fileName = strtolower(str_replace(' ', '-', $bankName));
+                                                        $bankFileBase = 'build/assets/img/' . $fileName;
+
+                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
                                                         $bankLogo = null;
+                                                        $foundFile = null;
+
                                                         foreach ($extensions as $ext) {
-                                                            if (file_exists(public_path($bankFileBase . '.' . $ext))) {
-                                                                $bankLogo = asset($bankFileBase . '.' . $ext);
+                                                            $fullPath = public_path($bankFileBase . '.' . $ext);
+                                                            $relativePath = $bankFileBase . '.' . $ext;
+                                                            echo "<!-- Debug: Checking: $relativePath -->";
+
+                                                            if (file_exists($fullPath)) {
+                                                                echo "<!-- Debug: Found: $relativePath -->";
+                                                                $bankLogo = asset($relativePath);
+                                                                $foundFile = $relativePath;
                                                                 break;
                                                             }
                                                         }
                                                     @endphp
 
-                                                    @if ($employee['bank_details']['bank_name'] && $bankLogo)
+                                                    @if ($bankName && $bankLogo)
                                                         <img src="{{ $bankLogo }}"
-                                                             alt="{{ $employee['bank_details']['bank_name'] }}"
-                                                             class="h-12 w-12">
-                                                        <span>{{ $employee['bank_details']['bank_name'] }}</span>
+                                                             alt="{{ $bankName }}"
+                                                             class="h-12 w-12"
+                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; console.log('Image failed to load: {{ $foundFile }}');">
+                                                        <span>{{ $bankName }}</span>
                                                     @else
-                                                        غير محدد
+                                                        <div style="color: red;">
+                                                            غير محدد
+                                                            <!-- Debug: {{ $bankName ? "Bank name exists: $bankName" : "No bank name" }} -->
+                                                            <!-- Debug: {{ $foundFile ? "File found: $foundFile" : "No file found" }} -->
+                                                        </div>
                                                     @endif
                                                 </div>
                                             </td>
