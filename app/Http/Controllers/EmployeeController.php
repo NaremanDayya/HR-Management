@@ -242,7 +242,7 @@ class EmployeeController extends Controller
                 'filters' => $filters
             ]);
         }
-dd($responseData);
+//dd($responseData);
         return view('Employees.financials', $responseData);
     }
     public function store(StoreEmployeeRequest $request)

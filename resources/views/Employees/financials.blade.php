@@ -225,8 +225,6 @@
             justify-content: center;
         }
 
-
-
         .status-badge {
             display: inline-block;
             padding: 5px 10px;
@@ -276,6 +274,11 @@
             font-size: 48px;
             color: #e5e7eb;
             margin-bottom: 15px;
+        }
+
+        .work-days-cell {
+            color: #3498db;
+            font-weight: 700;
         }
     </style>
 @endpush
@@ -389,11 +392,12 @@
                                     <tr>
                                         <th><i class="fas fa-id-card-alt me-1 text-primary"></i> ID</th>
                                         <th><i class="fas fa-user-tie me-1 text-info"></i> اسم الموظف</th>
-                                        <th><i class="fas fa-project-tie me-1 text-info"></i> المشروع </th>
+                                        <th><i class="fas fa-project-diagram me-1 text-info"></i> المشروع</th>
                                         <th><i class="fas fa-coins me-1 text-warning"></i> الراتب الأساسي</th>
                                         <th><i class="fas fa-plus-circle me-1 text-success"></i> المكافآت</th>
                                         <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
                                         <th><i class="fas fa-hand-holding-usd me-1 text-danger"></i> خصومات السلف</th>
+                                        <th><i class="fas fa-calendar-check me-1 text-primary"></i> أيام العمل</th>
                                         <th><i class="fas fa-calendar-times me-1 text-warning"></i> أيام الغياب</th>
                                         <th><i class="fas fa-money-bill-wave me-1 text-success"></i> صافي الراتب</th>
                                         <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
@@ -422,15 +426,18 @@
                                             <td class="text-danger">
                                                 {{ number_format($employee['advance_deductions']) }} ر.س
                                             </td>
-                                            <td class="text-black font-weight-bold">
+                                            <td class="work-days-cell font-weight-bold">
+                                                {{ $employee['work_days'] ?? 26 }} يوم
+                                            </td>
+                                            <td class="text-warning font-weight-bold">
                                                 {{ $employee['absence_days'] ?? 0 }} يوم
                                             </td>
                                             <td class="text-success font-weight-bold">
                                                 {{ number_format($employee['net_salary']) }} ر.س
                                             </td>
                                             <td class="text-success font-weight-bold">
-                                            {{ ($employee['bank_details']['iban']) }}
-
+                                                {{ ($employee['bank_details']['iban']) }}
+                                            </td>
                                             <td class="text-success font-weight-bold">
                                                 {{ ($employee['bank_details']['owner_account_name']) }}
                                             </td>
@@ -465,6 +472,7 @@
                             '{{ $employee['id'] }}',
                             '{{ $employee['name'] }}',
                             '{{ $employee['base_salary'] }}',
+                            '{{ $employee['work_days'] ?? 26 }}',
                             this.parentNode.parentNode
                         )"
                                                     class="action-btn view-btn">
@@ -486,16 +494,16 @@
                             @endif
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Salary Adjustment Modal -->
     <div id="salaryAdjustmentModal">
         <div class="modal-content">
             <button onclick="closeSalaryModal()" class="absolute left-4 top-4 text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
@@ -514,26 +522,29 @@
 
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">خصومات الشهر الحالي</label>
-                <input id="currentDeductions" class="w-full border border-gray-300 rounded-md px-3 py-2"
-                       oninput="validateNumberInput(this)" />
+                <input id="currentDeductions" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateNumberInput(this)" />
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">خصومات السلف</label>
-                <input id="advanceDeductions" class="w-full border border-gray-300 rounded-md px-3 py-2"
-                       oninput="validateNumberInput(this)" />
+                <input id="advanceDeductions" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateNumberInput(this)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm text-gray-700 mb-1">أيام العمل</label>
+                <input id="workDays" type="number" min="1" max="31" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateWorkDays(this)" />
+                <small class="text-gray-500 text-xs">عدد أيام العمل الشهرية (الافتراضي: 26)</small>
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">عدد أيام الغياب</label>
-                <input id="absenceDays" type="number" min="0" max="26" step="1"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateAbsenceDays(this)" />
+                <input id="absenceDays" type="number" min="0" max="31" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateAbsenceDays(this)" />
+                <small class="text-gray-500 text-xs">يجب أن يكون أقل من أو يساوي أيام العمل</small>
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">صافي الراتب</label>
-                <input id="adjustedSalary"
-                       class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 font-bold" readonly />
+                <input id="adjustedSalary" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 font-bold" readonly />
             </div>
 
             <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
@@ -552,7 +563,6 @@
             </div>
         </div>
     </div>
-    {{--    test--}}
 @endsection
 
 @push('scripts')
@@ -611,6 +621,7 @@
                         tableBody.innerHTML = originalContent;
                     });
             }
+
             function updateTableAndSummary(data) {
                 // Update summary cards
                 document.getElementById('totalSalariesCard').textContent =
@@ -628,7 +639,7 @@
                 if (data.employees.length === 0) {
                     tableBody.innerHTML = `
                 <tr>
-                    <td colspan="13" class="text-center py-4">
+                    <td colspan="14" class="text-center py-4">
                         <div class="empty-state">
                             <div class="empty-icon">
                                 <i class="fas fa-file-invoice-dollar"></i>
@@ -661,7 +672,10 @@
                     <td class="text-danger">
                         ${numberFormat(employee.advance_deductions)} ر.س
                     </td>
-                    <td class="text-black font-weight-bold">
+                    <td class="work-days-cell font-weight-bold">
+                        ${employee.work_days || 26} يوم
+                    </td>
+                    <td class="text-warning font-weight-bold">
                         ${employee.absence_days || 0} يوم
                     </td>
                     <td class="text-success font-weight-bold">
@@ -683,6 +697,7 @@
                             '${employee.id}',
                             '${employee.name}',
                             '${employee.base_salary}',
+                            '${employee.work_days || 26}',
                             this.parentNode.parentNode
                         )" class="action-btn view-btn">
                             <i class="fas fa-edit"></i> تعديل
@@ -694,21 +709,17 @@
 
                 tableBody.innerHTML = tableHTML;
             }
+
             // Helper function to get bank logo HTML
             function getBankLogoHTML(bankName) {
                 if (!bankName) return 'غير محدد';
 
                 const bankFileBase = 'build/assets/img/' + bankName.toLowerCase().replace(/ /g, '-');
                 const extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-
-                // Create base URL for assets
                 const baseUrl = '{{ asset("") }}';
 
                 for (let ext of extensions) {
                     const logoPath = baseUrl + bankFileBase + '.' + ext;
-
-                    // In a real implementation, you might want to check if the image exists
-                    // For now, we'll return the first possible path
                     return `
             <img src="${logoPath}"
                  alt="${bankName}"
@@ -739,6 +750,7 @@
             });
         });
 
+        // Excel Export Function
         document.getElementById('excelExportBtn').addEventListener('click', function() {
             const table = document.querySelector('.financial-table');
             const rows = table.querySelectorAll('tr');
@@ -758,8 +770,8 @@
                 const cells = rows[i].querySelectorAll('td');
 
                 for (let j = 0; j < colsToExport; j++) {
-                    // Handle bank logo cell - extract bank name (Cell 10)
-                    if (j === 10) {
+                    // Handle bank logo cell - extract bank name (Cell 12)
+                    if (j === 12) {
                         const bankDetails = cells[j].querySelector('.bank-details');
                         if (bankDetails) {
                             const bankNameSpan = bankDetails.querySelector('span');
@@ -781,29 +793,30 @@
             const wscols = [
                 { width: 10 },  // 0: ID
                 { width: 25 },  // 1: Name
-                { width: 15 },  // 2: Base Salary
-                { width: 15 },  // 3: Increases
-                { width: 15 },  // 4: Current Deductions
-                { width: 15 },  // 5: Advance Deductions
-                { width: 12 },  // 6: Absence Days
-                { width: 15 },  // 7: Net Salary
-                { width: 25 },  // 8: IBAN
-                { width: 20 },  // 9: Owner Name
-                { width: 20 }   // 10: Bank
+                { width: 20 },  // 2: Project
+                { width: 15 },  // 3: Base Salary
+                { width: 15 },  // 4: Increases
+                { width: 15 },  // 5: Current Deductions
+                { width: 15 },  // 6: Advance Deductions
+                { width: 12 },  // 7: Work Days
+                { width: 12 },  // 8: Absence Days
+                { width: 15 },  // 9: Net Salary
+                { width: 25 },  // 10: IBAN
+                { width: 20 },  // 11: Owner Name
+                { width: 20 }   // 12: Bank
             ];
             ws['!cols'] = wscols;
 
             XLSX.utils.book_append_sheet(wb, ws, "البيانات المالية");
-
             XLSX.writeFile(wb, 'البيانات_المالية_للموظفين_' + new Date().toISOString().slice(0, 10) + '.xlsx');
         });
 
+        // PDF Export Function
         document.getElementById('pdfExportBtn').addEventListener('click', function() {
             const originalTable = document.querySelector('.financial-table');
-
             const tableClone = originalTable.cloneNode(true);
-
             const rows = tableClone.querySelectorAll('tr');
+
             rows.forEach(row => {
                 const cells = row.querySelectorAll('th, td');
                 if (cells.length > 0) {
@@ -899,7 +912,6 @@
 
             const copyright = document.createElement('p');
             copyright.textContent = `© ${new Date().getFullYear()} جميع الحقوق محفوظة`;
-
             footer.appendChild(copyright);
             pdfContainer.appendChild(footer);
 
@@ -950,83 +962,40 @@
                     pdfBtn.disabled = false;
                 });
         });
-        document.addEventListener('DOMContentLoaded', function() {
-            originalTotalSalaries = parseFloat(document.getElementById('totalSalariesCard').textContent.replace(
-                /[^\d.]/g, '')) || 0;
-            originalTotalDeductions = parseFloat(document.getElementById('totalDeductionsCard').textContent.replace(
-                /[^\d.]/g, '')) || 0;
-            originalTotalNetSalaries = parseFloat(document.getElementById('totalNetSalariesCard').textContent
-                .replace(/[^\d.]/g, '')) || 0;
-        });
-    </script>
-    <script>
+
+        // Salary Adjustment Modal Functions
         let currentEmployeeRow = null;
         let originalSalary = 0;
         let currentEmployeeId = null;
-        let originalTotalSalaries = parseFloat({{ $totalSalaries }});
-        let originalTotalDeductions = parseFloat({{ $totalDeductions }});
-        let originalTotalNetSalaries = parseFloat({{ $totalNetSalaries }});
 
-        function openSalaryModal(employeeId, employeeName, baseSalary, rowElement) {
+        function openSalaryModal(employeeId, employeeName, baseSalary, workDays, rowElement) {
             currentEmployeeRow = rowElement;
             currentEmployeeId = employeeId;
             originalSalary = parseFloat(baseSalary);
 
-            // CORRECTED COLUMN INDICES based on debug output:
-            // Cell 0: ID
-            // Cell 1: Name
-            // Cell 2: Base Salary
-            // Cell 3: Increases
-            // Cell 4: Current Deductions
-            // Cell 5: Advance Deductions
-            // Cell 6: Absence Days
-            // Cell 7: Net Salary
-            // Cell 8: IBAN
-            // Cell 9: Owner Name
-            // Cell 10: Bank
-            // Cell 11: Actions
-
-            const currentDeductions = parseFloat(rowElement.cells[4].textContent.replace(/[^\d.]/g, '')) || 0;
-            const advanceDeductions = parseFloat(rowElement.cells[5].textContent.replace(/[^\d.]/g, '')) || 0;
-            const absenceDays = parseInt(rowElement.cells[6].textContent.replace(/[^\d]/g, '')) || 0;
-            const netSalary = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0;
+            // Get current values from the table row - UPDATED CELL INDICES
+            const currentDeductions = parseFloat(rowElement.cells[5].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 5: Current Deductions
+            const advanceDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6: Advance Deductions
+            const workDaysValue = parseInt(rowElement.cells[7].textContent.replace(/[^\d]/g, '')) || 26; // Cell 7: Work Days
+            const absenceDays = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || 0; // Cell 8: Absence Days
+            const netSalary = parseFloat(rowElement.cells[9].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 9: Net Salary
 
             // Set values in the modal
             document.getElementById('employeeName').value = employeeName;
             document.getElementById('currentSalary').value = numberFormat(originalSalary) + ' ر.س';
             document.getElementById('currentDeductions').value = numberFormat(currentDeductions);
             document.getElementById('advanceDeductions').value = numberFormat(advanceDeductions);
+            document.getElementById('workDays').value = workDaysValue;
             document.getElementById('absenceDays').value = absenceDays;
             document.getElementById('adjustedSalary').value = numberFormat(netSalary) + ' ر.س';
 
-            // Hide save button initially
             document.getElementById('saveSalaryBtn').classList.add('hidden');
-
-            // Show modal
             document.getElementById('salaryAdjustmentModal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
 
-
-        function debugColumnIndices(rowElement) {
-            console.log('=== DEBUG COLUMN INDICES ===');
-            const cells = rowElement.cells;
-            for (let i = 0; i < cells.length; i++) {
-                console.log(`Cell ${i}:`, cells[i].textContent.trim());
-            }
-            console.log('=== END DEBUG ===');
-        }
-
-
-        function closeSalaryModal() {
-            document.getElementById('salaryAdjustmentModal').classList.remove('show');
-            document.body.style.overflow = 'auto'; // Re-enable scrolling
-            currentEmployeeRow = null;
-            currentEmployeeId = null;
-            originalSalary = 0;
-        }
-
         function calculateAdjustedSalary() {
+            const workDays = parseInt(document.getElementById('workDays').value) || 26;
             const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
             const currentDeductions = parseFloat(
                 document.getElementById('currentDeductions').value.replace(/[^0-9.]/g, '')
@@ -1035,61 +1004,42 @@
                 document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
             ) || 0;
 
-            // Get the current month increases from the table row (cell index 3)
-            const currentIncreasesText = currentEmployeeRow.cells[3].textContent;
+            // Validate work days and absence days
+            if (workDays < 1 || workDays > 31) {
+                alert('أيام العمل يجب أن تكون بين 1 و 31 يوم');
+                return;
+            }
+
+            if (absenceDays < 0) {
+                alert('أيام الغياب لا يمكن أن تكون سالبة');
+                return;
+            }
+
+            if (absenceDays > workDays) {
+                alert('أيام الغياب لا يمكن أن تكون أكثر من أيام العمل');
+                return;
+            }
+
+            // Get the current month increases from the table row (cell index 4)
+            const currentIncreasesText = currentEmployeeRow.cells[4].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
-            if (isNaN(absenceDays)) {
-                alert('الرجاء إدخال عدد أيام غياب صحيح');
-                return;
-            }
-
-            if (absenceDays < 0 || absenceDays > 26) {
-                alert('عدد أيام الغياب يجب أن يكون بين 0 و 26');
-                return;
-            }
-
-            // Calculate daily rate based on base salary + increases
-            const dailyRate = (originalSalary + currentIncreases) / 26;
+            // Calculate daily rate based on work days
+            const dailyRate = originalSalary / workDays;
             const absenceDeduction = absenceDays * dailyRate;
-
-            // Calculate net salary: base + increases - all deductions
-            const netSalary = (originalSalary + currentIncreases) - currentDeductions - advanceDeductions - absenceDeduction;
-
-            // Ensure net salary doesn't go negative
+            const totalEarnings = originalSalary + currentIncreases;
+            const totalDeductions = currentDeductions + advanceDeductions + absenceDeduction;
+            const netSalary = totalEarnings - totalDeductions;
             const finalNetSalary = Math.max(0, netSalary);
 
             document.getElementById('adjustedSalary').value = numberFormat(finalNetSalary) + ' ر.س';
             document.getElementById('saveSalaryBtn').classList.remove('hidden');
         }
 
-        function updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff) {
-            const totalDeductionsDiff = currentDeductionsDiff + advanceDeductionsDiff + absenceDeductionDiff;
-
-            const totalDeductionsElement = document.getElementById('totalDeductionsCard');
-            const totalNetSalariesElement = document.getElementById('totalNetSalariesCard');
-
-            let currentTotalDeductions = parseFloat(totalDeductionsElement.textContent.replace(/[^\d.]/g, '')) || 0;
-            let currentTotalNetSalaries = parseFloat(totalNetSalariesElement.textContent.replace(/[^\d.]/g, '')) || 0;
-
-            const newTotalDeductions = Math.max(0, currentTotalDeductions + totalDeductionsDiff);
-            const newTotalNetSalaries = Math.max(0, currentTotalNetSalaries - totalDeductionsDiff);
-
-            totalDeductionsElement.textContent = numberFormat(newTotalDeductions) + ' ر.س';
-            totalNetSalariesElement.textContent = numberFormat(newTotalNetSalaries) + ' ر.س';
-
-            totalDeductionsElement.classList.add('value-updated');
-            totalNetSalariesElement.classList.add('value-updated');
-
-            setTimeout(() => {
-                totalDeductionsElement.classList.remove('value-updated');
-                totalNetSalariesElement.classList.remove('value-updated');
-            }, 1000);
-        }
-
         function saveAdjustedSalary() {
             if (!currentEmployeeRow) return;
 
+            const workDays = parseInt(document.getElementById('workDays').value) || 26;
             const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
             const currentDeductions = parseFloat(
                 document.getElementById('currentDeductions').value.replace(/[^0-9.]/g, '')
@@ -1098,50 +1048,80 @@
                 document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
             ) || 0;
 
-            // Get previous values from the table row
-            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[3].textContent.replace(/[^\d.]/g, '')) || 0;
-            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[4].textContent.replace(/[^\d.]/g, '')) || 0;
-            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[5].textContent.replace(/[^\d]/g, '')) || 0;
+            // Get previous values from the table row - UPDATED CELL INDICES
+            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[5].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 5
+            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6
+            const prevWorkDays = parseInt(currentEmployeeRow.cells[7].textContent.replace(/[^\d]/g, '')) || 26; // Cell 7
+            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[8].textContent.replace(/[^\d]/g, '')) || 0; // Cell 8
 
-            // Get current increases value
-            const currentIncreasesText = currentEmployeeRow.cells[3].textContent;
+            // Get current increases value (cell index 4)
+            const currentIncreasesText = currentEmployeeRow.cells[4].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
             // Calculate new values
-            const dailyRate = (originalSalary + currentIncreases) / 26;
+            const dailyRate = originalSalary / workDays;
             const absenceDeduction = absenceDays * dailyRate;
-            const netSalary = Math.max(0, (originalSalary + currentIncreases) - currentDeductions - advanceDeductions - absenceDeduction);
+            const netSalary = Math.max(0, (originalSalary + currentIncreases) - (currentDeductions + advanceDeductions + absenceDeduction));
 
-            // Update table cells - note the adjusted cell indices due to new columns
-            // Cell indices: 0=ID, 1=Name, 2=Base Salary, 3=Increases, 4=Current Deductions, 5=Advance Deductions, 6=Net Salary, 7=IBAN, 8=Owner Name, 9=Bank, 10=Actions
-
-            // Update deductions (cell 4)
-            currentEmployeeRow.cells[4].textContent = numberFormat(currentDeductions) + ' ر.س';
-            currentEmployeeRow.cells[4].className = 'text-danger';
-
-            // Update advance deductions (cell 5)
-            currentEmployeeRow.cells[5].textContent = numberFormat(advanceDeductions) + ' ر.س';
+            // UPDATED CELL INDICES FOR UPDATING:
+            // Update current deductions (cell 5)
+            currentEmployeeRow.cells[5].textContent = numberFormat(currentDeductions) + ' ر.س';
             currentEmployeeRow.cells[5].className = 'text-danger';
 
-            // Update absence days (cell 6)
-            currentEmployeeRow.cells[6].textContent = numberFormat(absenceDays) + ' يوم';
-            currentEmployeeRow.cells[6].className = 'text-warning font-weight-bold absence-days-updated';
+            // Update advance deductions (cell 6)
+            currentEmployeeRow.cells[6].textContent = numberFormat(advanceDeductions) + ' ر.س';
+            currentEmployeeRow.cells[6].className = 'text-danger';
 
-            // Update net salary (cell 6)
-            currentEmployeeRow.cells[7].textContent = numberFormat(netSalary) + ' ر.س';
-            currentEmployeeRow.cells[7].className = 'text-success font-weight-bold salary-updated';
+            // Update work days (cell 7)
+            currentEmployeeRow.cells[7].textContent = workDays + ' يوم';
+            currentEmployeeRow.cells[7].className = 'work-days-cell font-weight-bold';
+
+            // Update absence days (cell 8)
+            currentEmployeeRow.cells[8].textContent = absenceDays + ' يوم';
+            currentEmployeeRow.cells[8].className = 'text-warning font-weight-bold';
+
+            // Update net salary (cell 9)
+            currentEmployeeRow.cells[9].textContent = numberFormat(netSalary) + ' ر.س';
+            currentEmployeeRow.cells[9].className = 'text-success font-weight-bold';
 
             // Show success message
             showToast('تم تحديث الراتب بنجاح', 'success');
-
-            // Update summary cards
-            const currentDeductionsDiff = currentDeductions - prevCurrentDeductions;
-            const advanceDeductionsDiff = advanceDeductions - prevAdvanceDeductions;
-            const absenceDeductionDiff = absenceDeduction - (prevAbsenceDays * ((originalSalary + currentIncreases) / 26));
-
-            updateSummaryCards(currentDeductionsDiff, advanceDeductionsDiff, absenceDeductionDiff);
-
             closeSalaryModal();
+        }
+
+        function validateWorkDays(input) {
+            let value = parseInt(input.value);
+            if (isNaN(value)) {
+                input.value = 26;
+                return;
+            }
+
+            if (value < 1) input.value = 1;
+            if (value > 31) input.value = 31;
+
+            // Ensure absence days don't exceed work days
+            const absenceDaysInput = document.getElementById('absenceDays');
+            const absenceDays = parseInt(absenceDaysInput.value) || 0;
+            if (absenceDays > value) {
+                absenceDaysInput.value = value;
+            }
+        }
+
+        function validateAbsenceDays(input) {
+            let value = parseInt(input.value);
+            if (isNaN(value)) {
+                input.value = 0;
+                return;
+            }
+
+            if (value < 0) input.value = 0;
+
+            // Ensure absence days don't exceed work days
+            const workDaysInput = document.getElementById('workDays');
+            const workDays = parseInt(workDaysInput.value) || 26;
+            if (value > workDays) {
+                input.value = workDays;
+            }
         }
 
         function numberFormat(number) {
@@ -1150,28 +1130,33 @@
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
+            toast.className = `custom-toast alert alert-${type === 'success' ? 'success' : 'danger'}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                min-width: 300px;
+                text-align: center;
+            `;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
+                ${message}
+            `;
             document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         function validateNumberInput(input) {
             input.value = input.value.replace(/[^0-9.]/g, '');
         }
 
-        // Helper function to validate absence days
-        function validateAbsenceDays(input) {
-            let value = parseInt(input.value);
-            if (isNaN(value)) {
-                input.value = '';
-            } else {
-                if (value < 0) input.value = 0;
-                if (value > 26) input.value = 26;
-            }
+        function closeSalaryModal() {
+            document.getElementById('salaryAdjustmentModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            currentEmployeeRow = null;
+            currentEmployeeId = null;
+            originalSalary = 0;
         }
     </script>
 @endpush
