@@ -15,6 +15,12 @@ class RequestType extends Model
     }
     public static function getIdByKey(string $key): int
     {
-        return self::where('key', $key)->value('id');
+        $id = self::where('key', $key)->value('id');
+        
+        if ($id === null) {
+            throw new \Exception("Request type with key '{$key}' not found. Please run: php artisan db:seed --class=RequestTypeSeeder");
+        }
+        
+        return $id;
     }
 }
