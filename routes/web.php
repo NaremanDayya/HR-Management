@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\EmployeeWorkHistoryController;
+use App\Http\Controllers\AdvancePaymentController;
 use App\Services\ImageMessageService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -86,15 +87,28 @@ Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess
         Route::put('/{employee}/change-password', [EmployeeController::class, 'changePassword'])->name('change-password');
         Route::post('/{employee}/update-photo', [EmployeeController::class, 'updatePhoto'])->name('updatePhoto');
     });
-Route::middleware(['auth'])->prefix('/admin/settings/')->name('settings.')->group(function () {
+
+Route::middleware(['auth'])->prefix('advances')->name('advances.')->group(function () {
+    Route::get('/payments', [AdvancePaymentController::class, 'index'])->name('payments.index');
+    Route::get('/{advance}/payments', [AdvancePaymentController::class, 'show'])->name('payments.show');
+    Route::post('/payments/{payment}/postpone', [AdvancePaymentController::class, 'postpone'])->name('payments.postpone');
+    Route::post('/payments/{payment}/mark-paid', [AdvancePaymentController::class, 'markAsPaid'])->name('payments.mark-paid');
+});
+
+Route::middleware(['auth'])->prefix('admin/settings/')->name('settings.')->group(function () {
     Route::post('age-threshold', [SettingController::class, 'updateAgeThreshold'])->name('age_threshold.update');
 });
+
 Route::get('manager/temporary-assignments', [EmployeeController::class, 'temporaryAssignmentsView'])
     ->name('manager.temporary.assignments')->middleware('auth');
 Route::post('/admin/update-photo', [DashboardController::class, 'updatePhoto'])->name('admin.updatePhoto');
 Route::get('/admin/impersonate/stop', [EmployeeController::class, 'stopImpersonate'])
     ->middleware('auth');
 Route::get('/financials', [EmployeeController::class, 'Allfinancials'])->name('financials.all')->middleware('auth');
+Route::get('/financials/export', [EmployeeController::class, 'exportFinancials'])->name('financials.export')->middleware('auth');
+Route::post('/employees/{employee}/terminate', [EmployeeController::class, 'terminateEmployee'])->name('employees.terminate')->middleware('auth');
+Route::get('/employees/{employee}/termination-summary', [EmployeeController::class, 'getTerminationSummary'])->name('employees.termination-summary')->middleware('auth');
+Route::post('/employees/{employee}/update-work-days', [EmployeeController::class, 'updateWorkDays'])->name('employees.update-work-days')->middleware('auth');
 
 Route::middleware([
     'auth',

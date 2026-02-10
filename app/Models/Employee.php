@@ -42,6 +42,11 @@ class Employee extends Model
         'last_working_date',
         'payload',
         'absence_days',
+        'outstanding_advance_debt',
+        'is_terminated',
+        'termination_date',
+        'termination_notes',
+        'work_days',
     ];
     protected $casts = [
         'joining_date' => 'date',
@@ -264,6 +269,11 @@ class Employee extends Model
     public function advanceDeductions()
     {
         return $this->hasMany(AdvanceDeduction::class);
+    }
+
+    public function advancePayments()
+    {
+        return $this->hasMany(AdvancePayment::class);
     }
 
 }

@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Notifications\NewEmployeeNotification;
 use App\Services\EmployeeService;
 use App\Services\EmployeeViewDataService;
+use App\Services\EmployeeTerminationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -147,8 +148,12 @@ class EmployeeController extends Controller
             $advanceDeductions = $employee->advanceDeductions->sum('amount');
             $currentMonthIncreases = $employee->increases->sum('increase_amount');
 
+            $workDays = $employee->work_days ?? 26;
+            $absenceDays = $employee->absence_days ?? 0;
+            $netPayableDays = $workDays - $absenceDays;
+
             $dailyRate = $employee->salary / 26;
-            $absenceDeduction = ($employee->absence_days ?? 0) * $dailyRate;
+            $absenceDeduction = $absenceDays * $dailyRate;
 
             $grossSalary = $employee->salary + $currentMonthIncreases;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
@@ -158,7 +163,9 @@ class EmployeeController extends Controller
                 'name' => $employee->name,
                 'base_salary' => $employee->salary,
                 'project' => $employee?->project?->name,
-                'absence_days' => $employee->absence_days,
+                'work_days' => $workDays,
+                'absence_days' => $absenceDays,
+                'net_payable_days' => $netPayableDays,
                 'absence_deduction' => $absenceDeduction,
                 'current_month_increases' => $currentMonthIncreases,
                 'current_month_deductions' => $currentMonthDeductions,
@@ -170,6 +177,8 @@ class EmployeeController extends Controller
                     'bank_name' => $employee->bank_name,
                 ],
                 'account_status' => $employee->user->account_status,
+                'outstanding_advance_debt' => $employee->outstanding_advance_debt ?? 0,
+                'is_terminated' => $employee->is_terminated ?? false,
             ];
         });
 
@@ -887,4 +896,196 @@ class EmployeeController extends Controller
 
         return redirect('/dashboard');
     }
+
+    public function terminateEmployee(Request $request, Employee $employee, EmployeeTerminationService $terminationService)
+    {
+        $validated = $request->validate([
+            'termination_date' => 'required|date',
+            'work_days' => 'nullable|integer|min:0',
+            'absence_days' => 'nullable|integer|min:0',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $result = $terminationService->terminateEmployee($employee, $validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إنهاء خدمة الموظف بنجاح',
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getTerminationSummary(Employee $employee, EmployeeTerminationService $terminationService)
+    {
+        try {
+            $summary = $terminationService->getTerminationSummary($employee);
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function updateWorkDays(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'work_days' => 'required|integer|min:0|max:31',
+            'absence_days' => 'required|integer|min:0|max:31',
+        ]);
+
+        try {
+            $employee->update([
+                'work_days' => $validated['work_days'],
+                'absence_days' => $validated['absence_days'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث أيام العمل والغياب بنجاح',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function exportFinancials(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+            'account_status',
+            'project',
+            'marital_status',
+            'english_level',
+            'residence',
+            'black_list',
+            'role',
+        ]);
+
+        $user = Auth::user();
+
+        if ($user->role == 'project_manager') {
+            $projectManagerEmployee = $user->employee;
+            if ($projectManagerEmployee) {
+                $managedProjects = $projectManagerEmployee->managedProjects;
+                if ($managedProjects && $managedProjects->isNotEmpty()) {
+                    $managedProjectIds = $managedProjects->pluck('id');
+                    $filters['project_ids'] = $managedProjectIds;
+                }
+            }
+        }
+
+        $employees = $this->employeeService->filterEmployees($filters);
+
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        $employees->load([
+            'deductions' => function ($q) use ($currentMonth, $currentYear) {
+                $q->whereMonth('created_at', $currentMonth)
+                    ->whereYear('created_at', $currentYear);
+            },
+            'advanceDeductions' => function ($q) use ($currentMonth, $currentYear) {
+                $q->whereMonth('deducted_at', $currentMonth)
+                    ->whereYear('deducted_at', $currentYear);
+            },
+            'increases' => function ($q) use ($currentMonth, $currentYear) {
+                $q->where('is_reward', '1')
+                    ->whereMonth('effective_date', $currentMonth)
+                    ->whereYear('effective_date', $currentYear);
+            },
+        ]);
+
+        $csvData = [];
+        $csvData[] = [
+            'رقم الموظف',
+            'اسم الموظف',
+            'المشروع',
+            'الراتب الأساسي',
+            'أيام العمل',
+            'أيام الغياب',
+            'أيام العمل الصافية',
+            'الزيادات',
+            'الخصومات',
+            'خصم السلف',
+            'خصم الغياب',
+            'الراتب الصافي',
+            'رقم الفاتورة',
+            'اسم صاحب الحساب',
+            'IBAN',
+            'اسم البنك',
+        ];
+
+        $invoiceNumber = 'INV-' . now()->format('Ym') . '-';
+        $counter = 1;
+
+        foreach ($employees as $employee) {
+            $currentMonthDeductions = $employee->deductions->sum('value');
+            $advanceDeductions = $employee->advanceDeductions->sum('amount');
+            $currentMonthIncreases = $employee->increases->sum('increase_amount');
+
+            $workDays = $employee->work_days ?? 26;
+            $absenceDays = $employee->absence_days ?? 0;
+            $netPayableDays = $workDays - $absenceDays;
+
+            $dailyRate = $employee->salary / 26;
+            $absenceDeduction = $absenceDays * $dailyRate;
+
+            $grossSalary = $employee->salary + $currentMonthIncreases;
+            $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
+
+            $csvData[] = [
+                $employee->id,
+                $employee->name,
+                $employee->project?->name ?? 'غير محدد',
+                number_format($employee->salary, 2),
+                $workDays,
+                $absenceDays,
+                $netPayableDays,
+                number_format($currentMonthIncreases, 2),
+                number_format($currentMonthDeductions, 2),
+                number_format($advanceDeductions, 2),
+                number_format($absenceDeduction, 2),
+                number_format($netSalary, 2),
+                $invoiceNumber . str_pad($counter++, 4, '0', STR_PAD_LEFT),
+                $employee->owner_account_name ?? '',
+                $employee->iban ?? '',
+                $employee->bank_name ?? '',
+            ];
+        }
+
+        $filename = 'employee_financials_' . now()->format('Y_m_d_His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 }
+

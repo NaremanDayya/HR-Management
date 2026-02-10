@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Models\SalaryIncrease;
 use App\Models\TemporaryPermission;
 use App\Models\User;
+use App\Models\AdvancePayment;
 use App\Notifications\EditEmployeeDataRequestNotification;
 use App\Notifications\EmployeeRequestStatusNotification;
 use App\Notifications\NewEmployeeRequestNotification;
@@ -136,6 +137,10 @@ class EmployeeRequestController extends Controller
                     'status' => $advance->request->status,
                     'approved_at' => now(),
                 ]);
+
+                if ($advance->status === 'approved') {
+                    $this->generateAdvancePayments($advance);
+                }
             }
         }
         if ($editTypeKey === 'salary_increase') {
@@ -174,5 +179,23 @@ class EmployeeRequestController extends Controller
             $editRequest->status
         ));
         return redirect()->back()->with('success', 'تم تحديث حالة الطلب بنجاح.');
+    }
+
+    private function generateAdvancePayments($advance)
+    {
+        $startDate = Carbon::parse($advance->start_deduction_at);
+        
+        for ($i = 0; $i < $advance->months_to_repay; $i++) {
+            $scheduledDate = $startDate->copy()->addMonths($i);
+            
+            AdvancePayment::create([
+                'advance_id' => $advance->id,
+                'employee_id' => $advance->employee_id,
+                'amount' => $advance->monthly_deduction,
+                'scheduled_date' => $scheduledDate,
+                'status' => 'pending',
+                'payment_number' => $i + 1,
+            ]);
+        }
     }
 }

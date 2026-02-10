@@ -54,4 +54,9 @@ class Advance extends Model
     {
         return $this->hasMany(AdvanceDeduction::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(AdvancePayment::class);
+    }
 }
