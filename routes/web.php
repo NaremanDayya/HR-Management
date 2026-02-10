@@ -90,6 +90,8 @@ Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess
 
 Route::middleware(['auth'])->prefix('advances')->name('advances.')->group(function () {
     Route::get('/payments', [AdvancePaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/all', [AdvancePaymentController::class, 'allPayments'])->name('payments.all');
+    Route::get('/payments/employee/{employee}', [AdvancePaymentController::class, 'employeePayments'])->name('payments.employee');
     Route::get('/{advance}/payments', [AdvancePaymentController::class, 'show'])->name('payments.show');
     Route::post('/payments/{payment}/postpone', [AdvancePaymentController::class, 'postpone'])->name('payments.postpone');
     Route::post('/payments/{payment}/mark-paid', [AdvancePaymentController::class, 'markAsPaid'])->name('payments.mark-paid');
