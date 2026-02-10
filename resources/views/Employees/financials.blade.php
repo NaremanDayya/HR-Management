@@ -402,7 +402,7 @@
                                         <th><i class="fas fa-money-bill-wave me-1 text-success"></i> صافي الراتب</th>
                                         <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
                                         <th><i class="fas fa-user-circle me-1 text-purple"></i> اسم صاحب الحساب</th>
-{{--                                        <th><i class="fas fa-university me-1 text-purple"></i> البنك</th>--}}
+                                        <th><i class="fas fa-university me-1 text-purple"></i> البنك</th>
                                         <th>الإجراءات</th>
                                     </tr>
                                     </thead>
@@ -441,31 +441,31 @@
                                             <td class="text-success font-weight-bold">
                                                 {{ ($employee['bank_details']['owner_account_name']) }}
                                             </td>
-{{--                                            <td>--}}
-{{--                                                <div class="bank-details">--}}
-{{--                                                    @php--}}
-{{--                                                        $bankFileBase = 'build/assets/img/' . strtolower(str_replace(' ', '-', $employee['bank_details']['bank_name']));--}}
-{{--                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];--}}
+                                            <td>
+                                                <div class="bank-details">
+                                                    @php
+                                                        $bankFileBase = 'build/assets/img/' . strtolower(str_replace(' ', '-', $employee['bank_details']['bank_name']));
+                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
 
-{{--                                                        $bankLogo = null;--}}
-{{--                                                        foreach ($extensions as $ext) {--}}
-{{--                                                            if (file_exists(public_path($bankFileBase . '.' . $ext))) {--}}
-{{--                                                                $bankLogo = asset($bankFileBase . '.' . $ext);--}}
-{{--                                                                break;--}}
-{{--                                                            }--}}
-{{--                                                        }--}}
-{{--                                                    @endphp--}}
+                                                        $bankLogo = null;
+                                                        foreach ($extensions as $ext) {
+                                                            if (file_exists(public_path($bankFileBase . '.' . $ext))) {
+                                                                $bankLogo = asset($bankFileBase . '.' . $ext);
+                                                                break;
+                                                            }
+                                                        }
+                                                    @endphp
 
-{{--                                                    @if ($employee['bank_details']['bank_name'] && $bankLogo)--}}
-{{--                                                        <img src="{{ $bankLogo }}"--}}
-{{--                                                             alt="{{ $employee['bank_details']['bank_name'] }}"--}}
-{{--                                                             class="h-12 w-12">--}}
-{{--                                                        <span>{{ $employee['bank_details']['bank_name'] }}</span>--}}
-{{--                                                    @else--}}
-{{--                                                        غير محدد--}}
-{{--                                                    @endif--}}
-{{--                                                </div>--}}
-{{--                                            </td>--}}
+                                                    @if ($employee['bank_details']['bank_name'] && $bankLogo)
+                                                        <img src="{{ $bankLogo }}"
+                                                             alt="{{ $employee['bank_details']['bank_name'] }}"
+                                                             class="h-12 w-12">
+                                                        <span>{{ $employee['bank_details']['bank_name'] }}</span>
+                                                    @else
+                                                        غير محدد
+                                                    @endif
+                                                </div>
+                                            </td>
                                             <td>
                                                 <button
                                                     onclick="openSalaryModal(
