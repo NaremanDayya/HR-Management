@@ -477,8 +477,8 @@
                                                     @else
                                                         <div style="color: red;">
                                                             غير محدد
-                                                            <!-- Debug: {{ $bankName ? "Bank name exists: $bankName" : "No bank name" }} -->
-                                                            <!-- Debug: {{ $foundFile ? "File found: $foundFile" : "No file found" }} -->
+                                                            {{ $bankName ? "Bank name exists: $bankName" : "No bank name" }}
+                                                           {{ $foundFile ? "File found: $foundFile" : "No file found" }}
                                                         </div>
                                                     @endif
                                                 </div>
