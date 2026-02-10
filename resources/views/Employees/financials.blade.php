@@ -441,48 +441,51 @@
                                             <td class="text-success font-weight-bold">
                                                 {{ ($employee['bank_details']['owner_account_name']) }}
                                             </td>
-                                            <td>
-                                                <div class="bank-details">
-                                                    @php
-                                                        $bankName = $employee['bank_details']['bank_name'] ?? '';
-                                                        echo "<!-- Debug: Bank Name: $bankName -->";
-
-                                                        $fileName = strtolower(str_replace(' ', '-', $bankName));
-                                                        $bankFileBase = 'build/assets/img/' . $fileName;
-
-                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-                                                        $bankLogo = null;
-                                                        $foundFile = null;
-
-                                                        foreach ($extensions as $ext) {
-                                                            $fullPath = public_path($bankFileBase . '.' . $ext);
-                                                            $relativePath = $bankFileBase . '.' . $ext;
-                                                            echo "<!-- Debug: Checking: $relativePath -->";
-
-                                                            if (file_exists($fullPath)) {
-                                                                echo "<!-- Debug: Found: $relativePath -->";
-                                                                $bankLogo = asset($relativePath);
-                                                                $foundFile = $relativePath;
-                                                                break;
-                                                            }
-                                                        }
-                                                    @endphp
-
-                                                    @if ($bankName && $bankLogo)
-                                                        <img src="{{ $bankLogo }}"
-                                                             alt="{{ $bankName }}"
-                                                             class="h-12 w-12"
-                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; console.log('Image failed to load: {{ $foundFile }}');">
-                                                        <span>{{ $bankName }}</span>
-                                                    @else
-                                                        <div style="color: red;">
-                                                            غير محدد
-                                                            {{ $bankName ? "Bank name exists: $bankName" : "No bank name" }}
-                                                           {{ $foundFile ? "File found: $foundFile" : "No file found" }}
-                                                        </div>
-                                                    @endif
-                                                </div>
+                                            <td class="text-success font-weight-bold">
+                                                {{ ($employee['bank_details']['bank_name']) }}
                                             </td>
+{{--                                            <td>--}}
+{{--                                                <div class="bank-details">--}}
+{{--                                                    @php--}}
+{{--                                                        $bankName = $employee['bank_details']['bank_name'] ?? '';--}}
+{{--                                                        echo "<!-- Debug: Bank Name: $bankName -->";--}}
+
+{{--                                                        $fileName = strtolower(str_replace(' ', '-', $bankName));--}}
+{{--                                                        $bankFileBase = 'build/assets/img/' . $fileName;--}}
+
+{{--                                                        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];--}}
+{{--                                                        $bankLogo = null;--}}
+{{--                                                        $foundFile = null;--}}
+
+{{--                                                        foreach ($extensions as $ext) {--}}
+{{--                                                            $fullPath = public_path($bankFileBase . '.' . $ext);--}}
+{{--                                                            $relativePath = $bankFileBase . '.' . $ext;--}}
+{{--                                                            echo "<!-- Debug: Checking: $relativePath -->";--}}
+
+{{--                                                            if (file_exists($fullPath)) {--}}
+{{--                                                                echo "<!-- Debug: Found: $relativePath -->";--}}
+{{--                                                                $bankLogo = asset($relativePath);--}}
+{{--                                                                $foundFile = $relativePath;--}}
+{{--                                                                break;--}}
+{{--                                                            }--}}
+{{--                                                        }--}}
+{{--                                                    @endphp--}}
+
+{{--                                                    @if ($bankName && $bankLogo)--}}
+{{--                                                        <img src="{{ $bankLogo }}"--}}
+{{--                                                             alt="{{ $bankName }}"--}}
+{{--                                                             class="h-12 w-12"--}}
+{{--                                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; console.log('Image failed to load: {{ $foundFile }}');">--}}
+{{--                                                        <span>{{ $bankName }}</span>--}}
+{{--                                                    @else--}}
+{{--                                                        <div style="color: red;">--}}
+{{--                                                            غير محدد--}}
+{{--                                                            {{ $bankName ? "Bank name exists: $bankName" : "No bank name" }}--}}
+{{--                                                           {{ $foundFile ? "File found: $foundFile" : "No file found" }}--}}
+{{--                                                        </div>--}}
+{{--                                                    @endif--}}
+{{--                                                </div>--}}
+{{--                                            </td>--}}
                                             <td>
                                                 <button
                                                     onclick="openSalaryModal(
