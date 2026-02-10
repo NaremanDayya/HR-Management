@@ -242,7 +242,7 @@ class EmployeeController extends Controller
                 'filters' => $filters
             ]);
         }
-
+dd($responseData);
         return view('Employees.financials', $responseData);
     }
     public function store(StoreEmployeeRequest $request)
@@ -1071,9 +1071,9 @@ class EmployeeController extends Controller
 
         $filename = 'employee_financials_' . now()->format('Y_m_d_His') . '.csv';
         $handle = fopen('php://temp', 'r+');
-        
+
         fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-        
+
         foreach ($csvData as $row) {
             fputcsv($handle, $row);
         }
