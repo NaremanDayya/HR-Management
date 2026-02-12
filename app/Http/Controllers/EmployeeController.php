@@ -101,6 +101,7 @@ class EmployeeController extends Controller
             'residence',
             'black_list',
             'role',
+            'salary_type',
         ]);
 
         $user = Auth::user();
@@ -162,6 +163,7 @@ class EmployeeController extends Controller
                 'id' => $employee->id,
                 'name' => $employee->name,
                 'base_salary' => $employee->salary,
+                'salary_type' => $employee->salary_type ?? 'monthly_salary',
                 'project' => $employee?->project?->name,
                 'work_days' => $workDays,
                 'absence_days' => $absenceDays,
@@ -975,6 +977,7 @@ class EmployeeController extends Controller
             'residence',
             'black_list',
             'role',
+            'salary_type',
         ]);
 
         $user = Auth::user();
@@ -1017,6 +1020,7 @@ class EmployeeController extends Controller
             'اسم الموظف',
             'المشروع',
             'الراتب الأساسي',
+            'نوع الراتب',
             'أيام العمل',
             'أيام الغياب',
             'أيام العمل الصافية',
@@ -1049,11 +1053,15 @@ class EmployeeController extends Controller
             $grossSalary = $employee->salary + $currentMonthIncreases;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
 
+            $salaryTypeLabel = ($employee->salary_type == 'monthly_salary') ? 'راتب شهري' : 
+                              (($employee->salary_type == 'wage_protection_salary') ? 'راتب حماية الأجور' : 'راتب شهري');
+
             $csvData[] = [
                 $employee->id,
                 $employee->name,
                 $employee->project?->name ?? 'غير محدد',
                 number_format($employee->salary, 2),
+                $salaryTypeLabel,
                 $workDays,
                 $absenceDays,
                 $netPayableDays,

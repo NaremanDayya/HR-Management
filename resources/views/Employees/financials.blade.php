@@ -329,7 +329,7 @@
                                 </div>
 
                                 <!-- Project Filter -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="project" class="form-label">المشروع</label>
                                     <select class="form-select" id="project" name="project">
                                         <option value="">جميع المشاريع</option>
@@ -342,8 +342,22 @@
                                     </select>
                                 </div>
 
+                                <!-- Salary Type Filter -->
+                                <div class="col-md-3">
+                                    <label for="salary_type" class="form-label">نوع الراتب</label>
+                                    <select class="form-select" id="salary_type" name="salary_type">
+                                        <option value="">جميع الأنواع</option>
+                                        <option value="monthly_salary" {{ request('salary_type') == 'monthly_salary' ? 'selected' : '' }}>
+                                            راتب شهري
+                                        </option>
+                                        <option value="wage_protection_salary" {{ request('salary_type') == 'wage_protection_salary' ? 'selected' : '' }}>
+                                            راتب حماية الأجور
+                                        </option>
+                                    </select>
+                                </div>
+
                                 <!-- Action Buttons -->
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <div class="d-flex gap-2">
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-filter"></i> تطبيق الفلتر
@@ -394,6 +408,7 @@
                                         <th><i class="fas fa-user-tie me-1 text-info"></i> اسم الموظف</th>
                                         <th><i class="fas fa-project-diagram me-1 text-info"></i> المشروع</th>
                                         <th><i class="fas fa-coins me-1 text-warning"></i> الراتب الأساسي</th>
+                                        <th><i class="fas fa-file-invoice-dollar me-1 text-info"></i> نوع الراتب</th>
                                         <th><i class="fas fa-plus-circle me-1 text-success"></i> المكافآت</th>
                                         <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
                                         <th><i class="fas fa-hand-holding-usd me-1 text-danger"></i> خصومات السلف</th>
@@ -413,6 +428,15 @@
                                             <td class="font-weight-600">{{ $employee['name'] }}</td>
                                             <td class="font-weight-600">{{ $employee['project'] }}</td>
                                             <td>{{ number_format($employee['base_salary']) }} ر.س</td>
+                                            <td class="font-weight-600">
+                                                @if($employee['salary_type'] == 'monthly_salary')
+                                                    راتب شهري
+                                                @elseif($employee['salary_type'] == 'wage_protection_salary')
+                                                    راتب حماية الأجور
+                                                @else
+                                                    راتب شهري
+                                                @endif
+                                            </td>
                                             <td class="text-success">
                                                 @if ($employee['current_month_increases'] > 0)
                                                     +{{ number_format($employee['current_month_increases']) }} ر.س
@@ -590,6 +614,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search');
             const projectSelect = document.getElementById('project');
+            const salaryTypeSelect = document.getElementById('salary_type');
             let filterTimeout;
 
             // Function to update URL without page reload
@@ -609,10 +634,12 @@
             function performLiveFiltering() {
                 const searchValue = searchInput.value;
                 const projectValue = projectSelect.value;
+                const salaryTypeValue = salaryTypeSelect.value;
 
                 const filters = {
                     search: searchValue,
                     project: projectValue,
+                    salary_type: salaryTypeValue,
                     live_filter: true // Add this to identify live filter requests
                 };
 
@@ -675,12 +702,15 @@
 
                 let tableHTML = '';
                 data.employees.forEach(employee => {
+                    const salaryTypeLabel = employee.salary_type === 'monthly_salary' ? 'راتب شهري' : 
+                                          (employee.salary_type === 'wage_protection_salary' ? 'راتب حماية الأجور' : 'راتب شهري');
                     tableHTML += `
                 <tr>
                     <td>${employee.id}</td>
                     <td class="font-weight-600">${employee.name}</td>
                     <td class="font-weight-600">${employee.project || '-'}</td>
                     <td>${numberFormat(employee.base_salary)} ر.س</td>
+                    <td class="font-weight-600">${salaryTypeLabel}</td>
                     <td class="text-success">
                         ${employee.current_month_increases > 0 ?
                         '+' + numberFormat(employee.current_month_increases) + ' ر.س' :
@@ -763,6 +793,11 @@
                 filterTimeout = setTimeout(performLiveFiltering, 300);
             });
 
+            salaryTypeSelect.addEventListener('change', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(performLiveFiltering, 300);
+            });
+
             // Prevent form submission for live filtering (we handle via AJAX)
             document.getElementById('filterForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -815,15 +850,16 @@
                 { width: 25 },  // 1: Name
                 { width: 20 },  // 2: Project
                 { width: 15 },  // 3: Base Salary
-                { width: 15 },  // 4: Increases
-                { width: 15 },  // 5: Current Deductions
-                { width: 15 },  // 6: Advance Deductions
-                { width: 12 },  // 7: Work Days
-                { width: 12 },  // 8: Absence Days
-                { width: 15 },  // 9: Net Salary
-                { width: 25 },  // 10: IBAN
-                { width: 20 },  // 11: Owner Name
-                { width: 20 }   // 12: Bank
+                { width: 20 },  // 4: Salary Type
+                { width: 15 },  // 5: Increases
+                { width: 15 },  // 6: Current Deductions
+                { width: 15 },  // 7: Advance Deductions
+                { width: 12 },  // 8: Work Days
+                { width: 12 },  // 9: Absence Days
+                { width: 15 },  // 10: Net Salary
+                { width: 25 },  // 11: IBAN
+                { width: 20 },  // 12: Owner Name
+                { width: 20 }   // 13: Bank
             ];
             ws['!cols'] = wscols;
 
@@ -994,11 +1030,11 @@
             originalSalary = parseFloat(baseSalary);
 
             // Get current values from the table row - UPDATED CELL INDICES
-            const currentDeductions = parseFloat(rowElement.cells[5].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 5: Current Deductions
-            const advanceDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6: Advance Deductions
-            const workDaysValue = parseInt(rowElement.cells[7].textContent.replace(/[^\d]/g, '')) || 26; // Cell 7: Work Days
-            const absenceDays = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || 0; // Cell 8: Absence Days
-            const netSalary = parseFloat(rowElement.cells[9].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 9: Net Salary
+            const currentDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6: Current Deductions
+            const advanceDeductions = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 7: Advance Deductions
+            const workDaysValue = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || 26; // Cell 8: Work Days
+            const absenceDays = parseInt(rowElement.cells[9].textContent.replace(/[^\d]/g, '')) || 0; // Cell 9: Absence Days
+            const netSalary = parseFloat(rowElement.cells[10].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 10: Net Salary
 
             // Set values in the modal
             document.getElementById('employeeName').value = employeeName;
@@ -1040,8 +1076,8 @@
                 return;
             }
 
-            // Get the current month increases from the table row (cell index 4)
-            const currentIncreasesText = currentEmployeeRow.cells[4].textContent;
+            // Get the current month increases from the table row (cell index 5)
+            const currentIncreasesText = currentEmployeeRow.cells[5].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
             // Calculate daily rate based on work days
@@ -1069,13 +1105,13 @@
             ) || 0;
 
             // Get previous values from the table row - UPDATED CELL INDICES
-            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[5].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 5
-            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6
-            const prevWorkDays = parseInt(currentEmployeeRow.cells[7].textContent.replace(/[^\d]/g, '')) || 26; // Cell 7
-            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[8].textContent.replace(/[^\d]/g, '')) || 0; // Cell 8
+            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6
+            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[7].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 7
+            const prevWorkDays = parseInt(currentEmployeeRow.cells[8].textContent.replace(/[^\d]/g, '')) || 26; // Cell 8
+            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[9].textContent.replace(/[^\d]/g, '')) || 0; // Cell 9
 
-            // Get current increases value (cell index 4)
-            const currentIncreasesText = currentEmployeeRow.cells[4].textContent;
+            // Get current increases value (cell index 5)
+            const currentIncreasesText = currentEmployeeRow.cells[5].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
             // Calculate new values
@@ -1084,25 +1120,25 @@
             const netSalary = Math.max(0, (originalSalary + currentIncreases) - (currentDeductions + advanceDeductions + absenceDeduction));
 
             // UPDATED CELL INDICES FOR UPDATING:
-            // Update current deductions (cell 5)
-            currentEmployeeRow.cells[5].textContent = numberFormat(currentDeductions) + ' ر.س';
-            currentEmployeeRow.cells[5].className = 'text-danger';
-
-            // Update advance deductions (cell 6)
-            currentEmployeeRow.cells[6].textContent = numberFormat(advanceDeductions) + ' ر.س';
+            // Update current deductions (cell 6)
+            currentEmployeeRow.cells[6].textContent = numberFormat(currentDeductions) + ' ر.س';
             currentEmployeeRow.cells[6].className = 'text-danger';
 
-            // Update work days (cell 7)
-            currentEmployeeRow.cells[7].textContent = workDays + ' يوم';
-            currentEmployeeRow.cells[7].className = 'work-days-cell font-weight-bold';
+            // Update advance deductions (cell 7)
+            currentEmployeeRow.cells[7].textContent = numberFormat(advanceDeductions) + ' ر.س';
+            currentEmployeeRow.cells[7].className = 'text-danger';
 
-            // Update absence days (cell 8)
-            currentEmployeeRow.cells[8].textContent = absenceDays + ' يوم';
-            currentEmployeeRow.cells[8].className = 'text-warning font-weight-bold';
+            // Update work days (cell 8)
+            currentEmployeeRow.cells[8].textContent = workDays + ' يوم';
+            currentEmployeeRow.cells[8].className = 'work-days-cell font-weight-bold';
 
-            // Update net salary (cell 9)
-            currentEmployeeRow.cells[9].textContent = numberFormat(netSalary) + ' ر.س';
-            currentEmployeeRow.cells[9].className = 'text-success font-weight-bold';
+            // Update absence days (cell 9)
+            currentEmployeeRow.cells[9].textContent = absenceDays + ' يوم';
+            currentEmployeeRow.cells[9].className = 'text-warning font-weight-bold';
+
+            // Update net salary (cell 10)
+            currentEmployeeRow.cells[10].textContent = numberFormat(netSalary) + ' ر.س';
+            currentEmployeeRow.cells[10].className = 'text-success font-weight-bold';
 
             // Show success message
             showToast('تم تحديث الراتب بنجاح', 'success');

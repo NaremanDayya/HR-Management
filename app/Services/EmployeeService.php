@@ -321,6 +321,10 @@ class EmployeeService
             });
         }
 
+        if (!empty($filters['salary_type'])) {
+            $query->where('salary_type', $filters['salary_type']);
+        }
+
         return $query->get();
     }
 

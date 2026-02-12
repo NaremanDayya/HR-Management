@@ -26,6 +26,7 @@ class Employee extends Model
         'project_id',
         'stop_reason',
         'salary',
+        'salary_type',
         'english_level',
         'certificate_type',
         'marital_status',
