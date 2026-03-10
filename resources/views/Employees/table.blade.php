@@ -2595,8 +2595,10 @@
             // Create FormData from the form
             const formData = new FormData(form);
 
-            // Add method spoofing for PATCH
+            // Add method spoofing for PUT
             formData.append('_method', 'PUT');
+            // Tell the service this is a full bulk update
+            formData.append('editable_field', 'all');
 
             // Send request to update route
             fetch(`/employees/${employeeId}`, {

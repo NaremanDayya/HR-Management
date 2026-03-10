@@ -215,13 +215,65 @@ class EmployeeService
                 $employee->$editableField = $data[$editableField] ?? $employee->$editableField;
                 break;
 
+            case 'all':
+                // Bulk update from admin edit modal (all fields at once)
+                if (!empty($data['name'])) $user->name = $data['name'];
+                if (!empty($data['id_card'])) $user->id_card = $data['id_card'];
+                if (!empty($data['nationality'])) $user->nationality = $data['nationality'];
+                if (!empty($data['birthday'])) $user->birthday = $data['birthday'];
+                if (!empty($data['gender'])) $user->gender = $data['gender'];
+                if (!empty($data['email'])) $user->email = $data['email'];
+                if (!empty($data['role'])) $user->assignRole($data['role']);
+                if (!empty($data['certificate_type'])) $user->certificate_type = $data['certificate_type'];
+                if (!empty($data['english_level'])) $user->english_level = $data['english_level'];
+                if (!empty($data['marital_status'])) $user->marital_status = $data['marital_status'];
+                if (!empty($data['password'])) $user->password = Hash::make($data['password']);
+
+                $contactInfo = $user->contact_info ?? [];
+                foreach (['phone_number', 'phone_type', 'residence', 'residence_neighborhood'] as $field) {
+                    if (isset($data[$field])) $contactInfo[$field] = $data[$field];
+                }
+                if (isset($data['work_area'])) $contactInfo['area'] = $data['work_area'];
+                $user->contact_info = $contactInfo;
+
+                $sizeInfo = $user->size_info ?? [];
+                foreach (['Tshirt_size', 'pants_size', 'Shoes_size'] as $field) {
+                    if (isset($data[$field])) $sizeInfo[$field] = $data[$field];
+                }
+                $user->size_info = $sizeInfo;
+
+                if ($image) {
+                    $path = $image->store('employees/images', 'public');
+                    $user->personal_image = $path;
+                }
+
+                if (isset($data['job'])) $employee->job = $data['job'];
+                if (!empty($data['iban'])) $employee->iban = 'SA' . $data['iban'];
+                if (isset($data['owner_account_name'])) $employee->owner_account_name = $data['owner_account_name'];
+                if (isset($data['bank_name'])) $employee->bank_name = $data['bank_name'];
+                if (isset($data['salary'])) $employee->salary = $data['salary'];
+                if (!empty($data['joining_date'])) $employee->joining_date = $data['joining_date'];
+                if (isset($data['health_card'])) $employee->health_card = $data['health_card'];
+                if (!empty($data['project'])) $employee->project_id = $data['project'];
+                if (isset($data['members_number'])) $employee->members_number = $data['members_number'];
+                if (!empty($data['work_area'])) $employee->work_area = $data['work_area'];
+
+                $vehicleInfo = $employee->vehicle_info ?? [];
+                foreach (['vehicle_type', 'vehicle_model', 'vehicle_ID'] as $field) {
+                    if (isset($data[$field])) $vehicleInfo[$field] = $data[$field];
+                }
+                $employee->vehicle_info = $vehicleInfo;
+                break;
+
             default:
                 throw new \Exception('لا يمكن تعديل هذا الحقل.');
         }
 
         $user->save();
         $employee->save();
-        $hasPermission->update(['used' => true]);
+        if ($hasPermission) {
+            $hasPermission->update(['used' => true]);
+        }
 
         return $employee;
     }
