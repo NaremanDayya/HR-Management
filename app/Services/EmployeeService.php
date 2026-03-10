@@ -123,7 +123,7 @@ class EmployeeService
                 $user->id_card = $data['id_card'];
                 break;
             case 'role':
-                $user->assignRole($data['role']);
+                $user->role = $data['role'];
                 break;
 
             case 'nationality':
@@ -223,7 +223,7 @@ class EmployeeService
                 if (!empty($data['birthday'])) $user->birthday = $data['birthday'];
                 if (!empty($data['gender'])) $user->gender = $data['gender'];
                 if (!empty($data['email'])) $user->email = $data['email'];
-                if (!empty($data['role'])) $user->assignRole($data['role']);
+                if (!empty($data['role'])) $user->role = $data['role'];
                 if (!empty($data['certificate_type'])) $user->certificate_type = $data['certificate_type'];
                 if (!empty($data['english_level'])) $user->english_level = $data['english_level'];
                 if (!empty($data['marital_status'])) $user->marital_status = $data['marital_status'];
