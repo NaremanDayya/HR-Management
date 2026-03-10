@@ -94,18 +94,22 @@ class User extends Authenticatable
             return $path;
         }
 
+        // Check local public storage first
         try {
-            // Check S3 storage FIRST (where images are stored during creation)
-            if (Storage::disk('s3')->exists($path)) {
-                return Storage::disk('s3')->url($path);
-            }
-
-            // Then check local public storage as fallback
             if (Storage::disk('public')->exists($path)) {
                 return Storage::url($path);
             }
         } catch (\Exception $e) {
-            \Log::error('Error accessing storage for image: ' . $e->getMessage());
+            \Log::error('Error accessing public storage for image: ' . $e->getMessage());
+        }
+
+        // Then check S3 as fallback
+        try {
+            if (Storage::disk('s3')->exists($path)) {
+                return Storage::disk('s3')->url($path);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error accessing S3 storage for image: ' . $e->getMessage());
         }
 
         return asset('images/default-avatar.png');

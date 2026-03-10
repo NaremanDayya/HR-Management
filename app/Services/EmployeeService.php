@@ -18,9 +18,11 @@ class EmployeeService
     public function create(array $data)
     {
         $imagePath = null;
-        if (isset($data['personal_image']) && $data['personal_image']) {
-            $imagePath = $data['personal_image']->store('employees/images', 's3');
-            Storage::disk('s3')->setVisibility($imagePath, 'public');
+        if (isset($data['personal_image']) && $data['personal_image'] instanceof \Illuminate\Http\UploadedFile) {
+            $stored = $data['personal_image']->store('employees/images', 'public');
+            if ($stored !== false) {
+                $imagePath = $stored;
+            }
         }
         // dd($imagePath);
         $user = User::create([

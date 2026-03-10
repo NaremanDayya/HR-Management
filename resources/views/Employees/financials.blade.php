@@ -577,13 +577,13 @@
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">أيام العمل</label>
                 <input id="workDays" type="number" min="1" max="31" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateWorkDays(this)" />
-                <small class="text-gray-500 text-xs">عدد أيام العمل الشهرية (الافتراضي: 26)</small>
+                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">عدد أيام العمل الشهرية (الافتراضي: 26)</p>
             </div>
 
             <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">عدد أيام الغياب</label>
                 <input id="absenceDays" type="number" min="0" max="31" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateAbsenceDays(this)" />
-                <small class="text-gray-500 text-xs">يجب أن يكون أقل من أو يساوي أيام العمل</small>
+                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">يجب أن يكون أقل من أو يساوي أيام العمل</p>
             </div>
 
             <div class="mb-3">
