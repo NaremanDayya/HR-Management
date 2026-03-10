@@ -159,7 +159,7 @@ class EmployeeService
             case 'certificate_type':
             case 'english_level':
             case 'marital_status':
-                $user->$editableField = $data[$editableField] ?? $user->$editableField;
+                $employee->$editableField = $data[$editableField] ?? $employee->$editableField;
                 break;
 
             case 'email':
@@ -224,9 +224,6 @@ class EmployeeService
                 if (!empty($data['gender'])) $user->gender = $data['gender'];
                 if (!empty($data['email'])) $user->email = $data['email'];
                 if (!empty($data['role'])) $user->role = $data['role'];
-                if (!empty($data['certificate_type'])) $user->certificate_type = $data['certificate_type'];
-                if (!empty($data['english_level'])) $user->english_level = $data['english_level'];
-                if (!empty($data['marital_status'])) $user->marital_status = $data['marital_status'];
                 if (!empty($data['password'])) $user->password = Hash::make($data['password']);
 
                 $contactInfo = $user->contact_info ?? [];
@@ -257,6 +254,9 @@ class EmployeeService
                 if (!empty($data['project'])) $employee->project_id = $data['project'];
                 if (isset($data['members_number'])) $employee->members_number = $data['members_number'];
                 if (!empty($data['work_area'])) $employee->work_area = $data['work_area'];
+                if (isset($data['certificate_type'])) $employee->certificate_type = $data['certificate_type'];
+                if (isset($data['english_level'])) $employee->english_level = $data['english_level'];
+                if (isset($data['marital_status'])) $employee->marital_status = $data['marital_status'];
 
                 $vehicleInfo = $employee->vehicle_info ?? [];
                 foreach (['vehicle_type', 'vehicle_model', 'vehicle_ID'] as $field) {
