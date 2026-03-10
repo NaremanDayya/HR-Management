@@ -44,7 +44,7 @@ class UpdateEmployeeRequest extends FormRequest
                 },
             ],
             'job' => 'nullable|string|max:255|regex:/[a-zA-Zأ-ي\s]+/u',
-            'id_card' => 'nullable|string|size:10|regex:/^[12][0-9]{9}$/|unique:users,id_card',
+            'id_card' => ['nullable', 'string', 'size:10', 'regex:/^[12][0-9]{9}$/', Rule::unique('users', 'id_card')->ignore($this->route('employee')->user_id)],
             'nationality' => 'nullable|string|max:100',
             'birthday' => 'nullable|date',
             'age' => 'nullable|integer|min:0',
@@ -54,10 +54,10 @@ class UpdateEmployeeRequest extends FormRequest
             'vehicle_type' => 'nullable|string|max:255',
             'vehicle_model' => 'nullable|string|max:255',
             'vehicle_ID' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
-                Rule::unique('employees', 'vehicle_info->vehicle_ID')
+                Rule::unique('employees', 'vehicle_info->vehicle_ID')->ignore($this->route('employee')->id)
             ],
             'members_number' => 'nullable|integer|min:0',
             'certificate_type' => 'nullable|string|max:255',
@@ -77,7 +77,7 @@ class UpdateEmployeeRequest extends FormRequest
             'marital_status' => 'nullable|string|max:50',
             'personal_image' => 'nullable|image|max:2048',
             'bank_name' => 'nullable|string',
-            'iban' => ['required', 'string', 'digits:22', 'unique:employees,iban'],
+            'iban' => ['nullable', 'string', 'digits:22', Rule::unique('employees', 'iban')->ignore($this->route('employee')->id)],
             'owner_account_name' => 'nullable|string|max:255',
             'supervisor' => [
                 'nullable',

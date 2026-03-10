@@ -253,14 +253,14 @@ class DashboardController extends Controller
 
         $user = Auth::user();
 
-        if ($user->personal_image && Storage::exists('public/' . $user->personal_image)) {
-            Storage::delete('public/' . $user->personal_image);
+        $existingPath = $user->getRawOriginal('personal_image');
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
         }
 
         $path = $request->file('personal_image')->store('employees/images', 'public');
 
         $user->personal_image = $path;
-//        dd($user->personal_image);
         $user->save();
 
         return back()->with('success', 'تم تغيير الصورة الشخصية بنجاح.');

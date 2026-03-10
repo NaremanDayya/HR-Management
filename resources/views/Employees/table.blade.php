@@ -2435,7 +2435,8 @@
                 'id_card': employee.id_card,
                 'nationality': employee.nationality,
                 'email': employee.email,
-                'iban': employee.iban,
+                'iban': employee.iban ? employee.iban.replace(/^SA/, '') : '',
+                'age': employee.age,
                 'phone_number': employee.phone_number,
                 'work_area': employee.work_area,
                 'salary': employee.salary,
@@ -2490,13 +2491,15 @@
                 }
             });
 
-            // Handle date fields
+            // Handle date fields (use flatpickr API when available)
             if (employee.birthday) {
                 const birthdayInput = form.querySelector('#birthday');
                 if (birthdayInput) {
-                    birthdayInput.value = employee.birthday;
-                    console.log('Set birthday to:', employee.birthday); // Debug log
-                    // Trigger age calculation if function exists
+                    if (birthdayInput._flatpickr) {
+                        birthdayInput._flatpickr.setDate(employee.birthday, false);
+                    } else {
+                        birthdayInput.value = employee.birthday;
+                    }
                     if (typeof calculateAge === 'function') {
                         calculateAge();
                     }
@@ -2506,8 +2509,11 @@
             if (employee.joining_date) {
                 const joiningDateInput = form.querySelector('#joining_date');
                 if (joiningDateInput) {
-                    joiningDateInput.value = employee.joining_date;
-                    console.log('Set joining_date to:', employee.joining_date); // Debug log
+                    if (joiningDateInput._flatpickr) {
+                        joiningDateInput._flatpickr.setDate(employee.joining_date, false);
+                    } else {
+                        joiningDateInput.value = employee.joining_date;
+                    }
                 }
             }
 

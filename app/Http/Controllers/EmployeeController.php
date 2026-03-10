@@ -840,8 +840,9 @@ class EmployeeController extends Controller
         $user = $employee->user;
 //        dd($employee);
 
-        if ($user->personal_image && Storage::exists('s3/' . $user->personal_image)) {
-            Storage::delete('s3/' . $user->personal_image);
+        $existingPath = $user->getRawOriginal('personal_image');
+        if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
         }
 
         $path = $request->file('profile_photo_path')->store('employees/images', 'public');
