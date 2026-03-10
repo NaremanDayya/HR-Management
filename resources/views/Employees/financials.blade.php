@@ -702,7 +702,7 @@
 
                 let tableHTML = '';
                 data.employees.forEach(employee => {
-                    const salaryTypeLabel = employee.salary_type === 'monthly_salary' ? 'راتب شهري' : 
+                    const salaryTypeLabel = employee.salary_type === 'monthly_salary' ? 'راتب شهري' :
                                           (employee.salary_type === 'wage_protection_salary' ? 'راتب حماية الأجور' : 'راتب شهري');
                     tableHTML += `
                 <tr>
@@ -1076,11 +1076,9 @@
                 return;
             }
 
-            // Get the current month increases from the table row (cell index 5)
             const currentIncreasesText = currentEmployeeRow.cells[5].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
-            // Calculate daily rate based on work days
             const dailyRate = originalSalary / workDays;
             const absenceDeduction = absenceDays * dailyRate;
             const totalEarnings = originalSalary + currentIncreases;

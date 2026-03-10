@@ -63,7 +63,6 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $appends = [
-        'personal_image',
     ];
     protected $casts = [
         'contact_info' => 'array',
@@ -96,14 +95,14 @@ class User extends Authenticatable
         }
 
         try {
-            // Check LOCAL storage FIRST
-            if (Storage::disk('public')->exists($path)) {
-                return Storage::url($path);
+            // Check S3 storage FIRST (where images are stored during creation)
+            if (Storage::disk('s3')->exists($path)) {
+                return Storage::disk('s3')->url($path);
             }
 
-            // Then check S3 as fallback
-            if (Storage::disk('s3')->exists($path)) {
-                return Storage::disk('s3')->temporaryUrl($path, now()->addMinutes(5));
+            // Then check local public storage as fallback
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::url($path);
             }
         } catch (\Exception $e) {
             \Log::error('Error accessing storage for image: ' . $e->getMessage());
