@@ -767,6 +767,122 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Employee Modal (for approved edit requests) -->
+            <div x-show="editModalOpen" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
+                style="backdrop-filter: blur(5px);">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <!-- Background overlay -->
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" @click="editModalOpen = false">
+                        <div class="absolute inset-0 bg-gray-900 bg-opacity-75"></div>
+                    </div>
+
+                    <!-- Modal container -->
+                    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                        style="width: 90%; max-width: 600px;">
+                        <div class="bg-white px-6 py-5">
+                            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    <i class="fas fa-pen-to-square text-orange-600"></i>
+                                    تعديل بيانات الموظف
+                                </h3>
+                                <button @click="editModalOpen = false" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+
+                            <form action="{{ route('employees.update', $emp) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="editable_field" value="{{ $editableField }}">
+                                
+                                <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle text-orange-500"></i>
+                                        </div>
+                                        <div class="mr-3">
+                                            <p class="text-sm text-orange-700">
+                                                <strong>الحقل المسموح بتعديله:</strong> {{ $editedFields[$editableField] ?? $editableField }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        {{ $editedFields[$editableField] ?? $editableField }}
+                                    </label>
+                                    
+                                    @if($editableField === 'name')
+                                        <input type="text" name="name" value="{{ old('name', $emp->name) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'email')
+                                        <input type="email" name="email" value="{{ old('email', $emp->user->email) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'phone_number')
+                                        <input type="tel" name="phone_number" value="{{ old('phone_number', $emp->user->contact_info['phone_number'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'salary')
+                                        <input type="number" step="0.01" name="salary" value="{{ old('salary', $emp->salary) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'job')
+                                        <input type="text" name="job" value="{{ old('job', $emp->job) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'iban')
+                                        <input type="text" name="iban" value="{{ old('iban', str_replace('SA', '', $emp->iban)) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
+                                            placeholder="رقم الآيبان بدون SA" required>
+                                    
+                                    @elseif($editableField === 'supervisor_id')
+                                        <select name="supervisor_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                            <option value="">بدون مشرف</option>
+                                            @foreach($supervisors as $supervisor)
+                                                <option value="{{ $supervisor->id }}" {{ old('supervisor_id', $emp->supervisor_id) == $supervisor->id ? 'selected' : '' }}>
+                                                    {{ $supervisor->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'project')
+                                        <select name="project" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                            <option value="">اختر المشروع</option>
+                                            @foreach($projects as $id => $name)
+                                                <option value="{{ $id }}" {{ old('project', $emp->project_id) == $id ? 'selected' : '' }}>
+                                                    {{ $name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @else
+                                        <input type="text" name="{{ $editableField }}" value="{{ old($editableField, $emp->$editableField ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    @endif
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="flex justify-end space-x-3 space-x-reverse pt-4 border-t border-gray-200">
+                                    <button type="button" @click="editModalOpen = false"
+                                        class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium">
+                                        إلغاء
+                                    </button>
+                                    <button type="submit"
+                                        class="px-5 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 font-medium shadow-md hover:shadow-orange-200">
+                                        <i class="fas fa-save mr-1"></i>
+                                        حفظ التعديلات
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Unified Sections -->
             <div class="unified-sections">
                 <!-- Employment Data Section -->
