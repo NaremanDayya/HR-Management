@@ -397,38 +397,53 @@ class EmployeeController extends Controller
         try {
             $this->employeeService->updateEmployee($employee, $data, $image);
 
-            // Reload the employee with relationships for the response
-            $employee->load([
-                'user',
-                'alerts',
-                'deductions',
-                'advances',
-                'increases',
-                'project',
-                'supervisor',
-                'areaManager',
-                'replacements',
-                'temporaryAssignments',
-                'replacedBy.oldEmployee.replacements',
-                'managedProjects'
-            ]);
+            // Check if this is an AJAX request
+            if ($request->expectsJson() || $request->ajax()) {
+                // Reload the employee with relationships for the response
+                $employee->load([
+                    'user',
+                    'alerts',
+                    'deductions',
+                    'advances',
+                    'increases',
+                    'project',
+                    'supervisor',
+                    'areaManager',
+                    'replacements',
+                    'temporaryAssignments',
+                    'replacedBy.oldEmployee.replacements',
+                    'managedProjects'
+                ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'تمت تعديل بيانات الموظف بنجاح.',
-                'data' => new EmployeeResource($employee)
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تمت تعديل بيانات الموظف بنجاح.',
+                    'data' => new EmployeeResource($employee),
+                    'redirect_url' => route('Employees.show', $employee->id)
+                ]);
+            }
+
+            // For regular form submissions, redirect with success message
+            return redirect()->route('Employees.show', $employee->id)
+                ->with('success', 'تمت تعديل بيانات الموظف بنجاح.');
+
         } catch (\Exception $e) {
             Log::error('Employee edit failed: ' . $e->getMessage(), [
                 'exception' => $e,
                 'request' => $request->all()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage(),
-                'error' => $e->getMessage()
-            ], 500);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage(),
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'حدث خطأ أثناء حفظ البيانات: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 

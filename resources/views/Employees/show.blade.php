@@ -791,7 +791,7 @@
                                 </button>
                             </div>
 
-                            <form action="{{ route('employees.update', $emp) }}" method="POST" enctype="multipart/form-data">
+                            <form id="editEmployeeModalForm" action="{{ route('employees.update', $emp) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="editable_field" value="{{ $editableField }}">
@@ -826,6 +826,51 @@
                                         <input type="tel" name="phone_number" value="{{ old('phone_number', $emp->user->contact_info['phone_number'] ?? '') }}" 
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
                                     
+                                    @elseif($editableField === 'phone_type')
+                                        <select name="phone_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            <option value="android" {{ old('phone_type', $emp->user->contact_info['phone_type'] ?? '') == 'android' ? 'selected' : '' }}>أندرويد</option>
+                                            <option value="iphone" {{ old('phone_type', $emp->user->contact_info['phone_type'] ?? '') == 'iphone' ? 'selected' : '' }}>آيفون</option>
+                                        </select>
+                                    
+                                    @elseif($editableField === 'gender')
+                                        <select name="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            <option value="male" {{ old('gender', $emp->user->gender) == 'male' ? 'selected' : '' }}>ذكر</option>
+                                            <option value="female" {{ old('gender', $emp->user->gender) == 'female' ? 'selected' : '' }}>أنثى</option>
+                                        </select>
+                                    
+                                    @elseif($editableField === 'marital_status')
+                                        <select name="marital_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            @foreach($maritalStatuses as $value => $label)
+                                                <option value="{{ $value }}" {{ old('marital_status', $emp->marital_status) == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'certificate_type')
+                                        <select name="certificate_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            @foreach($certificateTypes as $value => $label)
+                                                <option value="{{ $value }}" {{ old('certificate_type', $emp->certificate_type) == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'english_level')
+                                        <select name="english_level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            @foreach($englishLevels as $value => $label)
+                                                <option value="{{ $value }}" {{ old('english_level', $emp->english_level) == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'health_card')
+                                        <select name="health_card" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                            <option value="1" {{ old('health_card', $emp->health_card) == '1' ? 'selected' : '' }}>نعم</option>
+                                            <option value="0" {{ old('health_card', $emp->health_card) == '0' ? 'selected' : '' }}>لا</option>
+                                        </select>
+                                    
                                     @elseif($editableField === 'salary')
                                         <input type="number" step="0.01" name="salary" value="{{ old('salary', $emp->salary) }}" 
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
@@ -837,7 +882,27 @@
                                     @elseif($editableField === 'iban')
                                         <input type="text" name="iban" value="{{ old('iban', str_replace('SA', '', $emp->iban)) }}" 
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
-                                            placeholder="رقم الآيبان بدون SA" required>
+                                            placeholder="رقم الآيبان بدون SA" maxlength="22" required>
+                                        <p class="mt-1 text-xs text-gray-500">أدخل 22 رقماً بدون بادئة SA</p>
+                                    
+                                    @elseif($editableField === 'id_card')
+                                        <input type="text" name="id_card" value="{{ old('id_card', $emp->user->id_card) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
+                                            maxlength="10" pattern="[12][0-9]{9}" required>
+                                        <p class="mt-1 text-xs text-gray-500">10 أرقام تبدأ بـ 1 أو 2</p>
+                                    
+                                    @elseif($editableField === 'birthday')
+                                        <input type="date" name="birthday" value="{{ old('birthday', $emp->user->birthday ? $emp->user->birthday->format('Y-m-d') : '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'joining_date')
+                                        <input type="date" name="joining_date" value="{{ old('joining_date', $emp->joining_date ? $emp->joining_date->format('Y-m-d') : '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'members_number')
+                                        <input type="number" name="members_number" value="{{ old('members_number', $emp->members_number) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" 
+                                            min="0" max="20">
                                     
                                     @elseif($editableField === 'supervisor_id')
                                         <select name="supervisor_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
@@ -858,6 +923,60 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                    
+                                    @elseif($editableField === 'nationality')
+                                        <input type="text" name="nationality" value="{{ old('nationality', $emp->user->nationality) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'residence')
+                                        <input type="text" name="residence" value="{{ old('residence', $emp->user->contact_info['residence'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'residence_neighborhood')
+                                        <input type="text" name="residence_neighborhood" value="{{ old('residence_neighborhood', $emp->user->contact_info['residence_neighborhood'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'work_area')
+                                        <input type="text" name="work_area" value="{{ old('work_area', $emp->user->contact_info['work_area'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'vehicle_type')
+                                        <input type="text" name="vehicle_type" value="{{ old('vehicle_type', $emp->vehicle_info['vehicle_type'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    
+                                    @elseif($editableField === 'vehicle_model')
+                                        <input type="text" name="vehicle_model" value="{{ old('vehicle_model', $emp->vehicle_info['vehicle_model'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    
+                                    @elseif($editableField === 'vehicle_ID')
+                                        <input type="text" name="vehicle_ID" value="{{ old('vehicle_ID', $emp->vehicle_info['vehicle_ID'] ?? '') }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    
+                                    @elseif($editableField === 'Tshirt_size')
+                                        <select name="Tshirt_size" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                            @foreach($shirtSizes as $value => $label)
+                                                <option value="{{ $value }}" {{ old('Tshirt_size', $emp->user->size_info['Tshirt_size'] ?? '') == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'pants_size')
+                                        <select name="pants_size" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                            @foreach($pantsSizes as $value => $label)
+                                                <option value="{{ $value }}" {{ old('pants_size', $emp->user->size_info['pants_size'] ?? '') == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    
+                                    @elseif($editableField === 'bank_name')
+                                        <input type="text" name="bank_name" value="{{ old('bank_name', $emp->bank_name) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                                    
+                                    @elseif($editableField === 'owner_account_name')
+                                        <input type="text" name="owner_account_name" value="{{ old('owner_account_name', $emp->owner_account_name) }}" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
                                     
                                     @else
                                         <input type="text" name="{{ $editableField }}" value="{{ old($editableField, $emp->$editableField ?? '') }}" 
@@ -1610,4 +1729,95 @@
                 });
             });
         </script>
+
+        <script>
+            // Handle edit form submission with AJAX
+            document.addEventListener('DOMContentLoaded', function() {
+                const editForm = document.getElementById('editEmployeeModalForm');
+                
+                if (editForm) {
+                    editForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(this);
+                        const submitButton = this.querySelector('button[type="submit"]');
+                        const originalButtonText = submitButton.innerHTML;
+                        
+                        // Disable submit button and show loading
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> جاري الحفظ...';
+                        
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show success toast
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'تم بنجاح',
+                                    text: data.message || 'تمت تعديل بيانات الموظف بنجاح.',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    toast: true,
+                                    position: 'top-end'
+                                });
+                                
+                                // Redirect after short delay
+                                setTimeout(() => {
+                                    window.location.href = data.redirect_url || '{{ route("Employees.show", $emp->id) }}';
+                                }, 1500);
+                            } else {
+                                // Show error message
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'خطأ',
+                                    text: data.message || 'حدث خطأ أثناء حفظ البيانات',
+                                    confirmButtonText: 'حسناً'
+                                });
+                                
+                                // Re-enable submit button
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalButtonText;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطأ في الاتصال',
+                                text: 'تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى.',
+                                confirmButtonText: 'حسناً'
+                            });
+                            
+                            // Re-enable submit button
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonText;
+                        });
+                    });
+                }
+            });
+        </script>
+
+        @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم بنجاح',
+                    text: '{{ session("success") }}',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+        </script>
+        @endif
     @endpush
