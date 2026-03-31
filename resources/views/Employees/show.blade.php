@@ -1771,7 +1771,7 @@
                                 
                                 // Redirect after short delay
                                 setTimeout(() => {
-                                    window.location.href = data.redirect_url || '{{ route("Employees.show", $emp->id) }}';
+                                    window.location.href = data.redirect_url || '{{ route("employees.show", $emp->id) }}';
                                 }, 1500);
                             } else {
                                 // Show error message

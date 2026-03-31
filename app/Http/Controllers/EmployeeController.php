@@ -358,7 +358,7 @@ class EmployeeController extends Controller
                 'message' => 'تم استبدال الموظف بنجاح وإضافة الموظف الجديد',
                 'data' => [
                     'new_employee' => new EmployeeResource($newEmployee),
-                    'redirect_url' => route('Employees.show', $newEmployee->id)
+                    'redirect_url' => route('employees.show', $newEmployee->id)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -397,6 +397,7 @@ class EmployeeController extends Controller
         try {
             $this->employeeService->updateEmployee($employee, $data, $image);
 
+
             // Check if this is an AJAX request
             if ($request->expectsJson() || $request->ajax()) {
                 // Reload the employee with relationships for the response
@@ -419,12 +420,12 @@ class EmployeeController extends Controller
                     'success' => true,
                     'message' => 'تمت تعديل بيانات الموظف بنجاح.',
                     'data' => new EmployeeResource($employee),
-                    'redirect_url' => route('Employees.show', $employee->id)
+                    'redirect_url' => route('employees.show', $employee->id)
                 ]);
             }
 
             // For regular form submissions, redirect with success message
-            return redirect()->route('Employees.show', $employee->id)
+            return redirect()->route('employees.show', $employee->id)
                 ->with('success', 'تمت تعديل بيانات الموظف بنجاح.');
 
         } catch (\Exception $e) {
@@ -1069,7 +1070,7 @@ class EmployeeController extends Controller
             $grossSalary = $employee->salary + $currentMonthIncreases;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
 
-            $salaryTypeLabel = ($employee->salary_type == 'monthly_salary') ? 'راتب شهري' : 
+            $salaryTypeLabel = ($employee->salary_type == 'monthly_salary') ? 'راتب شهري' :
                               (($employee->salary_type == 'wage_protection_salary') ? 'راتب حماية الأجور' : 'راتب شهري');
 
             $csvData[] = [
