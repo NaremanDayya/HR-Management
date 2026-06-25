@@ -27,7 +27,7 @@ class ProjectController extends Controller
 
         if ($authUser->role === 'project_manager') {
             $query->where('manager_id', $authUser->id);
-        } elseif (in_array($authUser->role, ['admin', 'hr_manager', 'hr_assistant'])) {
+        } elseif (in_array($authUser->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager'])) {
         }
 
         $projects = $query->get();

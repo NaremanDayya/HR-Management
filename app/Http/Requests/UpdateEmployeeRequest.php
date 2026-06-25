@@ -32,10 +32,10 @@ class UpdateEmployeeRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
+                    // Blacklist is evaluated purely by name + stop_reason, regardless of
+                    // current account status, id_card, or phone number.
                     $blacklisted = Employee::where('name', $value)
-                        ->whereHas('user', function ($query) {
-                            $query->where('account_status', 'inactive');
-                        })
+                        ->where('id', '!=', $this->route('employee')->id)
                         ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
                         ->exists();
                     if ($blacklisted) {
@@ -77,7 +77,7 @@ class UpdateEmployeeRequest extends FormRequest
             'marital_status' => 'nullable|string|max:50',
             'personal_image' => 'nullable|image|max:2048',
             'bank_name' => 'nullable|string',
-            'iban' => ['nullable', 'string', 'digits:22', Rule::unique('employees', 'iban')->ignore($this->route('employee')->id)],
+            'iban' => ['nullable', 'string', 'digits:22'],
             'owner_account_name' => 'nullable|string|max:255',
             'supervisor' => [
                 'nullable',

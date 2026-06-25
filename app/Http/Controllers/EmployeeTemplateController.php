@@ -551,10 +551,9 @@ class EmployeeTemplateController extends Controller
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
+                    // Blacklist is evaluated purely by name + stop_reason, regardless of
+                    // current account status, id_card, or phone number.
                     $blacklisted = Employee::where('name', $value)
-                        ->whereHas('user', function ($query) {
-                            $query->where('account_status', 'deactivated');
-                        })
                         ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
                         ->exists();
 
@@ -574,7 +573,6 @@ class EmployeeTemplateController extends Controller
                 'required',
                 'string',
                 'digits:22',
-                'unique:employees,iban'
             ],
             'vehicle_ID' => [
                 'required',
@@ -681,7 +679,6 @@ class EmployeeTemplateController extends Controller
             'owner_account_name.required' => 'حقل اسم صاحب الحساب مطلوب',
             'iban.required' => 'حقل رقم الآيبان مطلوب',
             'iban.digits' => 'رقم الآيبان يجب أن يكون 22 رقماً',
-            'iban.unique' => 'رقم الآيبان مستخدم مسبقاً',
             'vehicle_ID.required' => 'حقل رقم اللوحة مطلوب',
             'vehicle_type.required' => 'حقل نوع المركبة مطلوب',
             'vehicle_model.required' => 'حقل موديل المركبة مطلوب',
@@ -724,12 +721,6 @@ class EmployeeTemplateController extends Controller
 
         if ($existingUser) {
             throw new \Exception('المستخدم موجود مسبقاً بالبريد الإلكتروني أو رقم الهوية');
-        }
-
-        // Check if employee with IBAN already exists
-        $existingEmployee = Employee::where('iban', 'SA' . $data['iban'])->first();
-        if ($existingEmployee) {
-            throw new \Exception('رقم الآيبان مستخدم مسبقاً');
         }
 
         $user = User::create([

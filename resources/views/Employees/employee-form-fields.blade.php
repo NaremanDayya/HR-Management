@@ -395,11 +395,11 @@
                 @enderror
             </div>
             <div id="area-manager-container" style="display: none;">
-                <label class="block text-sm font-medium text-gray-700 mb-1">مدير المنطقة</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">مشرف المشرفين</label>
                 <select id="area-manager-select" name="area_manager"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('area_manager') border-red-500 @enderror"
                         disabled>
-                    <option value="" disabled selected>اختر مدير المنطقة</option>
+                    <option value="" disabled selected>اختر مشرف المشرفين</option>
                     @foreach($area_managers as $id => $name)
                         <option value="{{ $id }}" {{ old('area_manager') == $id ? 'selected' : '' }}>
                             {{ $name }}
@@ -536,7 +536,7 @@
 
             if (filteredAreaManagers.length > 0) {
                 areaManagerSelect.disabled = false;
-                areaManagerSelect.innerHTML = `<option value="" disabled selected>اختر مدير المنطقة</option>`;
+                areaManagerSelect.innerHTML = `<option value="" disabled selected>اختر مشرف المشرفين</option>`;
 
                 filteredAreaManagers.forEach(am => {
                     const option = document.createElement('option');
@@ -551,7 +551,7 @@
         } else {
             // If areaManagers doesn't have project_id or is in different format
             areaManagerSelect.disabled = false;
-            areaManagerSelect.innerHTML = `<option value="" disabled selected>اختر مدير المنطقة</option>`;
+            areaManagerSelect.innerHTML = `<option value="" disabled selected>اختر مشرف المشرفين</option>`;
 
             areaManagers.forEach(am => {
                 const option = document.createElement('option');

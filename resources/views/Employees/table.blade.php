@@ -780,6 +780,19 @@
                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
                                                            placeholder="اختر التاريخ" required>
                                                 </div>
+                                                <div class="mb-4 text-right">
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1 text-right">
+                                                        المشروع الذي سيتم تعيين الموظف فيه
+                                                    </label>
+                                                    <select name="project_id"
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 rtl text-right"
+                                                            required>
+                                                        <option value="" selected disabled>اختر المشروع</option>
+                                                        @foreach($projects as $id => $name)
+                                                            <option value="{{ $id }}">{{ $name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
                                             </x-bulk-action-modal>
                                         </li>
 
@@ -867,16 +880,15 @@
                                             </li>
                                         @endif
                                         <li>
-                                            <x-bulk-action-modal action="united_clothes" modal-title="طلب زي موحد"
-                                                                 confirm-text="ملابس موحدة" button-class="bg-blue-600"
-                                                                 modal-id="united-clothes" :has-form="true">
+                                            <x-bulk-action-modal action="uniform" modal-title="طلب يونيفورم"
+                                                                 confirm-text="يونيفورم" button-class="bg-blue-600"
+                                                                 modal-id="uniform" :has-form="true">
                                                 <div class="space-y-4">
                                                     <!-- Header -->
                                                     <div class="text-right">
-                                                        <h3 class="text-lg font-medium text-gray-800">اختيار أنواع
-                                                            اللباس
+                                                        <h3 class="text-lg font-medium text-gray-800">اختيار عناصر
+                                                            اليونيفورم
                                                         </h3>
-
                                                     </div>
 
                                                     <!-- Checkbox Group -->
@@ -885,14 +897,13 @@
                                                         <label
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="clothing_types[]"
+                                                                <input type="checkbox" name="uniform_types[]"
                                                                        value="tshirt"
                                                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
                                                                     class="block text-sm font-medium text-gray-800">تيشيرت</span>
-
                                                             </div>
                                                         </label>
 
@@ -900,39 +911,60 @@
                                                         <label
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="clothing_types[]"
+                                                                <input type="checkbox" name="uniform_types[]"
                                                                        value="pants"
                                                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
                                                                     class="block text-sm font-medium text-gray-800">بنطال</span>
-
                                                             </div>
                                                         </label>
 
-                                                        <!-- Cap Option -->
+                                                        <!-- Shoes Option -->
                                                         <label
                                                             class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
                                                             <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="clothing_types[]"
-                                                                       value="cap"
+                                                                <input type="checkbox" name="uniform_types[]"
+                                                                       value="shoes"
                                                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                             </div>
                                                             <div class="mr-3 text-right">
                                                                 <span
-                                                                    class="block text-sm font-medium text-gray-800">قبعة</span>
+                                                                    class="block text-sm font-medium text-gray-800">حذاء</span>
+                                                            </div>
+                                                        </label>
 
+                                                        <!-- ID Card Option -->
+                                                        <label
+                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
+                                                            <div class="flex items-center h-5">
+                                                                <input type="checkbox" name="uniform_types[]"
+                                                                       value="id_card"
+                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                            </div>
+                                                            <div class="mr-3 text-right">
+                                                                <span
+                                                                    class="block text-sm font-medium text-gray-800">بطاقة تعريف</span>
+                                                            </div>
+                                                        </label>
+
+                                                        <!-- Tool Bag Option -->
+                                                        <label
+                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
+                                                            <div class="flex items-center h-5">
+                                                                <input type="checkbox" name="uniform_types[]"
+                                                                       value="tool_bag"
+                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                                            </div>
+                                                            <div class="mr-3 text-right">
+                                                                <span
+                                                                    class="block text-sm font-medium text-gray-800">حقيبة أدوات</span>
                                                             </div>
                                                         </label>
                                                     </div>
                                                 </div>
                                             </x-bulk-action-modal>
-                                        </li>
-                                        <li>
-                                            <x-bulk-action-modal action="tool_bag" modal-title="تأكيد طلب حقيبة أدوات"
-                                                                 confirm-text="حقيبة أدوات" button-class="bg-red-600"
-                                                                 modal-id="tool_bag"/>
                                         </li>
                                         <li>
                                             <x-bulk-action-modal action="salary_advance" modal-title="طلب سلفة"
@@ -1257,7 +1289,7 @@
                                                         <label
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">من
                                                             تاريخ</label>
-                                                        <input type="text" id="start_date" name="start_date"
+                                                        <input type="text" id="temp_assignment_start_date" name="start_date"
                                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
                                                                placeholder="اختر التاريخ" required>
                                                     </div>
@@ -1265,7 +1297,7 @@
                                                         <label
                                                             class="block text-sm font-medium text-gray-700 mb-1 text-right">إلى
                                                             تاريخ</label>
-                                                        <input type="text" id="end_date" name="end_date"
+                                                        <input type="text" id="temp_assignment_end_date" name="end_date"
                                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right rtl"
                                                                placeholder="اختر التاريخ" required>
                                                     </div>
@@ -2813,6 +2845,10 @@
             altFormat: "F j, Y",
             allowInput: true,
             defaultHour: 12,
+            // Render the calendar inline inside the modal instead of appending it
+            // to <body>. Otherwise, clicking a date is seen as a "click outside"
+            // by the bulk-actions dropdown and the whole modal gets hidden.
+            static: true,
         });
         flatpickr("#birthday", {
             locale: "ar",
@@ -2829,6 +2865,7 @@
             altFormat: "F j, Y",
             allowInput: true,
             defaultHour: 12,
+            static: true,
         });
 
         flatpickr("#end_date", {
@@ -2838,6 +2875,7 @@
             altFormat: "F j, Y",
             allowInput: true,
             defaultHour: 12,
+            static: true,
         });
         flatpickr("#stop_date", {
             locale: "ar",
@@ -2846,6 +2884,25 @@
             altFormat: "F j, Y",
             allowInput: true,
             defaultHour: 12,
+            static: true,
+        });
+        flatpickr("#temp_assignment_start_date", {
+            locale: "ar",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+            allowInput: true,
+            defaultHour: 12,
+            static: true,
+        });
+        flatpickr("#temp_assignment_end_date", {
+            locale: "ar",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+            allowInput: true,
+            defaultHour: 12,
+            static: true,
         });
     </script>
     <script>

@@ -15,23 +15,25 @@ class EmployeeViewDataService
 
         $roleLabels = [
             'project_manager' => 'مدير مشروع',
+            'senior_project_manager' => 'مدير مديري المشاريع',
             'hr_manager' => 'مدير موارد بشرية',
             'hr_assistant' => 'مساعد مدير موارد بشرية',
 //            'shelf_stacker' => 'مصفف أرفف',
-//            'area_manager' => 'مدير منطقة',
+//            'area_manager' => 'مشرف المشرفين',
 //            'supervisor' => 'مشرف',
         ];
         $allowedForHrManager = [
             'project_manager' => 'مدير مشروع',
+            'senior_project_manager' => 'مدير مديري المشاريع',
             'hr_assistant' => 'مساعد مدير موارد بشرية',
 //            'shelf_stacker' => 'مصفف أرفف',
-//            'area_manager' => 'مدير منطقة',
+//            'area_manager' => 'مشرف المشرفين',
 //            'supervisor' => 'مشرف',
         ];
 
         $allowedForProjectManager = [
             'shelf_stacker' => 'مصفف أرفف',
-            'area_manager' => 'مدير منطقة',
+            'area_manager' => 'مشرف المشرفين',
             'supervisor' => 'مشرف',
         ];
 

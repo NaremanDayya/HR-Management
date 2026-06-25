@@ -35,10 +35,11 @@ class StoreEmployeeRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
+                    // Blacklist is evaluated purely by name + stop_reason, regardless of
+                    // current account status, id_card, or phone number — otherwise a
+                    // bad-performance employee could rejoin fraudulently by changing
+                    // their ID/phone while keeping the same name.
                     $blacklisted = Employee::where('name', $value)
-                        ->whereHas('user', function ($query) {
-                            $query->where('account_status', 'deactivated');
-                        })
                         ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
                         ->exists();
 
@@ -61,7 +62,7 @@ class StoreEmployeeRequest extends FormRequest
             'bank_name' => 'required|string',
             'age' => 'required|integer|min:10|max:100',
             'owner_account_name' => 'required|string|max:255',
-            'iban' => ['required', 'string', 'digits:22', 'unique:employees,iban'],
+            'iban' => ['required', 'string', 'digits:22'],
             'vehicle_ID' => [
                 'required',
                 'string',

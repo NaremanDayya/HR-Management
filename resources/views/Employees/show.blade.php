@@ -979,7 +979,17 @@
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
                                     
                                     @else
-                                        <input type="text" name="{{ $editableField }}" value="{{ old($editableField, $emp->$editableField ?? '') }}" 
+                                        @php
+                                            $fallbackValue = old($editableField, $emp->$editableField ?? '');
+                                            if (is_array($fallbackValue)) {
+                                                $fallbackValue = json_encode($fallbackValue, JSON_UNESCAPED_UNICODE);
+                                            } elseif (is_bool($fallbackValue)) {
+                                                $fallbackValue = $fallbackValue ? '1' : '0';
+                                            } elseif (!is_scalar($fallbackValue) && $fallbackValue !== null) {
+                                                $fallbackValue = (string) $fallbackValue;
+                                            }
+                                        @endphp
+                                        <input type="text" name="{{ $editableField }}" value="{{ $fallbackValue }}"
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                                     @endif
                                 </div>

@@ -31,6 +31,18 @@ class RequestTypeSeeder extends Seeder
                 'key' => 'temporary_assignment',
                 'label' => 'طلب نقل مؤقت',
             ],
+            [
+                'key' => 'united_clothes',
+                'label' => 'طلب يونيفورم',
+            ],
+            [
+                'key' => 'tool_bag',
+                'label' => 'طلب حقيبة أدوات',
+            ],
+            [
+                'key' => 'generate_health_card',
+                'label' => 'طلب إصدار بطاقة صحية',
+            ],
         ];
 
         foreach ($requestTypes as $type) {

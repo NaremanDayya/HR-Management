@@ -65,11 +65,8 @@ class EmployeeActionController extends Controller
                 case 'change-password':
                     return $this->updatePassword($employeeIds, $request);
 
-                case 'united_clothes':
-                    return $this->handleUnitedClothes($employeeIds, $request);
-
-                case 'tool_bag':
-                    return $this->handleToolBag($employeeIds, $request);
+                case 'uniform':
+                    return $this->handleUniform($employeeIds, $request);
 
                 case 'salary_advance':
                     return $this->handleSalaryAdvance($employeeIds, $request);
@@ -109,6 +106,7 @@ class EmployeeActionController extends Controller
     {
         $validated = $request->validate([
             'start_date' => 'required|date',
+            'project_id' => 'required|exists:projects,id',
         ]);
 
         $userIds = Employee::whereIn('id', $employeeIds)->pluck('user_id');
@@ -119,6 +117,7 @@ class EmployeeActionController extends Controller
 
         Employee::whereIn('id', $employeeIds)->update([
             'joining_date' => $validated['start_date'],
+            'project_id' => $validated['project_id'],
         ]);
 
         foreach ($employeeIds as $id) {
@@ -133,7 +132,7 @@ class EmployeeActionController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تفعيل الحسابات المحددة بنجاح'
+            'message' => 'تم تفعيل الحسابات المحددة بنجاح وتعيينها على المشروع المحدد'
         ]);
     }
 
@@ -193,27 +192,27 @@ class EmployeeActionController extends Controller
     }
 
 
-    private function handleUnitedClothes(array $employeeIds, Request $request)
+    private function handleUniform(array $employeeIds, Request $request)
     {
         $validated = $request->validate([
-            'clothing_types' => 'required|array|min:1',
-            'clothing_types.*' => 'in:tshirt,pants,cap',
+            'uniform_types' => 'required|array|min:1',
+            'uniform_types.*' => 'in:tshirt,pants,shoes,id_card,tool_bag',
         ]);
 
-        $clothingTypes = $validated['clothing_types'];
+        $uniformTypes = $validated['uniform_types'];
 
         foreach ($employeeIds as $employeeId) {
             $employee = Employee::with('user')->findOrFail($employeeId);
 
-            foreach ($clothingTypes as $type) {
+            foreach ($uniformTypes as $type) {
                 $sizeKey = match ($type) {
                     'tshirt' => 'Tshirt_size',
                     'pants' => 'pants_size',
-                    'cap' => 'cap_size',
+                    'shoes' => 'Shoes_size',
                     default => null,
                 };
 
-                $size = $employee->user->size_info[$sizeKey] ?? 'one size';
+                $size = $sizeKey ? ($employee->user->size_info[$sizeKey] ?? 'one size') : null;
 
                 $empRequest = EmployeeRequest::create([
                     'employee_id' => $employeeId,
@@ -232,33 +231,9 @@ class EmployeeActionController extends Controller
         $admin = User::where('role', 'admin')->first();
         $admin->notify(new NewEmployeeRequestNotification($empRequest, 'united_clothes'));
 
-
-
         return response()->json([
             'success' => true,
-            'message' => 'تم تقديم طلب الملابس الموحدة للموظفين المحددين',
-        ]);
-    }
-
-
-    private function handleToolBag(array $employeeIds, Request $request)
-    {
-
-        foreach ($employeeIds as $employeeId) {
-            $empRequest = EmployeeRequest::create([
-                'employee_id' => $employeeId,
-                'request_type_id' => RequestType::getIdByKey('tool_bag'),
-                'status' => 'pending',
-                'requester_type' => 'App\Models\User',
-                'requester_id' => Auth::id(),
-            ]);
-        }
-        $admin = User::where('role', 'admin')->first();
-        $admin->notify(new NewEmployeeRequestNotification($empRequest, 'tool_bag'));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تقديم طلب حقيبة الأدوات للموظفين المحددين'
+            'message' => 'تم تقديم طلب اليونيفورم للموظفين المحددين',
         ]);
     }
 

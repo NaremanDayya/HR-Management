@@ -39,8 +39,9 @@ class ReplaceEmployeeRequest extends FormRequest
                 'string',
                 'max:255',
                 function ($attribute, $value, $fail) {
+                    // Blacklist is evaluated purely by name + stop_reason, regardless of
+                    // current account status, id_card, or phone number.
                     $blacklisted = User::where('name', $value)
-                        ->where('account_status', 'deactivated')
                         ->whereHas('employee', function ($query) {
                             $query->whereIn('stop_reason', ['سوء اداء', 'سوء أداء']);
                         })
@@ -70,7 +71,7 @@ class ReplaceEmployeeRequest extends FormRequest
             'pants_size' => 'nullable|string|max:10',
             'Shoes_size' => 'nullable|string|max:10',
             'bank_name' => 'required|string',
-            'iban' => ['required', 'string', 'digits:22', 'unique:employees,iban'],
+            'iban' => ['required', 'string', 'digits:22'],
             'owner_account_name' => 'required|string|max:255',
             'gender' => 'required|in:female,male',
             'health_card' => 'nullable|string|max:255',

@@ -104,6 +104,10 @@ class EmployeeController extends Controller
             'salary_type',
         ]);
 
+        $selectedMonth = (int) $request->input('month', now()->month);
+        $selectedYear = (int) $request->input('year', now()->year);
+        $monthDays = \Carbon\Carbon::create($selectedYear, $selectedMonth, 1)->daysInMonth;
+
         $user = Auth::user();
 
         // If user is project_manager, filter to show only their employees
@@ -125,8 +129,8 @@ class EmployeeController extends Controller
 
         $employees = $this->employeeService->filterEmployees($filters);
 
-        $currentMonth = now()->month;
-        $currentYear = now()->year;
+        $currentMonth = $selectedMonth;
+        $currentYear = $selectedYear;
 
         $employees->load([
             'deductions' => function ($q) use ($currentMonth, $currentYear) {
@@ -144,16 +148,18 @@ class EmployeeController extends Controller
             },
         ]);
 
-        $employees->transform(function ($employee) {
+        $employees->transform(function ($employee) use ($monthDays) {
             $currentMonthDeductions = $employee->deductions->sum('value');
             $advanceDeductions = $employee->advanceDeductions->sum('amount');
             $currentMonthIncreases = $employee->increases->sum('increase_amount');
 
-            $workDays = $employee->work_days ?? 26;
+            // Work days = actual number of calendar days in the selected month
+            // (Fridays included), not a fixed/editable figure.
+            $workDays = $monthDays;
             $absenceDays = $employee->absence_days ?? 0;
-            $netPayableDays = $workDays - $absenceDays;
+            $actualWorkDays = max(0, $workDays - $absenceDays);
 
-            $dailyRate = $employee->salary / 26;
+            $dailyRate = $employee->salary / $workDays;
             $absenceDeduction = $absenceDays * $dailyRate;
 
             $grossSalary = $employee->salary + $currentMonthIncreases;
@@ -167,7 +173,8 @@ class EmployeeController extends Controller
                 'project' => $employee?->project?->name,
                 'work_days' => $workDays,
                 'absence_days' => $absenceDays,
-                'net_payable_days' => $netPayableDays,
+                'net_payable_days' => $actualWorkDays,
+                'actual_work_days' => $actualWorkDays,
                 'absence_deduction' => $absenceDeduction,
                 'current_month_increases' => $currentMonthIncreases,
                 'current_month_deductions' => $currentMonthDeductions,
@@ -216,7 +223,10 @@ class EmployeeController extends Controller
             'avgNetSalaries' => $employees->avg('net_salary'),
             'minSalaries' => $employees->min('base_salary'),
             'maxSalaries' => $employees->max('base_salary'),
-            'currentMonth' => now()->format('F Y'),
+            'currentMonth' => \Carbon\Carbon::create($selectedYear, $selectedMonth, 1)->locale('ar')->translatedFormat('F Y'),
+            'selectedMonth' => $selectedMonth,
+            'selectedYear' => $selectedYear,
+            'monthDays' => $monthDays,
             'authRole' => $user->role,
             'role' => Role::where('name', $user->role)->first(),
             'currentFilters' => $filters, // Pass current filters to view
@@ -240,6 +250,7 @@ class EmployeeController extends Controller
                         'maxSalaries' => $responseData['maxSalaries'],
                     ],
                     'currentMonth' => $responseData['currentMonth'],
+                    'monthDays' => $monthDays,
                 ],
                 'filters' => $filters
             ]);
@@ -960,20 +971,33 @@ class EmployeeController extends Controller
 
     public function updateWorkDays(Request $request, Employee $employee)
     {
+        $selectedMonth = (int) $request->input('month', now()->month);
+        $selectedYear = (int) $request->input('year', now()->year);
+        $monthDays = \Carbon\Carbon::create($selectedYear, $selectedMonth, 1)->daysInMonth;
+
         $validated = $request->validate([
-            'work_days' => 'required|integer|min:0|max:31',
-            'absence_days' => 'required|integer|min:0|max:31',
+            'absence_days' => "required|integer|min:0|max:{$monthDays}",
         ]);
 
         try {
             $employee->update([
-                'work_days' => $validated['work_days'],
                 'absence_days' => $validated['absence_days'],
             ]);
 
+            $absenceDays = $validated['absence_days'];
+            $actualWorkDays = max(0, $monthDays - $absenceDays);
+            $dailyRate = $employee->salary / $monthDays;
+            $absenceDeduction = $absenceDays * $dailyRate;
+
             return response()->json([
                 'success' => true,
-                'message' => 'تم تحديث أيام العمل والغياب بنجاح',
+                'message' => 'تم تحديث أيام الغياب بنجاح',
+                'data' => [
+                    'work_days' => $monthDays,
+                    'absence_days' => $absenceDays,
+                    'actual_work_days' => $actualWorkDays,
+                    'absence_deduction' => $absenceDeduction,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([

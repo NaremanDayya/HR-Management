@@ -356,6 +356,26 @@
                                     </select>
                                 </div>
 
+                                <!-- Month Filter -->
+                                <div class="col-md-2">
+                                    <label for="month" class="form-label">الشهر</label>
+                                    <select class="form-select" id="month" name="month">
+                                        @foreach([1=>'يناير',2=>'فبراير',3=>'مارس',4=>'أبريل',5=>'مايو',6=>'يونيو',7=>'يوليو',8=>'أغسطس',9=>'سبتمبر',10=>'أكتوبر',11=>'نوفمبر',12=>'ديسمبر'] as $num => $label)
+                                            <option value="{{ $num }}" {{ (int) request('month', $selectedMonth) === $num ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Year Filter -->
+                                <div class="col-md-2">
+                                    <label for="year" class="form-label">السنة</label>
+                                    <select class="form-select" id="year" name="year">
+                                        @foreach(range(now()->year + 1, now()->year - 5) as $yr)
+                                            <option value="{{ $yr }}" {{ (int) request('year', $selectedYear) === $yr ? 'selected' : '' }}>{{ $yr }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 <!-- Action Buttons -->
                                 <div class="col-md-2">
                                     <div class="d-flex gap-2">
@@ -412,8 +432,9 @@
                                         <th><i class="fas fa-plus-circle me-1 text-success"></i> المكافآت</th>
                                         <th><i class="fas fa-minus-circle me-1 text-danger"></i> خصومات الشهر</th>
                                         <th><i class="fas fa-hand-holding-usd me-1 text-danger"></i> خصومات السلف</th>
-                                        <th><i class="fas fa-calendar-check me-1 text-primary"></i> أيام العمل</th>
+                                        <th><i class="fas fa-calendar-check me-1 text-primary"></i> أيام العمل (الشهر)</th>
                                         <th><i class="fas fa-calendar-times me-1 text-warning"></i> أيام الغياب</th>
+                                        <th><i class="fas fa-calendar-day me-1 text-info"></i> أيام العمل الفعلية</th>
                                         <th><i class="fas fa-money-bill-wave me-1 text-success"></i> صافي الراتب</th>
                                         <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
                                         <th><i class="fas fa-user-circle me-1 text-purple"></i> اسم صاحب الحساب</th>
@@ -451,10 +472,16 @@
                                                 {{ number_format($employee['advance_deductions']) }} ر.س
                                             </td>
                                             <td class="work-days-cell font-weight-bold">
-                                                {{ $employee['work_days'] ?? 26 }} يوم
+                                                {{ $employee['work_days'] ?? $monthDays }} يوم
                                             </td>
-                                            <td class="text-warning font-weight-bold">
+                                            <td class="text-warning font-weight-bold absence-days-cell"
+                                                style="cursor:pointer; text-decoration:underline;"
+                                                title="اضغط لتعديل أيام الغياب"
+                                                onclick="openSalaryModal('{{ $employee['id'] }}','{{ $employee['name'] }}','{{ $employee['base_salary'] }}','{{ $employee['work_days'] ?? $monthDays }}', this.parentNode)">
                                                 {{ $employee['absence_days'] ?? 0 }} يوم
+                                            </td>
+                                            <td class="text-info font-weight-bold actual-work-days-cell">
+                                                {{ $employee['actual_work_days'] ?? ($employee['net_payable_days'] ?? $monthDays) }} يوم
                                             </td>
                                             <td class="text-success font-weight-bold">
                                                 {{ number_format($employee['net_salary']) }} ر.س
@@ -575,9 +602,9 @@
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm text-gray-700 mb-1">أيام العمل</label>
-                <input id="workDays" type="number" min="1" max="31" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateWorkDays(this)" />
-                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">عدد أيام العمل الشهرية (الافتراضي: 26)</p>
+                <label class="block text-sm text-gray-700 mb-1">أيام العمل (الشهر المحدد)</label>
+                <input id="workDays" type="number" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100" readonly />
+                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">يُحتسب تلقائيًا حسب عدد أيام الشهر المحدد في الفلتر (يشمل الجمعة)</p>
             </div>
 
             <div class="mb-3">
@@ -615,6 +642,8 @@
             const searchInput = document.getElementById('search');
             const projectSelect = document.getElementById('project');
             const salaryTypeSelect = document.getElementById('salary_type');
+            const monthSelect = document.getElementById('month');
+            const yearSelect = document.getElementById('year');
             let filterTimeout;
 
             // Function to update URL without page reload
@@ -635,11 +664,15 @@
                 const searchValue = searchInput.value;
                 const projectValue = projectSelect.value;
                 const salaryTypeValue = salaryTypeSelect.value;
+                const monthValue = monthSelect ? monthSelect.value : '';
+                const yearValue = yearSelect ? yearSelect.value : '';
 
                 const filters = {
                     search: searchValue,
                     project: projectValue,
                     salary_type: salaryTypeValue,
+                    month: monthValue,
+                    year: yearValue,
                     live_filter: true // Add this to identify live filter requests
                 };
 
@@ -686,7 +719,7 @@
                 if (data.employees.length === 0) {
                     tableBody.innerHTML = `
                 <tr>
-                    <td colspan="14" class="text-center py-4">
+                    <td colspan="16" class="text-center py-4">
                         <div class="empty-state">
                             <div class="empty-icon">
                                 <i class="fas fa-file-invoice-dollar"></i>
@@ -725,8 +758,12 @@
                     <td class="work-days-cell font-weight-bold">
                         ${employee.work_days || 26} يوم
                     </td>
-                    <td class="text-warning font-weight-bold">
+                    <td class="text-warning font-weight-bold absence-days-cell" style="cursor:pointer; text-decoration:underline;" title="اضغط لتعديل أيام الغياب"
+                        onclick="openSalaryModal('${employee.id}','${employee.name}','${employee.base_salary}','${employee.work_days || 26}', this.parentNode)">
                         ${employee.absence_days || 0} يوم
+                    </td>
+                    <td class="text-info font-weight-bold actual-work-days-cell">
+                        ${employee.actual_work_days ?? employee.net_payable_days ?? ''} يوم
                     </td>
                     <td class="text-success font-weight-bold">
                         ${numberFormat(employee.net_salary)} ر.س
@@ -797,6 +834,20 @@
                 clearTimeout(filterTimeout);
                 filterTimeout = setTimeout(performLiveFiltering, 300);
             });
+
+            if (monthSelect) {
+                monthSelect.addEventListener('change', function() {
+                    clearTimeout(filterTimeout);
+                    filterTimeout = setTimeout(performLiveFiltering, 300);
+                });
+            }
+
+            if (yearSelect) {
+                yearSelect.addEventListener('change', function() {
+                    clearTimeout(filterTimeout);
+                    filterTimeout = setTimeout(performLiveFiltering, 300);
+                });
+            }
 
             // Prevent form submission for live filtering (we handle via AJAX)
             document.getElementById('filterForm').addEventListener('submit', function(e) {
@@ -1029,12 +1080,14 @@
             currentEmployeeId = employeeId;
             originalSalary = parseFloat(baseSalary);
 
-            // Get current values from the table row - UPDATED CELL INDICES
-            const currentDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6: Current Deductions
-            const advanceDeductions = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 7: Advance Deductions
-            const workDaysValue = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || 26; // Cell 8: Work Days
-            const absenceDays = parseInt(rowElement.cells[9].textContent.replace(/[^\d]/g, '')) || 0; // Cell 9: Absence Days
-            const netSalary = parseFloat(rowElement.cells[10].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 10: Net Salary
+            // Cell indices (0-based): 0 id, 1 name, 2 project, 3 base_salary, 4 salary_type,
+            // 5 increases, 6 deductions, 7 advance_deductions, 8 work_days, 9 absence_days,
+            // 10 actual_work_days, 11 net_salary, 12 iban, 13 owner, 14 bank, 15 actions
+            const currentDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0;
+            const advanceDeductions = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0;
+            const workDaysValue = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || parseInt(workDays) || 26;
+            const absenceDays = parseInt(rowElement.cells[9].textContent.replace(/[^\d]/g, '')) || 0;
+            const netSalary = parseFloat(rowElement.cells[11].textContent.replace(/[^\d.]/g, '')) || 0;
 
             // Set values in the modal
             document.getElementById('employeeName').value = employeeName;
@@ -1091,7 +1144,7 @@
         }
 
         function saveAdjustedSalary() {
-            if (!currentEmployeeRow) return;
+            if (!currentEmployeeRow || !currentEmployeeId) return;
 
             const workDays = parseInt(document.getElementById('workDays').value) || 26;
             const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
@@ -1102,45 +1155,63 @@
                 document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
             ) || 0;
 
-            // Get previous values from the table row - UPDATED CELL INDICES
-            const prevCurrentDeductions = parseFloat(currentEmployeeRow.cells[6].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 6
-            const prevAdvanceDeductions = parseFloat(currentEmployeeRow.cells[7].textContent.replace(/[^\d.]/g, '')) || 0; // Cell 7
-            const prevWorkDays = parseInt(currentEmployeeRow.cells[8].textContent.replace(/[^\d]/g, '')) || 26; // Cell 8
-            const prevAbsenceDays = parseInt(currentEmployeeRow.cells[9].textContent.replace(/[^\d]/g, '')) || 0; // Cell 9
-
-            // Get current increases value (cell index 5)
             const currentIncreasesText = currentEmployeeRow.cells[5].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
-            // Calculate new values
-            const dailyRate = originalSalary / workDays;
-            const absenceDeduction = absenceDays * dailyRate;
-            const netSalary = Math.max(0, (originalSalary + currentIncreases) - (currentDeductions + advanceDeductions + absenceDeduction));
+            const month = document.getElementById('month')?.value || new Date().getMonth() + 1;
+            const year = document.getElementById('year')?.value || new Date().getFullYear();
 
-            // UPDATED CELL INDICES FOR UPDATING:
-            // Update current deductions (cell 6)
-            currentEmployeeRow.cells[6].textContent = numberFormat(currentDeductions) + ' ر.س';
-            currentEmployeeRow.cells[6].className = 'text-danger';
+            const saveBtn = document.getElementById('saveSalaryBtn');
+            saveBtn.disabled = true;
 
-            // Update advance deductions (cell 7)
-            currentEmployeeRow.cells[7].textContent = numberFormat(advanceDeductions) + ' ر.س';
-            currentEmployeeRow.cells[7].className = 'text-danger';
+            fetch(`/employees/${currentEmployeeId}/update-work-days`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ absence_days: absenceDays, month: month, year: year }),
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (!result.success) {
+                        showToast(result.message || 'حدث خطأ أثناء الحفظ', 'danger');
+                        return;
+                    }
 
-            // Update work days (cell 8)
-            currentEmployeeRow.cells[8].textContent = workDays + ' يوم';
-            currentEmployeeRow.cells[8].className = 'work-days-cell font-weight-bold';
+                    const data = result.data;
+                    const netSalary = Math.max(0, (originalSalary + currentIncreases) - (currentDeductions + advanceDeductions + data.absence_deduction));
 
-            // Update absence days (cell 9)
-            currentEmployeeRow.cells[9].textContent = absenceDays + ' يوم';
-            currentEmployeeRow.cells[9].className = 'text-warning font-weight-bold';
+                    currentEmployeeRow.cells[6].textContent = numberFormat(currentDeductions) + ' ر.س';
+                    currentEmployeeRow.cells[6].className = 'text-danger';
 
-            // Update net salary (cell 10)
-            currentEmployeeRow.cells[10].textContent = numberFormat(netSalary) + ' ر.س';
-            currentEmployeeRow.cells[10].className = 'text-success font-weight-bold';
+                    currentEmployeeRow.cells[7].textContent = numberFormat(advanceDeductions) + ' ر.س';
+                    currentEmployeeRow.cells[7].className = 'text-danger';
 
-            // Show success message
-            showToast('تم تحديث الراتب بنجاح', 'success');
-            closeSalaryModal();
+                    currentEmployeeRow.cells[8].textContent = data.work_days + ' يوم';
+                    currentEmployeeRow.cells[8].className = 'work-days-cell font-weight-bold';
+
+                    currentEmployeeRow.cells[9].textContent = data.absence_days + ' يوم';
+                    currentEmployeeRow.cells[9].className = 'text-warning font-weight-bold absence-days-cell';
+                    currentEmployeeRow.cells[9].style.cursor = 'pointer';
+                    currentEmployeeRow.cells[9].style.textDecoration = 'underline';
+
+                    currentEmployeeRow.cells[10].textContent = data.actual_work_days + ' يوم';
+                    currentEmployeeRow.cells[10].className = 'text-info font-weight-bold actual-work-days-cell';
+
+                    currentEmployeeRow.cells[11].textContent = numberFormat(netSalary) + ' ر.س';
+                    currentEmployeeRow.cells[11].className = 'text-success font-weight-bold';
+
+                    showToast('تم تحديث أيام الغياب والراتب بنجاح', 'success');
+                    closeSalaryModal();
+                })
+                .catch(() => {
+                    showToast('حدث خطأ أثناء الاتصال بالخادم', 'danger');
+                })
+                .finally(() => {
+                    saveBtn.disabled = false;
+                });
         }
 
         function validateWorkDays(input) {
