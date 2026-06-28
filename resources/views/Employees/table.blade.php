@@ -1514,27 +1514,141 @@
         </div>
 
         <!-- Self Registration Link Modal -->
+        <style>
+            #selfRegistrationLinkModal .modal-content {
+                border: none;
+                border-radius: 18px;
+                overflow: hidden;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            }
+            #selfRegistrationLinkModal .reg-link-header {
+                background: linear-gradient(135deg, #740e0e 0%, #9a1e1e 100%);
+                color: #fff;
+                padding: 22px 24px;
+                position: relative;
+            }
+            #selfRegistrationLinkModal .reg-link-header h5 {
+                margin: 0;
+                font-weight: 700;
+                font-size: 1.15rem;
+            }
+            #selfRegistrationLinkModal .reg-link-header p {
+                margin: 6px 0 0;
+                font-size: 0.85rem;
+                opacity: 0.9;
+            }
+            #selfRegistrationLinkModal .reg-link-header .btn-close {
+                position: absolute;
+                left: 18px;
+                top: 22px;
+                filter: brightness(0) invert(1);
+                opacity: 0.85;
+            }
+            #selfRegistrationLinkModal .reg-link-body {
+                padding: 24px;
+                background: #F8F9FB;
+            }
+            #selfRegistrationLinkModal .project-select-wrap label {
+                font-weight: 600;
+                font-size: 0.85rem;
+                color: #555;
+                margin-bottom: 6px;
+                display: block;
+            }
+            #selfRegistrationLinkModal .project-select-wrap select {
+                border-radius: 10px;
+                padding: 10px 14px;
+                border: 1px solid #e0e0e0;
+                font-weight: 600;
+            }
+            #selfRegistrationLinkModal .role-card {
+                background: #fff;
+                border-radius: 14px;
+                padding: 14px 16px;
+                margin-top: 14px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                border: 1px solid #eee;
+            }
+            #selfRegistrationLinkModal .role-card-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            #selfRegistrationLinkModal .role-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.82rem;
+                font-weight: 700;
+                padding: 4px 12px;
+                border-radius: 30px;
+                color: #fff;
+            }
+            #selfRegistrationLinkModal .role-chip.shelf_stacker { background: #2a9d8f; }
+            #selfRegistrationLinkModal .role-chip.supervisor { background: #e07a2c; }
+            #selfRegistrationLinkModal .role-chip.area_manager { background: #5b5fc7; }
+            #selfRegistrationLinkModal .role-link-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            #selfRegistrationLinkModal .role-link-input {
+                flex: 1;
+                background: #F5F6F8;
+                border: 1px dashed #d8d8d8;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 0.82rem;
+                color: #555;
+                direction: ltr;
+                text-align: left;
+                font-family: monospace;
+            }
+            #selfRegistrationLinkModal .copy-btn {
+                background: #740e0e;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 8px 16px;
+                font-weight: 600;
+                font-size: 0.82rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+                transition: background 0.2s ease;
+            }
+            #selfRegistrationLinkModal .copy-btn:hover { background: #5d0a0a; color: #fff; }
+            #selfRegistrationLinkModal .copy-btn.copied { background: #2a9d8f; }
+        </style>
         <div class="modal fade" id="selfRegistrationLinkModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-md">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">رابط تسجيل الموظفين الذاتي</h5>
+                <div class="modal-content" x-data="{
+                    projectId: '{{ array_key_first($projects) }}',
+                    copiedRole: null,
+                    roles: {
+                        shelf_stacker: { label: 'مصفف أرفف', icon: '📦' },
+                        supervisor: { label: 'مشرف', icon: '🧑‍💼' },
+                        area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
+                    },
+                    copyLink(role) {
+                        const input = document.getElementById('self-reg-link-' + role);
+                        input.select();
+                        navigator.clipboard.writeText(input.value).then(() => {
+                            this.copiedRole = role;
+                            setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
+                        }).catch(() => document.execCommand('copy'));
+                    }
+                }">
+                    <div class="reg-link-header">
+                        <h5>🔗 رابط تسجيل الموظفين الذاتي</h5>
+                        <p>اختر المشروع والدور الوظيفي، ثم شارك الرابط مع الموظفين المعنيين ليعبّوا بياناتهم بنفسهم.</p>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" x-data="{
-                        projectId: '{{ array_key_first($projects) }}',
-                        roles: {
-                            shelf_stacker: 'مصفف أرفف',
-                            supervisor: 'مشرف',
-                            area_manager: 'مشرف المشرفين'
-                        }
-                    }">
-                        <p class="text-muted" style="font-size: 0.9rem;">
-                            اختر المشروع والدور الوظيفي المطلوب، ثم شارك الرابط مع الموظفين المعنيين، وسيقوم كل موظف
-                            بتعبئة بياناته بنفسه. ستظهر بياناته في جدول الموظفين بحالة "قيد المراجعة" حتى تقوم بقبولها أو رفضها.
-                        </p>
-                        <div class="mb-3">
-                            <label class="form-label">المشروع</label>
+                    <div class="reg-link-body">
+                        <div class="project-select-wrap">
+                            <label>المشروع</label>
                             <select class="form-select" x-model="projectId">
                                 @foreach ($projects as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
@@ -1542,15 +1656,24 @@
                             </select>
                         </div>
 
-                        <template x-for="(label, role) in roles" :key="role">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <input type="text" readonly class="form-control"
-                                       :id="'self-reg-link-' + role"
-                                       :value="'{{ url('/register-employee') }}/' + projectId + '/' + role">
-                                <button type="button" class="btn btn-outline-purple" style="white-space: nowrap;"
-                                        x-on:click="copySelfRegistrationLink('self-reg-link-' + role)"
-                                        x-text="label + ' - نسخ'">
-                                </button>
+                        <template x-for="(info, role) in roles" :key="role">
+                            <div class="role-card">
+                                <div class="role-card-head">
+                                    <span class="role-chip" :class="role">
+                                        <span x-text="info.icon"></span>
+                                        <span x-text="info.label"></span>
+                                    </span>
+                                </div>
+                                <div class="role-link-row">
+                                    <input type="text" readonly class="role-link-input"
+                                           :id="'self-reg-link-' + role"
+                                           :value="'{{ url('/register-employee') }}/' + projectId + '/' + role">
+                                    <button type="button" class="copy-btn" :class="{ copied: copiedRole === role }"
+                                            x-on:click="copyLink(role)">
+                                        <span x-show="copiedRole !== role">📋 نسخ</span>
+                                        <span x-show="copiedRole === role">✅ تم النسخ</span>
+                                    </button>
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -3366,17 +3489,7 @@
             }
         }
 
-        function copySelfRegistrationLink(inputId) {
-            const input = document.getElementById(inputId);
-            input.select();
-            navigator.clipboard.writeText(input.value).then(() => {
-                alert('تم نسخ الرابط');
-            }).catch(() => {
-                document.execCommand('copy');
-            });
-        }
-
-        function reviewSelfSubmission(employeeId, action) {
+function reviewSelfSubmission(employeeId, action) {
             const confirmMsg = action === 'accept'
                 ? 'هل تريد قبول بيانات هذا الموظف وإضافته إلى المشروع؟'
                 : 'هل تريد رفض بيانات هذا الموظف؟';
