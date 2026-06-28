@@ -1524,23 +1524,29 @@
             #selfRegistrationLinkModal .reg-link-header {
                 background: linear-gradient(135deg, #740e0e 0%, #9a1e1e 100%);
                 color: #fff;
-                padding: 22px 24px;
+                padding: 20px 44px 22px 44px;
                 position: relative;
+                min-height: auto;
             }
             #selfRegistrationLinkModal .reg-link-header h5 {
                 margin: 0;
                 font-weight: 700;
                 font-size: 1.15rem;
+                line-height: 1.5;
+                white-space: normal;
             }
             #selfRegistrationLinkModal .reg-link-header p {
-                margin: 6px 0 0;
+                margin: 8px 0 0;
                 font-size: 0.85rem;
-                opacity: 0.9;
+                line-height: 1.7;
+                opacity: 0.92;
+                white-space: normal;
+                word-wrap: break-word;
             }
             #selfRegistrationLinkModal .reg-link-header .btn-close {
                 position: absolute;
-                left: 18px;
-                top: 22px;
+                left: 16px;
+                top: 20px;
                 filter: brightness(0) invert(1);
                 opacity: 0.85;
             }
