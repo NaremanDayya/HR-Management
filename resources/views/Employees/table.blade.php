@@ -581,6 +581,14 @@
         background: red;
     }
 
+    .status-indicator.pending {
+        background: rgb(245, 166, 35);
+    }
+
+    .status-indicator.rejected {
+        background: #6b7280;
+    }
+
     .employee-table th {
         font-weight: 600;
         background-color: #f8f9fa;
@@ -690,6 +698,12 @@
                                         data-bs-target="#createEmployeeModal">
                                     <i class="fas fa-plus"></i> إضافة موظف
                                 </button>
+                                @if (!empty($projects))
+                                    <button class="btn btn-outline-purple" data-bs-toggle="modal"
+                                            data-bs-target="#selfRegistrationLinkModal">
+                                        <i class="fas fa-link"></i> رابط تسجيل الموظفين
+                                    </button>
+                                @endif
                             @endif
                             <div class="export-btn-group no-print">
                                 <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
@@ -1499,6 +1513,51 @@
             </div>
         </div>
 
+        <!-- Self Registration Link Modal -->
+        <div class="modal fade" id="selfRegistrationLinkModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">رابط تسجيل الموظفين الذاتي</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" x-data="{
+                        projectId: '{{ array_key_first($projects) }}',
+                        roles: {
+                            shelf_stacker: 'مصفف أرفف',
+                            supervisor: 'مشرف',
+                            area_manager: 'مشرف المشرفين'
+                        }
+                    }">
+                        <p class="text-muted" style="font-size: 0.9rem;">
+                            اختر المشروع والدور الوظيفي المطلوب، ثم شارك الرابط مع الموظفين المعنيين، وسيقوم كل موظف
+                            بتعبئة بياناته بنفسه. ستظهر بياناته في جدول الموظفين بحالة "قيد المراجعة" حتى تقوم بقبولها أو رفضها.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">المشروع</label>
+                            <select class="form-select" x-model="projectId">
+                                @foreach ($projects as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <template x-for="(label, role) in roles" :key="role">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <input type="text" readonly class="form-control"
+                                       :id="'self-reg-link-' + role"
+                                       :value="'{{ url('/register-employee') }}/' + projectId + '/' + role">
+                                <button type="button" class="btn btn-outline-purple" style="white-space: nowrap;"
+                                        x-on:click="copySelfRegistrationLink('self-reg-link-' + role)"
+                                        x-text="label + ' - نسخ'">
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Create Employee Modal -->
         <div class="modal fade" id="createEmployeeModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -1648,6 +1707,8 @@
                     options: {
                         active: 'نشط',
                         inactive: 'غير نشط',
+                        pending: 'قيد المراجعة (نموذج ذاتي)',
+                        rejected: 'مرفوض (نموذج ذاتي)',
                         blacklist: 'في القائمة السوداء'
                     },
                     applyFilter(value, key) {
@@ -1979,6 +2040,9 @@
                             </th>
                             <th class="text-center text-uppercase ">
                                 سبب التوقف
+                            </th>
+                            <th class="no-print text-center text-uppercase ">
+                                مراجعة النموذج
                             </th>
 
                         </tr>
@@ -2336,7 +2400,24 @@
                     </span>
                                     @endif
                                 </td>
-
+                                <td class="no-print align-middle text-center">
+                                    @if ($employee['account_status'] === 'pending')
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                    onclick="reviewSelfSubmission({{ $employee['id'] }}, 'accept')">
+                                                <i class="fas fa-check"></i> قبول
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    onclick="reviewSelfSubmission({{ $employee['id'] }}, 'reject')">
+                                                <i class="fas fa-times"></i> رفض
+                                            </button>
+                                        </div>
+                                    @elseif ($employee['account_status'] === 'rejected')
+                                        <span class="badge bg-secondary">مرفوض</span>
+                                    @else
+                                        <span class="text-secondary">-</span>
+                                    @endif
+                                </td>
 
                             </tr>
                         @endforeach
@@ -3283,6 +3364,42 @@
             if (document.getElementById('deduction_amount').value) {
                 calculateDeductionPercentage();
             }
+        }
+
+        function copySelfRegistrationLink(inputId) {
+            const input = document.getElementById(inputId);
+            input.select();
+            navigator.clipboard.writeText(input.value).then(() => {
+                alert('تم نسخ الرابط');
+            }).catch(() => {
+                document.execCommand('copy');
+            });
+        }
+
+        function reviewSelfSubmission(employeeId, action) {
+            const confirmMsg = action === 'accept'
+                ? 'هل تريد قبول بيانات هذا الموظف وإضافته إلى المشروع؟'
+                : 'هل تريد رفض بيانات هذا الموظف؟';
+            if (!confirm(confirmMsg)) return;
+
+            fetch(`/employees/${employeeId}/review-submission`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ action: action }),
+            })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message || 'حدث خطأ أثناء معالجة الطلب');
+                    }
+                })
+                .catch(() => alert('حدث خطأ أثناء الاتصال بالخادم'));
         }
 
         function calculatePercentage() {

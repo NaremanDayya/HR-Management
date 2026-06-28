@@ -37,7 +37,7 @@ class Project extends Model
     {
         return $this->hasMany(Employee::class, 'project_id')
             ->whereHas('user', function ($query) {
-                $query->where('account_status', '!=', 'active');
+                $query->whereNotIn('account_status', ['active', 'pending', 'rejected']);
             });
     }
     public function getActiveEmployeesCountAttribute()

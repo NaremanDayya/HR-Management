@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 
 class EmployeeService
 {
-    public function create(array $data)
+    public function create(array $data, string $accountStatus = 'active')
     {
         $imagePath = null;
         if (isset($data['personal_image']) && $data['personal_image'] instanceof \Illuminate\Http\UploadedFile) {
@@ -32,7 +32,7 @@ class EmployeeService
             'id_card' => $data['id_card'],
             'birthday' => $data['birthday'],
             'nationality' => $data['nationality'],
-            'account_status' => 'active',
+            'account_status' => $accountStatus,
             'gender' => $data['gender'],
             'personal_image' => $imagePath,
             'role' => $data['role'],

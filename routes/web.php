@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EmployeeTemplateController;
+use App\Http\Controllers\PublicEmployeeRegistrationController;
 
 
 Route::get('/', function () {
@@ -45,6 +46,9 @@ Route::get('/employees/credentials', function () {
 
     return view('Employees.credentials', compact('credentials'));
 })->name('employees.credentials');
+Route::get('/register-employee/{project}/{role}', [PublicEmployeeRegistrationController::class, 'show'])->name('public.employee-register.show');
+Route::post('/register-employee/{project}/{role}', [PublicEmployeeRegistrationController::class, 'store'])->name('public.employee-register.store');
+
 Route::get('/whatsapp/chat/{phone}', function ($phone, Request $request) {
     $phone = preg_replace('/[^0-9]/', '', $phone);
     $defaultMessage = $request->get('text', 'السلام عليكم ورحمة الله وبركاته');
@@ -84,6 +88,7 @@ Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess
         Route::get('/{employee}/increases', [EmployeeController::class, 'showIncreases'])->name('increases');
         Route::get('/{employee}/history', [EmployeeWorkHistoryController::class, 'getWorkHistory'])->name('histories');
         Route::get('/{employee}/assignments', [EmployeeController::class, 'showTemporaryProjectAssignments'])->name('assignments');
+        Route::post('/{employee}/review-submission', [EmployeeController::class, 'reviewSubmission'])->name('review-submission');
         Route::put('/{employee}/change-password', [EmployeeController::class, 'changePassword'])->name('change-password');
         Route::post('/{employee}/update-photo', [EmployeeController::class, 'updatePhoto'])->name('updatePhoto');
     });

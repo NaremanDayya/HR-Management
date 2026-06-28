@@ -1007,6 +1007,31 @@ class EmployeeController extends Controller
         }
     }
 
+    public function reviewSubmission(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:accept,reject',
+        ]);
+
+        if ($employee->user->account_status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'هذا الموظف ليس في حالة مراجعة نموذج ذاتي.',
+            ], 422);
+        }
+
+        $employee->user->update([
+            'account_status' => $validated['action'] === 'accept' ? 'active' : 'rejected',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $validated['action'] === 'accept'
+                ? 'تم قبول بيانات الموظف بنجاح'
+                : 'تم رفض بيانات الموظف',
+        ]);
+    }
+
     public function exportFinancials(Request $request)
     {
         $filters = $request->only([
