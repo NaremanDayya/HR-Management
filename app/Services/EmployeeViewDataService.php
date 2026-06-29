@@ -16,6 +16,7 @@ class EmployeeViewDataService
         $roleLabels = [
             'project_manager' => 'مدير مشروع',
             'senior_project_manager' => 'مدير مديري المشاريع',
+            'operations_manager' => 'مدير العمليات',
             'hr_manager' => 'مدير موارد بشرية',
             'hr_assistant' => 'مساعد مدير موارد بشرية',
 //            'shelf_stacker' => 'مصفف أرفف',
@@ -121,7 +122,7 @@ class EmployeeViewDataService
                 '49' => '49',
                 '50' => '50',
             ],
-            'projects' => in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant'])
+            'projects' => in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])
                 ? Project::pluck('name', 'id')->toArray()
                 : Project::where('manager_id', Auth::id())->pluck('name', 'id')->toArray(),
 

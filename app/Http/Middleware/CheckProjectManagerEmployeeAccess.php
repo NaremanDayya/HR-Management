@@ -19,7 +19,7 @@ class CheckProjectManagerEmployeeAccess
     {
         $user = Auth::user();
 
-        if (in_array($user->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager'])) {
+        if (in_array($user->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager', 'operations_manager'])) {
             return $next($request);
         }
 

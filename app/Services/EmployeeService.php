@@ -287,7 +287,7 @@ class EmployeeService
             $query->whereHas('project', function ($q) use ($authUser) {
                 $q->where('manager_id', $authUser->id);
             });
-        } elseif (in_array($authUser->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager'])) {
+        } elseif (in_array($authUser->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager', 'operations_manager'])) {
             $query->where('user_id', '!=', $authUser->id);
         }
 

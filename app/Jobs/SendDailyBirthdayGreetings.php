@@ -31,7 +31,7 @@ class SendDailyBirthdayGreetings implements ShouldQueue
 
         // Recipients who should be informed about every employee's birthday,
         // regardless of which project the employee belongs to.
-        $broadAudience = User::whereIn('role', ['admin', 'hr_manager', 'hr_assistant'])->get();
+        $broadAudience = User::whereIn('role', ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])->get();
 
         foreach ($users as $user) {
             Notification::send($user, new BirthdayGreeting());

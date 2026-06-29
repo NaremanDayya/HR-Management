@@ -1594,6 +1594,27 @@
             #selfRegistrationLinkModal .role-chip.shelf_stacker { background: #2a9d8f; }
             #selfRegistrationLinkModal .role-chip.supervisor { background: #e07a2c; }
             #selfRegistrationLinkModal .role-chip.area_manager { background: #5b5fc7; }
+            #selfRegistrationLinkModal .role-chip.project_manager { background: #740e0e; }
+            #selfRegistrationLinkModal .role-card.pm-link {
+                border: 1px dashed #740e0e;
+                background: #fff8f8;
+            }
+            #selfRegistrationLinkModal .divider-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #999;
+                font-size: 0.78rem;
+                font-weight: 600;
+                margin: 22px 0 10px;
+            }
+            #selfRegistrationLinkModal .divider-label::before,
+            #selfRegistrationLinkModal .divider-label::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: #e3e3e3;
+            }
             #selfRegistrationLinkModal .role-link-row {
                 display: flex;
                 align-items: center;
@@ -1682,6 +1703,31 @@
                                 </div>
                             </div>
                         </template>
+
+                        @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                            <div class="divider-label">رابط خاص بقسم الموارد البشرية</div>
+                            <div class="role-card pm-link">
+                                <div class="role-card-head">
+                                    <span class="role-chip project_manager">
+                                        <span>🏢</span>
+                                        <span>مدير مشروع جديد</span>
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-2" style="font-size: 0.78rem;">
+                                    رابط مستقل لا يتبع مشروعًا محددًا — المتقدم يدخل اسم المشروع الجديد الذي سيديره بنفسه.
+                                </p>
+                                <div class="role-link-row">
+                                    <input type="text" readonly class="role-link-input"
+                                           id="self-reg-link-project_manager"
+                                           value="{{ url('/register-employee/project-manager') }}">
+                                    <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'project_manager' }"
+                                            x-on:click="copyLink('project_manager')">
+                                        <span x-show="copiedRole !== 'project_manager'">📋 نسخ</span>
+                                        <span x-show="copiedRole === 'project_manager'">✅ تم النسخ</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
