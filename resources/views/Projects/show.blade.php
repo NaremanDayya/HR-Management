@@ -54,7 +54,9 @@
                             class="btn bg-purple-400 border-4 border-purple-600 text-black shadow-lg hover:bg-purple-500 edit-project-btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple text-purple-600 shadow-lg"
                             data-id="{{ $project->id }}" data-name="{{ $project->name }}"
                             data-description="{{ $project->description }}"
-                            data-manager-name="{{ $project->manager->name ?? '' }}" data-bs-toggle="modal"
+                            data-manager-name="{{ $project->manager->name ?? '' }}"
+                            data-allowed-roles="{{ json_encode($project->allowed_roles_or_default) }}"
+                            data-bs-toggle="modal"
                             data-bs-target="#editProjectModal">
                             <i class="fas fa-edit"></i>
                             <span>تعديل المشروع</span>
@@ -604,6 +606,21 @@
                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الأدوار المسموحة في هذا
+                            المشروع</label>
+                        <div class="flex flex-col gap-2 bg-gray-50 border border-gray-200 rounded-lg p-3"
+                             id="edit_allowed_roles_wrap">
+                            @foreach (\App\Models\Project::SELF_REGISTRATION_ROLES as $roleKey => $roleLabel)
+                                <label class="flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="allowed_roles[]" value="{{ $roleKey }}"
+                                           class="edit-allowed-role rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    {{ $roleLabel }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="flex justify-end space-x-2 pt-4 border-t">
                         <button type="button" data-bs-dismiss="modal"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
@@ -632,10 +649,15 @@
                         const projectName = this.getAttribute('data-name');
                         const projectDescription = this.getAttribute('data-description');
                         const projectManagerName = this.getAttribute('data-manager-name');
+                        const allowedRoles = JSON.parse(this.getAttribute('data-allowed-roles') || '[]');
 
                         document.getElementById('edit_name').value = projectName || '';
                         document.getElementById('edit_description').value = projectDescription || '';
                         document.getElementById('edit_manager_name').value = projectManagerName || '';
+
+                        document.querySelectorAll('#edit_allowed_roles_wrap .edit-allowed-role').forEach(cb => {
+                            cb.checked = allowedRoles.includes(cb.value);
+                        });
 
                         document.getElementById('editProjectForm').setAttribute('action',
                             `/projects/${projectId}`);
