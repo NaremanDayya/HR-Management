@@ -73,7 +73,7 @@
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموظف</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">تاريخ الطلب</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">البنك الجديد</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الآيبان الجديد</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">الآيبان الجديد</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
                         </tr>
@@ -89,7 +89,7 @@
                                     {{ $req->created_at->format('Y-m-d H:i') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $req->new_bank_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" dir="ltr">{{ $req->new_iban }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-center" dir="ltr">{{ $req->new_iban }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if ($req->status === 'pending')
                                         <span class="px-2 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-800">قيد الانتظار</span>
@@ -145,7 +145,8 @@
         </div>
 
         <!-- Details Modal -->
-        <div x-show="detailsOpen" x-cloak style="position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1050; display: flex; align-items: center; justify-content: center;"
+        <div x-show="detailsOpen" x-cloak x-init="$nextTick(() => document.body.appendChild($el))"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1050; display: flex; align-items: center; justify-content: center;"
             @click.self="detailsOpen = false">
             <div style="background: #fff; border-radius: 16px; max-width: 560px; width: 92%; max-height: 88vh; overflow-y: auto; padding: 28px;">
                 <template x-if="selected">
@@ -233,7 +234,8 @@
         </div>
 
         <!-- Reject Reason Modal -->
-        <div x-show="rejectOpen" x-cloak style="position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1060; display: flex; align-items: center; justify-content: center;"
+        <div x-show="rejectOpen" x-cloak x-init="$nextTick(() => document.body.appendChild($el))"
+            style="position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1060; display: flex; align-items: center; justify-content: center;"
             @click.self="rejectOpen = false">
             <div style="background:#fff; border-radius:16px; max-width:420px; width:92%; padding:24px;">
                 <template x-if="selected">
