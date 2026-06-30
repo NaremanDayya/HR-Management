@@ -1651,38 +1651,7 @@
         </style>
         <div class="modal fade" id="selfRegistrationLinkModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-md">
-                <div class="modal-content" x-data="{
-                    projectId: '{{ array_key_first($projects) }}',
-                    copiedRole: null,
-                    roles: {
-                        shelf_stacker: { label: 'مصفف أرفف', icon: '📦' },
-                        supervisor: { label: 'مشرف', icon: '🧑‍💼' },
-                        area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
-                    },
-                    projectAllowedRoles: @json($projectAllowedRoles ?? []),
-                    employeesByProject: @json($employeesForBankLink ?? []),
-                    bankLinkEmployeeId: '',
-                    isRoleAllowed(role) {
-                        const allowed = this.projectAllowedRoles[this.projectId];
-                        return !allowed || allowed.includes(role);
-                    },
-                    copyLink(role) {
-                        const input = document.getElementById('self-reg-link-' + role);
-                        input.select();
-                        navigator.clipboard.writeText(input.value).then(() => {
-                            this.copiedRole = role;
-                            setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
-                        }).catch(() => document.execCommand('copy'));
-                    },
-                    copyBankLink() {
-                        const input = document.getElementById('bank-update-link');
-                        input.select();
-                        navigator.clipboard.writeText(input.value).then(() => {
-                            this.copiedRole = 'bank_update';
-                            setTimeout(() => { if (this.copiedRole === 'bank_update') this.copiedRole = null; }, 1800);
-                        }).catch(() => document.execCommand('copy'));
-                    }
-                }">
+                <div class="modal-content" x-data="selfRegLinkModal()">
                     <div class="reg-link-header">
                         <h5>🔗 رابط تسجيل الموظفين الذاتي</h5>
                         <p>اختر المشروع والدور الوظيفي، ثم شارك الرابط مع الموظفين المعنيين ليعبّوا بياناتهم بنفسهم.</p>
@@ -2681,6 +2650,42 @@
 @endsection
 
 @push('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('selfRegLinkModal', () => ({
+                projectId: '{{ array_key_first($projects) }}',
+                copiedRole: null,
+                roles: {
+                    shelf_stacker: { label: 'مصفف أرفف', icon: '📦' },
+                    supervisor: { label: 'مشرف', icon: '🧑‍💼' },
+                    area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
+                },
+                projectAllowedRoles: @json($projectAllowedRoles ?? []),
+                employeesByProject: @json($employeesForBankLink ?? []),
+                bankLinkEmployeeId: '',
+                isRoleAllowed(role) {
+                    const allowed = this.projectAllowedRoles[this.projectId];
+                    return !allowed || allowed.includes(role);
+                },
+                copyLink(role) {
+                    const input = document.getElementById('self-reg-link-' + role);
+                    input.select();
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        this.copiedRole = role;
+                        setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
+                    }).catch(() => document.execCommand('copy'));
+                },
+                copyBankLink() {
+                    const input = document.getElementById('bank-update-link');
+                    input.select();
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        this.copiedRole = 'bank_update';
+                        setTimeout(() => { if (this.copiedRole === 'bank_update') this.copiedRole = null; }, 1800);
+                    }).catch(() => document.execCommand('copy'));
+                }
+            }));
+        });
+    </script>
     <script>
 
         document.addEventListener('DOMContentLoaded', function() {
