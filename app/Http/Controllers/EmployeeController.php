@@ -74,11 +74,17 @@ class EmployeeController extends Controller
         })
             ->select('id', 'name', 'project_id')
             ->get();
+        $employeesForBankLink = Employee::select('id', 'name', 'project_id')
+            ->whereNotNull('project_id')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('project_id');
         return view('Employees.table', array_merge([
             'employees' => $resources->toArray(request()),
             'projectsObjects' => $projectsObjects,
             'supervisors' => $supervisors,
             'area_managers' => $area_managers,
+            'employeesForBankLink' => $employeesForBankLink,
             'totalSalaries' => number_format($employees->sum('salary')),
             'employeesCount' => $employees->count(),
             'avgSalaries' => number_format($employees->avg('salary')),

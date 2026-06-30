@@ -1660,6 +1660,8 @@
                         area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
                     },
                     projectAllowedRoles: @json($projectAllowedRoles ?? []),
+                    employeesByProject: @json($employeesForBankLink ?? []),
+                    bankLinkEmployeeId: '',
                     isRoleAllowed(role) {
                         const allowed = this.projectAllowedRoles[this.projectId];
                         return !allowed || allowed.includes(role);
@@ -1670,6 +1672,14 @@
                         navigator.clipboard.writeText(input.value).then(() => {
                             this.copiedRole = role;
                             setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
+                        }).catch(() => document.execCommand('copy'));
+                    },
+                    copyBankLink() {
+                        const input = document.getElementById('bank-update-link');
+                        input.select();
+                        navigator.clipboard.writeText(input.value).then(() => {
+                            this.copiedRole = 'bank_update';
+                            setTimeout(() => { if (this.copiedRole === 'bank_update') this.copiedRole = null; }, 1800);
                         }).catch(() => document.execCommand('copy'));
                     }
                 }">
@@ -1733,6 +1743,28 @@
                                 </div>
                             </div>
                         @endif
+
+                        <div class="divider-label">رابط تحديث البيانات البنكية</div>
+                        <div class="role-card">
+                            <p class="text-muted mb-2" style="font-size: 0.78rem;">
+                                اختر الموظف لإنشاء رابط خاص به لتعديل بياناته البنكية.
+                            </p>
+                            <select class="form-select mb-2" x-model="bankLinkEmployeeId">
+                                <option value="">اختر الموظف...</option>
+                                <template x-for="emp in (employeesByProject[projectId] || [])" :key="emp.id">
+                                    <option :value="emp.id" x-text="emp.name"></option>
+                                </template>
+                            </select>
+                            <div class="role-link-row" x-show="bankLinkEmployeeId">
+                                <input type="text" readonly class="role-link-input" id="bank-update-link"
+                                       :value="'{{ url('/bank-update-request') }}/' + bankLinkEmployeeId">
+                                <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'bank_update' }"
+                                        x-on:click="copyBankLink()">
+                                    <span x-show="copiedRole !== 'bank_update'">📋 نسخ</span>
+                                    <span x-show="copiedRole === 'bank_update'">✅ تم النسخ</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
