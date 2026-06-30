@@ -22,24 +22,37 @@ class BankUpdateRequestController extends Controller
     public function storePublicForm(Request $request, Employee $employee)
     {
         $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'account_status' => 'required|in:active,inactive',
+            'id_card_number' => 'required|string|max:50',
+            'mobile_number' => 'required|string|max:30',
+            'city' => 'required|string|max:255',
             'new_iban' => 'required|string|max:34',
             'new_bank_name' => 'required|string|max:255',
             'new_owner_account_name' => 'required|string|max:255',
-            'id_card_image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'id_card_images' => 'required|array|min:1|max:5',
+            'id_card_images.*' => 'image|mimes:jpg,jpeg,png,webp|max:4096',
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $idCardPath = $request->file('id_card_image')->store('bank_update_requests/id_cards', 'public');
+        $idCardPaths = collect($request->file('id_card_images'))
+            ->map(fn ($file) => $file->store('bank_update_requests/id_cards', 'public'))
+            ->all();
 
         $bankUpdateRequest = BankUpdateRequest::create([
             'employee_id' => $employee->id,
+            'full_name' => $validated['full_name'],
+            'account_status' => $validated['account_status'],
+            'id_card_number' => $validated['id_card_number'],
+            'mobile_number' => $validated['mobile_number'],
+            'city' => $validated['city'],
             'current_iban' => $employee->iban,
             'current_bank_name' => $employee->bank_name,
             'current_owner_account_name' => $employee->owner_account_name,
             'new_iban' => $validated['new_iban'],
             'new_bank_name' => $validated['new_bank_name'],
             'new_owner_account_name' => $validated['new_owner_account_name'],
-            'id_card_image' => $idCardPath,
+            'id_card_images' => $idCardPaths,
             'notes' => $validated['notes'] ?? null,
             'status' => 'pending',
         ]);

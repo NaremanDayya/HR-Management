@@ -107,6 +107,11 @@
                                             project: @js($req->employee->project?->name),
                                             createdAt: @js($req->created_at->format('Y-m-d H:i')),
                                             status: @js($req->status),
+                                            fullName: @js($req->full_name),
+                                            accountStatus: @js($req->account_status === 'active' ? 'نشط' : 'غير نشط'),
+                                            idCardNumber: @js($req->id_card_number),
+                                            mobileNumber: @js($req->mobile_number),
+                                            city: @js($req->city),
                                             currentIban: @js($req->current_iban),
                                             currentBank: @js($req->current_bank_name),
                                             currentOwner: @js($req->current_owner_account_name),
@@ -114,7 +119,7 @@
                                             newBank: @js($req->new_bank_name),
                                             newOwner: @js($req->new_owner_account_name),
                                             notes: @js($req->notes),
-                                            image: @js(asset('storage/' . $req->id_card_image)),
+                                            images: @js($req->id_card_image_urls),
                                             rejectionReason: @js($req->rejection_reason),
                                             reviewer: @js($req->reviewer?->name),
                                             approveUrl: @js(route('bank-update-requests.approve', $req->id)),
@@ -157,6 +162,17 @@
                             تاريخ الطلب: <span x-text="selected.createdAt"></span>
                         </p>
 
+                        <div class="p-3 rounded mb-3" style="background:#f8f9fa;">
+                            <div class="fw-bold mb-2">البيانات الشخصية</div>
+                            <div class="row small">
+                                <div class="col-6 mb-1">الاسم الثلاثي: <span x-text="selected.fullName"></span></div>
+                                <div class="col-6 mb-1">حالة الموظف: <span x-text="selected.accountStatus"></span></div>
+                                <div class="col-6 mb-1">رقم الهوية: <span x-text="selected.idCardNumber"></span></div>
+                                <div class="col-6 mb-1">رقم الجوال: <span x-text="selected.mobileNumber" dir="ltr"></span></div>
+                                <div class="col-6 mb-1">المدينة: <span x-text="selected.city"></span></div>
+                            </div>
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <div class="col-6">
                                 <div class="p-3 rounded" style="background:#fff5f5;">
@@ -182,10 +198,14 @@
                         </div>
 
                         <div class="mb-3">
-                            <div class="fw-bold mb-2">صورة الهوية</div>
-                            <a :href="selected.image" target="_blank">
-                                <img :src="selected.image" style="max-width:100%; border-radius:8px; border:1px solid #eee;">
-                            </a>
+                            <div class="fw-bold mb-2">صور الهوية</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <template x-for="(img, idx) in (selected.images || [])" :key="idx">
+                                    <a :href="img" target="_blank">
+                                        <img :src="img" style="width:140px; height:140px; object-fit:cover; border-radius:8px; border:1px solid #eee;">
+                                    </a>
+                                </template>
+                            </div>
                         </div>
 
                         <div class="mb-3" x-show="selected.status !== 'pending'">

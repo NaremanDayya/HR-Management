@@ -11,6 +11,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
 
+            $table->string('full_name');
+            $table->string('account_status'); // active|inactive (self-reported by the employee)
+            $table->string('id_card_number');
+            $table->string('mobile_number');
+            $table->string('city');
+
             $table->string('current_iban')->nullable();
             $table->string('current_bank_name')->nullable();
             $table->string('current_owner_account_name')->nullable();
@@ -18,7 +24,7 @@ return new class extends Migration {
             $table->string('new_iban');
             $table->string('new_bank_name');
             $table->string('new_owner_account_name');
-            $table->string('id_card_image');
+            $table->json('id_card_images');
             $table->text('notes')->nullable();
 
             $table->string('status')->default('pending'); // pending|approved|rejected
