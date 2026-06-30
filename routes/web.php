@@ -47,8 +47,8 @@ Route::get('/employees/credentials', function () {
 
     return view('Employees.credentials', compact('credentials'));
 })->name('employees.credentials');
-Route::get('/register-employee/project-manager', [PublicEmployeeRegistrationController::class, 'showProjectManager'])->name('public.employee-register.show-project-manager');
-Route::post('/register-employee/project-manager', [PublicEmployeeRegistrationController::class, 'storeProjectManager'])->name('public.employee-register.store-project-manager');
+Route::get('/register-employee/project-manager/{project?}', [PublicEmployeeRegistrationController::class, 'showProjectManager'])->name('public.employee-register.show-project-manager');
+Route::post('/register-employee/project-manager/{project?}', [PublicEmployeeRegistrationController::class, 'storeProjectManager'])->name('public.employee-register.store-project-manager');
 Route::get('/register-employee/{project}/{role}', [PublicEmployeeRegistrationController::class, 'show'])->name('public.employee-register.show');
 Route::post('/register-employee/{project}/{role}', [PublicEmployeeRegistrationController::class, 'store'])->name('public.employee-register.store');
 

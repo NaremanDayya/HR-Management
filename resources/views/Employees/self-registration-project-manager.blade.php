@@ -53,8 +53,12 @@
 <body>
     <div class="form-card">
         <div class="text-center mb-4">
-            <h1 class="form-title">نموذج تسجيل بيانات مدير مشروع جديد</h1>
-            <p class="text-muted">عبّئ بياناتك الشخصية واسم المشروع الذي ستديره</p>
+            <h1 class="form-title">نموذج تسجيل بيانات مدير مشروع</h1>
+            @if ($project)
+                <p class="text-muted">عبّئ بياناتك الشخصية لتصبح مديرًا لمشروع "{{ $project->name }}"</p>
+            @else
+                <p class="text-muted">عبّئ بياناتك الشخصية واسم المشروع الذي ستديره</p>
+            @endif
         </div>
 
         @if ($errors->any())
@@ -67,15 +71,22 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('public.employee-register.store-project-manager') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('public.employee-register.store-project-manager', $project?->id) }}" enctype="multipart/form-data">
             @csrf
 
             <h5 class="section-title">المشروع</h5>
             <div class="row g-3">
-                <div class="col-md-12">
-                    <label class="form-label">اسم المشروع الذي ستديره</label>
-                    <input type="text" name="new_project_name" class="form-control" value="{{ old('new_project_name') }}" required>
-                </div>
+                @if ($project)
+                    <div class="col-md-12">
+                        <label class="form-label">المشروع</label>
+                        <input type="text" class="form-control" value="{{ $project->name }}" disabled>
+                    </div>
+                @else
+                    <div class="col-md-12">
+                        <label class="form-label">اسم المشروع الذي ستديره</label>
+                        <input type="text" name="new_project_name" class="form-control" value="{{ old('new_project_name') }}" required>
+                    </div>
+                @endif
             </div>
 
             <h5 class="section-title">البيانات الشخصية</h5>

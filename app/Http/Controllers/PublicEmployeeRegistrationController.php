@@ -107,9 +107,12 @@ class PublicEmployeeRegistrationController extends Controller
         return view('Employees.self-registration-success', ['project' => $project]);
     }
 
-    public function showProjectManager()
+    public function showProjectManager(?Project $project = null)
     {
+        abort_if($project && $project->manager_id, 404, 'تم تعيين مدير لهذا المشروع بالفعل.');
+
         return view('Employees.self-registration-project-manager', [
+            'project' => $project,
             'maritalStatuses' => [
                 'single' => 'أعزب',
                 'married' => 'متزوج',
@@ -134,27 +137,44 @@ class PublicEmployeeRegistrationController extends Controller
         ]);
     }
 
-    public function storeProjectManager(PublicProjectManagerRegistrationRequest $request)
+    public function storeProjectManager(PublicProjectManagerRegistrationRequest $request, ?Project $project = null)
     {
+        abort_if($project && $project->manager_id, 404, 'تم تعيين مدير لهذا المشروع بالفعل.');
+
         $data = $request->validated();
-        $newProjectName = $data['new_project_name'];
+        $newProjectName = $data['new_project_name'] ?? null;
         unset($data['new_project_name']);
 
         $data['role'] = 'project_manager';
         $data['personal_image'] = $request->file('personal_image');
 
-        $employee = DB::transaction(function () use ($data, $newProjectName) {
-            // projects.manager_id is NOT NULL, so the user must exist before the
-            // project row can be created — create the employee first (without a
-            // project), then the project pointing at them, then link the two.
+        if ($project) {
+            $data['project'] = $project->id;
+        }
+
+        $employee = DB::transaction(function () use ($data, $newProjectName, $project) {
+            if ($project) {
+                // Re-check inside the transaction in case two people raced this link.
+                if ($project->fresh()->manager_id) {
+                    abort(409, 'تم تعيين مدير لهذا المشروع بالفعل.');
+                }
+
+                $employee = app(EmployeeService::class)->create($data, 'pending');
+                $project->update(['manager_id' => $employee->user_id]);
+
+                return $employee;
+            }
+
+            // projects.manager_id is nullable, but here we still create the user
+            // before the project to keep using the same id for both steps.
             $employee = app(EmployeeService::class)->create($data, 'pending');
 
-            $project = Project::create([
+            $newProject = Project::create([
                 'name' => $newProjectName,
                 'manager_id' => $employee->user_id,
             ]);
 
-            $employee->update(['project_id' => $project->id]);
+            $employee->update(['project_id' => $newProject->id]);
 
             return $employee;
         });

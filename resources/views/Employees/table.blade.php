@@ -1667,6 +1667,29 @@
                             </select>
                         </div>
 
+                        <div class="role-card pm-link" x-show="projectsMissingManager[projectId]">
+                            <div class="role-card-head">
+                                <span class="role-chip project_manager">
+                                    <span>🏢</span>
+                                    <span>مدير هذا المشروع</span>
+                                </span>
+                            </div>
+                            <p class="text-muted mb-2" style="font-size: 0.78rem;">
+                                هذا المشروع لا يوجد له مدير بعد. شارك هذا الرابط مع الشخص المعني — سيُعيَّن تلقائيًا
+                                كمديرٍ لهذا المشروع دون الحاجة لكتابة اسمه يدويًا.
+                            </p>
+                            <div class="role-link-row">
+                                <input type="text" readonly class="role-link-input"
+                                       :id="'self-reg-link-pm-' + projectId"
+                                       :value="'{{ url('/register-employee/project-manager') }}/' + projectId">
+                                <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'pm-' + projectId }"
+                                        x-on:click="copyProjectManagerLink()">
+                                    <span x-show="copiedRole !== 'pm-' + projectId">📋 نسخ</span>
+                                    <span x-show="copiedRole === 'pm-' + projectId">✅ تم النسخ</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <template x-for="(info, role) in roles" :key="role">
                             <div class="role-card" x-show="isRoleAllowed(role)">
                                 <div class="role-card-head">
@@ -2662,12 +2685,22 @@
                 },
                 projectAllowedRoles: @json($projectAllowedRoles ?? []),
                 employeesByProject: @json($employeesForBankLink ?? []),
+                projectsMissingManager: @json($projectsObjects->mapWithKeys(fn ($p) => [$p->id => is_null($p->manager_id)])),
                 bankLinkEmployeeId: '',
                 isRoleAllowed(role) {
                     const allowed = this.projectAllowedRoles[this.projectId];
                     return !allowed || allowed.includes(role);
                 },
                 copyLink(role) {
+                    const input = document.getElementById('self-reg-link-' + role);
+                    input.select();
+                    navigator.clipboard.writeText(input.value).then(() => {
+                        this.copiedRole = role;
+                        setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
+                    }).catch(() => document.execCommand('copy'));
+                },
+                copyProjectManagerLink() {
+                    const role = 'pm-' + this.projectId;
                     const input = document.getElementById('self-reg-link-' + role);
                     input.select();
                     navigator.clipboard.writeText(input.value).then(() => {

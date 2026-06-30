@@ -34,7 +34,13 @@ class PublicProjectManagerRegistrationRequest extends FormRequest
                     }
                 },
             ],
-            'new_project_name' => ['required', 'string', 'max:255', Rule::unique('projects', 'name')],
+            'new_project_name' => [
+                Rule::requiredIf(fn () => ! $this->route('project')),
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('projects', 'name'),
+            ],
             'email' => 'required|email|unique:users,email',
             'job' => 'required|string|max:255',
             'joining_date' => 'required|date',
