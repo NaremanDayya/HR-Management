@@ -126,6 +126,10 @@ class EmployeeViewDataService
                 ? Project::pluck('name', 'id')->toArray()
                 : Project::where('manager_id', Auth::id())->pluck('name', 'id')->toArray(),
 
+            'projectAllowedRoles' => Project::all()->mapWithKeys(
+                fn($project) => [$project->id => $project->allowed_roles_or_default]
+            ),
+
             'maritalStatuses' => [
                 'single' => 'أعزب',
                 'married' => 'متزوج',

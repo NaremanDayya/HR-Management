@@ -623,6 +623,19 @@
                                 <i class="fas fa-exchange-alt"></i> استبدال موظف
                             </button>
                         @endif
+                        <a href="{{ route('bank-update-requests.index', ['employee_id' => $emp->id]) }}"
+                            class="action-button secondary" title="سجل طلبات تعديل البيانات البنكية">
+                            <i class="fas fa-university"></i>
+                            <span>سجل البيانات البنكية</span>
+                        </a>
+                        @if (in_array(\Illuminate\Support\Facades\Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                            <button type="button" class="action-button"
+                                style="background: linear-gradient(to right, #0c447c, #185fa5); color: white; box-shadow: 0 2px 10px rgba(12, 68, 124, 0.3);"
+                                onclick="copyBankUpdateLink({{ $emp->id }})" title="نسخ رابط تعديل البيانات البنكية للموظف">
+                                <i class="fas fa-link"></i>
+                                <span>رابط تعديل البيانات البنكية</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -1830,4 +1843,23 @@
             });
         </script>
         @endif
+
+        <script>
+            function copyBankUpdateLink(employeeId) {
+                const link = `{{ url('/bank-update-request') }}/${employeeId}`;
+                navigator.clipboard.writeText(link).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم نسخ الرابط',
+                        text: 'شارك هذا الرابط مع الموظف لتعديل بياناته البنكية',
+                        timer: 2500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }).catch(() => {
+                    prompt('انسخ الرابط يدويًا:', link);
+                });
+            }
+        </script>
     @endpush

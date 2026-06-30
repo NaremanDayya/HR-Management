@@ -14,6 +14,7 @@ class EmployeeLoginIp extends Model
     protected $fillable = [
         'employee_id',
         'ip_address',
+        'device_token',
         'is_allowed',
         'is_temporary',
         'allowed_until',

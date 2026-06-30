@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\Project;
 use App\Models\User;
 
 class ProjectRequest extends FormRequest
@@ -28,6 +29,8 @@ class ProjectRequest extends FormRequest
             'manager_name' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
             'manager_id' => 'nullable|exists:users,id',
+            'allowed_roles' => 'nullable|array',
+            'allowed_roles.*' => Rule::in(array_keys(Project::SELF_REGISTRATION_ROLES)),
         ];
     }
 

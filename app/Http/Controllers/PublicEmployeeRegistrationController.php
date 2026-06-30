@@ -23,6 +23,7 @@ class PublicEmployeeRegistrationController extends Controller
     public function show(Project $project, string $role)
     {
         abort_unless(array_key_exists($role, self::ALLOWED_ROLES), 404);
+        abort_unless(in_array($role, $project->allowed_roles_or_default), 404);
 
         $supervisors = collect();
         $areaManagers = collect();
@@ -76,6 +77,7 @@ class PublicEmployeeRegistrationController extends Controller
     public function store(Project $project, string $role, PublicEmployeeRegistrationRequest $request)
     {
         abort_unless(array_key_exists($role, self::ALLOWED_ROLES), 404);
+        abort_unless(in_array($role, $project->allowed_roles_or_default), 404);
 
         $data = $request->validated();
         $data['role'] = $role;

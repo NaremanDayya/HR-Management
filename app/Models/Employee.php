@@ -43,6 +43,8 @@ class Employee extends Model
         'last_working_date',
         'payload',
         'absence_days',
+        'overtime_hours',
+        'overtime_days',
         'outstanding_advance_debt',
         'is_terminated',
         'termination_date',
@@ -275,6 +277,22 @@ class Employee extends Model
     public function advancePayments()
     {
         return $this->hasMany(AdvancePayment::class);
+    }
+
+    public function bankUpdateRequests()
+    {
+        return $this->hasMany(BankUpdateRequest::class);
+    }
+
+    public function calculateOvertimePay(int $monthDays): float
+    {
+        $dailyRate = $monthDays > 0 ? $this->salary / $monthDays : 0;
+        $hourlyRate = $dailyRate / 8;
+
+        $overtimeHoursPay = ($this->overtime_hours ?? 0) * $hourlyRate * 1.5;
+        $overtimeDaysPay = ($this->overtime_days ?? 0) * $dailyRate * 1.5;
+
+        return $overtimeHoursPay + $overtimeDaysPay;
     }
 
 }

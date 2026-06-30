@@ -161,8 +161,9 @@ class EmployeeController extends Controller
 
             $dailyRate = $employee->salary / $workDays;
             $absenceDeduction = $absenceDays * $dailyRate;
+            $overtimePay = $employee->calculateOvertimePay($workDays);
 
-            $grossSalary = $employee->salary + $currentMonthIncreases;
+            $grossSalary = $employee->salary + $currentMonthIncreases + $overtimePay;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
 
             return [
@@ -176,6 +177,9 @@ class EmployeeController extends Controller
                 'net_payable_days' => $actualWorkDays,
                 'actual_work_days' => $actualWorkDays,
                 'absence_deduction' => $absenceDeduction,
+                'overtime_hours' => $employee->overtime_hours ?? 0,
+                'overtime_days' => $employee->overtime_days ?? 0,
+                'overtime_pay' => $overtimePay,
                 'current_month_increases' => $currentMonthIncreases,
                 'current_month_deductions' => $currentMonthDeductions,
                 'advance_deductions' => $advanceDeductions,
@@ -977,26 +981,34 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'absence_days' => "required|integer|min:0|max:{$monthDays}",
+            'overtime_hours' => 'nullable|integer|min:0|max:' . ($monthDays * 24),
+            'overtime_days' => "nullable|integer|min:0|max:{$monthDays}",
         ]);
 
         try {
             $employee->update([
                 'absence_days' => $validated['absence_days'],
+                'overtime_hours' => $validated['overtime_hours'] ?? 0,
+                'overtime_days' => $validated['overtime_days'] ?? 0,
             ]);
 
             $absenceDays = $validated['absence_days'];
             $actualWorkDays = max(0, $monthDays - $absenceDays);
             $dailyRate = $employee->salary / $monthDays;
             $absenceDeduction = $absenceDays * $dailyRate;
+            $overtimePay = $employee->calculateOvertimePay($monthDays);
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم تحديث أيام الغياب بنجاح',
+                'message' => 'تم تحديث أيام الغياب والساعات الإضافية بنجاح',
                 'data' => [
                     'work_days' => $monthDays,
                     'absence_days' => $absenceDays,
                     'actual_work_days' => $actualWorkDays,
                     'absence_deduction' => $absenceDeduction,
+                    'overtime_hours' => $employee->overtime_hours,
+                    'overtime_days' => $employee->overtime_days,
+                    'overtime_pay' => $overtimePay,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -1090,6 +1102,9 @@ class EmployeeController extends Controller
             'أيام العمل',
             'أيام الغياب',
             'أيام العمل الصافية',
+            'ساعات إضافية',
+            'أيام إضافية',
+            'قيمة الإضافي',
             'الزيادات',
             'الخصومات',
             'خصم السلف',
@@ -1115,8 +1130,9 @@ class EmployeeController extends Controller
 
             $dailyRate = $employee->salary / 26;
             $absenceDeduction = $absenceDays * $dailyRate;
+            $overtimePay = $employee->calculateOvertimePay(26);
 
-            $grossSalary = $employee->salary + $currentMonthIncreases;
+            $grossSalary = $employee->salary + $currentMonthIncreases + $overtimePay;
             $netSalary = $grossSalary - $currentMonthDeductions - $advanceDeductions - $absenceDeduction;
 
             $salaryTypeLabel = ($employee->salary_type == 'monthly_salary') ? 'راتب شهري' :
@@ -1131,6 +1147,9 @@ class EmployeeController extends Controller
                 $workDays,
                 $absenceDays,
                 $netPayableDays,
+                $employee->overtime_hours ?? 0,
+                $employee->overtime_days ?? 0,
+                number_format($overtimePay, 2),
                 number_format($currentMonthIncreases, 2),
                 number_format($currentMonthDeductions, 2),
                 number_format($advanceDeductions, 2),

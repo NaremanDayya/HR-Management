@@ -439,6 +439,8 @@
                                         <th><i class="fas fa-credit-card me-1 text-purple"></i> رقم الآيبان</th>
                                         <th><i class="fas fa-user-circle me-1 text-purple"></i> اسم صاحب الحساب</th>
                                         <th><i class="fas fa-university me-1 text-purple"></i> البنك</th>
+                                        <th><i class="fas fa-business-time me-1 text-warning"></i> ساعات إضافية</th>
+                                        <th><i class="fas fa-calendar-plus me-1 text-warning"></i> أيام إضافية</th>
                                         <th>الإجراءات</th>
                                     </tr>
                                     </thead>
@@ -494,6 +496,12 @@
                                             </td>
                                             <td class="text-success font-weight-bold">
                                                 {{ ($employee['bank_details']['bank_name']) }}
+                                            </td>
+                                            <td class="text-warning font-weight-bold overtime-hours-cell">
+                                                {{ $employee['overtime_hours'] ?? 0 }} ساعة
+                                            </td>
+                                            <td class="text-warning font-weight-bold overtime-days-cell">
+                                                {{ $employee['overtime_days'] ?? 0 }} يوم
                                             </td>
 {{--                                            <td>--}}
 {{--                                                <div class="bank-details">--}}
@@ -614,6 +622,18 @@
             </div>
 
             <div class="mb-3">
+                <label class="block text-sm text-gray-700 mb-1">ساعات إضافية</label>
+                <input id="overtimeHours" type="number" min="0" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateOvertimeHours(this)" />
+                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">تُحسب الساعة الواحدة بـ 1.5 ساعة من أجر الساعة</p>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm text-gray-700 mb-1">أيام إضافية</label>
+                <input id="overtimeDays" type="number" min="0" step="1" class="w-full border border-gray-300 rounded-md px-3 py-2" oninput="validateOvertimeDays(this)" />
+                <p class="mt-1 text-gray-500 text-xs" style="display:block;margin-top:4px;">يُحسب اليوم الواحد بـ 1.5 يوم من أجر اليوم</p>
+            </div>
+
+            <div class="mb-3">
                 <label class="block text-sm text-gray-700 mb-1">صافي الراتب</label>
                 <input id="adjustedSalary" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 font-bold" readonly />
             </div>
@@ -719,7 +739,7 @@
                 if (data.employees.length === 0) {
                     tableBody.innerHTML = `
                 <tr>
-                    <td colspan="16" class="text-center py-4">
+                    <td colspan="18" class="text-center py-4">
                         <div class="empty-state">
                             <div class="empty-icon">
                                 <i class="fas fa-file-invoice-dollar"></i>
@@ -778,6 +798,12 @@
                         <div class="bank-details">
                             ${getBankLogoHTML(employee.bank_details.bank_name)}
                         </div>
+                    </td>
+                    <td class="text-warning font-weight-bold overtime-hours-cell">
+                        ${employee.overtime_hours || 0} ساعة
+                    </td>
+                    <td class="text-warning font-weight-bold overtime-days-cell">
+                        ${employee.overtime_days || 0} يوم
                     </td>
                     <td>
                         <button onclick="openSalaryModal(
@@ -1082,12 +1108,15 @@
 
             // Cell indices (0-based): 0 id, 1 name, 2 project, 3 base_salary, 4 salary_type,
             // 5 increases, 6 deductions, 7 advance_deductions, 8 work_days, 9 absence_days,
-            // 10 actual_work_days, 11 net_salary, 12 iban, 13 owner, 14 bank, 15 actions
+            // 10 actual_work_days, 11 net_salary, 12 iban, 13 owner, 14 bank,
+            // 15 overtime_hours, 16 overtime_days, 17 actions
             const currentDeductions = parseFloat(rowElement.cells[6].textContent.replace(/[^\d.]/g, '')) || 0;
             const advanceDeductions = parseFloat(rowElement.cells[7].textContent.replace(/[^\d.]/g, '')) || 0;
             const workDaysValue = parseInt(rowElement.cells[8].textContent.replace(/[^\d]/g, '')) || parseInt(workDays) || 26;
             const absenceDays = parseInt(rowElement.cells[9].textContent.replace(/[^\d]/g, '')) || 0;
             const netSalary = parseFloat(rowElement.cells[11].textContent.replace(/[^\d.]/g, '')) || 0;
+            const overtimeHours = parseInt(rowElement.cells[15]?.textContent.replace(/[^\d]/g, '')) || 0;
+            const overtimeDays = parseInt(rowElement.cells[16]?.textContent.replace(/[^\d]/g, '')) || 0;
 
             // Set values in the modal
             document.getElementById('employeeName').value = employeeName;
@@ -1096,6 +1125,8 @@
             document.getElementById('advanceDeductions').value = numberFormat(advanceDeductions);
             document.getElementById('workDays').value = workDaysValue;
             document.getElementById('absenceDays').value = absenceDays;
+            document.getElementById('overtimeHours').value = overtimeHours;
+            document.getElementById('overtimeDays').value = overtimeDays;
             document.getElementById('adjustedSalary').value = numberFormat(netSalary) + ' ر.س';
 
             document.getElementById('saveSalaryBtn').classList.add('hidden');
@@ -1112,6 +1143,8 @@
             const advanceDeductions = parseFloat(
                 document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
             ) || 0;
+            const overtimeHours = parseInt(document.getElementById('overtimeHours').value) || 0;
+            const overtimeDays = parseInt(document.getElementById('overtimeDays').value) || 0;
 
             // Validate work days and absence days
             if (workDays < 1 || workDays > 31) {
@@ -1133,8 +1166,10 @@
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
 
             const dailyRate = originalSalary / workDays;
+            const hourlyRate = dailyRate / 8;
             const absenceDeduction = absenceDays * dailyRate;
-            const totalEarnings = originalSalary + currentIncreases;
+            const overtimePay = (overtimeHours * hourlyRate * 1.5) + (overtimeDays * dailyRate * 1.5);
+            const totalEarnings = originalSalary + currentIncreases + overtimePay;
             const totalDeductions = currentDeductions + advanceDeductions + absenceDeduction;
             const netSalary = totalEarnings - totalDeductions;
             const finalNetSalary = Math.max(0, netSalary);
@@ -1154,6 +1189,8 @@
             const advanceDeductions = parseFloat(
                 document.getElementById('advanceDeductions').value.replace(/[^0-9.]/g, '')
             ) || 0;
+            const overtimeHours = parseInt(document.getElementById('overtimeHours').value) || 0;
+            const overtimeDays = parseInt(document.getElementById('overtimeDays').value) || 0;
 
             const currentIncreasesText = currentEmployeeRow.cells[5].textContent;
             const currentIncreases = parseFloat(currentIncreasesText.replace(/[^0-9.]/g, '')) || 0;
@@ -1171,7 +1208,13 @@
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
-                body: JSON.stringify({ absence_days: absenceDays, month: month, year: year }),
+                body: JSON.stringify({
+                    absence_days: absenceDays,
+                    overtime_hours: overtimeHours,
+                    overtime_days: overtimeDays,
+                    month: month,
+                    year: year,
+                }),
             })
                 .then(res => res.json())
                 .then(result => {
@@ -1181,7 +1224,7 @@
                     }
 
                     const data = result.data;
-                    const netSalary = Math.max(0, (originalSalary + currentIncreases) - (currentDeductions + advanceDeductions + data.absence_deduction));
+                    const netSalary = Math.max(0, (originalSalary + currentIncreases + data.overtime_pay) - (currentDeductions + advanceDeductions + data.absence_deduction));
 
                     currentEmployeeRow.cells[6].textContent = numberFormat(currentDeductions) + ' ر.س';
                     currentEmployeeRow.cells[6].className = 'text-danger';
@@ -1203,7 +1246,14 @@
                     currentEmployeeRow.cells[11].textContent = numberFormat(netSalary) + ' ر.س';
                     currentEmployeeRow.cells[11].className = 'text-success font-weight-bold';
 
-                    showToast('تم تحديث أيام الغياب والراتب بنجاح', 'success');
+                    if (currentEmployeeRow.cells[15]) {
+                        currentEmployeeRow.cells[15].textContent = data.overtime_hours + ' ساعة';
+                    }
+                    if (currentEmployeeRow.cells[16]) {
+                        currentEmployeeRow.cells[16].textContent = data.overtime_days + ' يوم';
+                    }
+
+                    showToast('تم تحديث أيام الغياب والساعات الإضافية والراتب بنجاح', 'success');
                     closeSalaryModal();
                 })
                 .catch(() => {
@@ -1246,6 +1296,20 @@
             const workDays = parseInt(workDaysInput.value) || 26;
             if (value > workDays) {
                 input.value = workDays;
+            }
+        }
+
+        function validateOvertimeHours(input) {
+            let value = parseInt(input.value);
+            if (isNaN(value) || value < 0) {
+                input.value = 0;
+            }
+        }
+
+        function validateOvertimeDays(input) {
+            let value = parseInt(input.value);
+            if (isNaN(value) || value < 0) {
+                input.value = 0;
             }
         }
 

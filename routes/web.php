@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BankUpdateRequestController;
 use App\Http\Controllers\EmployeeLoginIpController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeActionController;
@@ -153,6 +154,15 @@ Route::middleware(['auth'])->prefix('EmployeeEditRequest')->name('employee-reque
     Route::post('/', [EmployeeRequestController::class, 'storeEditRequest'])->name('store');
     Route::get('/', [EmployeeRequestController::class, 'index'])->name('index');
     Route::post('/{id}/status', [EmployeeRequestController::class, 'changeStatus'])->name('change-status');
+});
+
+Route::get('/bank-update-request/{employee}', [BankUpdateRequestController::class, 'showPublicForm'])->name('public.bank-update.show');
+Route::post('/bank-update-request/{employee}', [BankUpdateRequestController::class, 'storePublicForm'])->name('public.bank-update.store');
+
+Route::middleware(['auth'])->prefix('bank-update-requests')->name('bank-update-requests.')->group(function () {
+    Route::get('/', [BankUpdateRequestController::class, 'index'])->name('index');
+    Route::post('/{bankUpdateRequest}/approve', [BankUpdateRequestController::class, 'approve'])->name('approve');
+    Route::post('/{bankUpdateRequest}/reject', [BankUpdateRequestController::class, 'reject'])->name('reject');
 });
 Route::middleware(['auth', 'web', \App\Http\Middleware\MarkNotificationAsRead::class])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

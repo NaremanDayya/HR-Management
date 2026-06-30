@@ -12,10 +12,23 @@ class Project extends Model
         'name',
         'manager_id',
         'description',
+        'allowed_roles',
+    ];
+    protected $casts = [
+        'allowed_roles' => 'array',
+    ];
+    public const SELF_REGISTRATION_ROLES = [
+        'shelf_stacker' => 'مصفف أرفف',
+        'supervisor' => 'مشرف',
+        'area_manager' => 'مشرف المشرفين',
     ];
     protected static function booted()
     {
         static::addGlobalScope(new YearScope());
+    }
+    public function getAllowedRolesOrDefaultAttribute(): array
+    {
+        return $this->allowed_roles ?: array_keys(self::SELF_REGISTRATION_ROLES);
     }
     public function manager()
     {

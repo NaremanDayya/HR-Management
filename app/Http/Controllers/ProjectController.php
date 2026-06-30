@@ -67,7 +67,8 @@ class ProjectController extends Controller
             $project->update([
                 'name' => $validated['name'],
                 'manager_id' => $validated['manager_id'] ?? null,
-                'description' => $validated['description'] ?? null
+                'description' => $validated['description'] ?? null,
+                'allowed_roles' => $validated['allowed_roles'] ?? null,
             ]);
 
             return response()->json([

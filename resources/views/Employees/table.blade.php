@@ -1659,6 +1659,11 @@
                         supervisor: { label: 'مشرف', icon: '🧑‍💼' },
                         area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
                     },
+                    projectAllowedRoles: @json($projectAllowedRoles ?? []),
+                    isRoleAllowed(role) {
+                        const allowed = this.projectAllowedRoles[this.projectId];
+                        return !allowed || allowed.includes(role);
+                    },
                     copyLink(role) {
                         const input = document.getElementById('self-reg-link-' + role);
                         input.select();
@@ -1684,7 +1689,7 @@
                         </div>
 
                         <template x-for="(info, role) in roles" :key="role">
-                            <div class="role-card">
+                            <div class="role-card" x-show="isRoleAllowed(role)">
                                 <div class="role-card-head">
                                     <span class="role-chip" :class="role">
                                         <span x-text="info.icon"></span>
