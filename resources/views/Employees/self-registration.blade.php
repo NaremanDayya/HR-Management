@@ -146,7 +146,7 @@
                     <label class="form-label">الراتب</label>
                     <input type="number" step="0.01" name="salary" class="form-control" value="{{ old('salary') }}" required>
                 </div>
-                @if ($role === 'shelf_stacker')
+                @if ($role === 'shelf_stacker' && $supervisors->isNotEmpty())
                     <div class="col-md-6">
                         <label class="form-label">المشرف المباشر</label>
                         <select name="supervisor" class="form-select" required>
@@ -155,11 +155,8 @@
                                 <option value="{{ $id }}" {{ old('supervisor') == $id ? 'selected' : '' }}>{{ $name }}</option>
                             @endforeach
                         </select>
-                        @if ($supervisors->isEmpty())
-                            <small class="text-danger">لا يوجد مشرفون مسجلون لهذا المشروع بعد، يرجى التواصل مع مدير المشروع.</small>
-                        @endif
                     </div>
-                @elseif ($role === 'supervisor')
+                @elseif ($role === 'supervisor' && $areaManagers->isNotEmpty())
                     <div class="col-md-6">
                         <label class="form-label">مشرف المشرفين</label>
                         <select name="area_manager" class="form-select" required>
@@ -168,9 +165,6 @@
                                 <option value="{{ $id }}" {{ old('area_manager') == $id ? 'selected' : '' }}>{{ $name }}</option>
                             @endforeach
                         </select>
-                        @if ($areaManagers->isEmpty())
-                            <small class="text-danger">لا يوجد مشرف مشرفين مسجل لهذا المشروع بعد، يرجى التواصل مع مدير المشروع.</small>
-                        @endif
                     </div>
                 @endif
                 <div class="col-md-6">

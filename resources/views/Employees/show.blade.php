@@ -1848,18 +1848,56 @@
             function copyBankUpdateLink(employeeId) {
                 const link = `{{ url('/bank-update-request') }}/${employeeId}`;
                 navigator.clipboard.writeText(link).then(() => {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'تم نسخ الرابط',
-                        text: 'شارك هذا الرابط مع الموظف لتعديل بياناته البنكية',
-                        timer: 2500,
-                        showConfirmButton: false,
-                        toast: true,
-                        position: 'top-end'
-                    });
+                    showModernToast('تم نسخ الرابط', 'شارك هذا الرابط مع الموظف لتعديل بياناته البنكية');
                 }).catch(() => {
                     prompt('انسخ الرابط يدويًا:', link);
                 });
             }
+
+            function showModernToast(title, message) {
+                Swal.fire({
+                    title: title,
+                    html: `<div class="modern-toast-message">${message}</div>`,
+                    iconHtml: '<i class="fas fa-check"></i>',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end',
+                    customClass: {
+                        popup: 'modern-toast-popup',
+                        icon: 'modern-toast-icon',
+                        title: 'modern-toast-title',
+                    },
+                });
+            }
         </script>
+
+        <style>
+            .modern-toast-popup {
+                border-radius: 16px !important;
+                box-shadow: 0 12px 32px rgba(116, 14, 14, 0.18) !important;
+                border: 1px solid #f0e0e0 !important;
+                padding: 0.9rem 1.1rem !important;
+                min-width: 340px;
+            }
+            .modern-toast-icon {
+                border-color: #28a745 !important;
+                color: #28a745 !important;
+                width: 2.4rem !important;
+                height: 2.4rem !important;
+                margin: 0 0.75rem 0 0 !important;
+            }
+            .modern-toast-title {
+                font-weight: 700 !important;
+                font-size: 0.98rem !important;
+                color: #2c2c2a !important;
+                margin: 0 !important;
+            }
+            .modern-toast-message {
+                font-size: 0.82rem;
+                color: #6b6b66;
+                margin-top: 2px;
+            }
+        </style>
     @endpush

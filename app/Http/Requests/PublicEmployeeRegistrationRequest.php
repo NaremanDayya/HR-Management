@@ -68,7 +68,7 @@ class PublicEmployeeRegistrationRequest extends FormRequest
             'phone_type' => 'required|in:android,iphone',
             'nationality' => 'required|string|max:100',
             'supervisor' => [
-                Rule::requiredIf(fn () => $this->route('role') === 'shelf_stacker'),
+                Rule::requiredIf(fn () => $this->route('role') === 'shelf_stacker' && $this->projectHasEmployeesWithRole('supervisor')),
                 'nullable',
                 'integer',
                 function ($attribute, $value, $fail) {
@@ -83,7 +83,7 @@ class PublicEmployeeRegistrationRequest extends FormRequest
                 },
             ],
             'area_manager' => [
-                Rule::requiredIf(fn () => $this->route('role') === 'supervisor'),
+                Rule::requiredIf(fn () => $this->route('role') === 'supervisor' && $this->projectHasEmployeesWithRole('area_manager')),
                 'nullable',
                 'integer',
                 function ($attribute, $value, $fail) {
@@ -155,5 +155,18 @@ class PublicEmployeeRegistrationRequest extends FormRequest
                 }
             }
         });
+    }
+
+    private function projectHasEmployeesWithRole(string $role): bool
+    {
+        $project = $this->route('project');
+
+        if (! $project) {
+            return false;
+        }
+
+        return Employee::where('project_id', $project->id)
+            ->whereHas('user', fn ($q) => $q->where('role', $role)->where('account_status', 'active'))
+            ->exists();
     }
 }
