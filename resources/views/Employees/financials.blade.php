@@ -660,11 +660,13 @@
 
 @push('scripts')
     <script>
-        const _selectedMonth = {{ $selectedMonth }};
-        const _selectedYear  = {{ $selectedYear }};
-        const _nowMonth      = {{ now()->month }};
-        const _nowYear       = {{ now()->year }};
-        const _isCurrentMonth = (_selectedMonth === _nowMonth && _selectedYear === _nowYear);
+        const _nowMonth = {{ now()->month }};
+        const _nowYear  = {{ now()->year }};
+        function _isCurrentMonth() {
+            const m = parseInt(document.getElementById('month')?.value ?? {{ $selectedMonth }}, 10);
+            const y = parseInt(document.getElementById('year')?.value  ?? {{ $selectedYear }},  10);
+            return m === _nowMonth && y === _nowYear;
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search');
@@ -814,7 +816,7 @@
                         ${employee.overtime_days || 0} يوم
                     </td>
                     <td>
-                        ${_isCurrentMonth ? `<button onclick="openSalaryModal(
+                        ${_isCurrentMonth() ? `<button onclick="openSalaryModal(
                             '${employee.id}',
                             '${employee.name}',
                             '${employee.base_salary}',
