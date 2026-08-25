@@ -80,11 +80,7 @@ class DashboardController extends Controller
             'admin_name' => User::where('role', 'admin')->value('name'),
         ];
 
-        $users = User::whereNotIn('role', ['admin', 'shelf_stacker', 'supervisor', 'area_manager', 'project_manager'])
-            ->with('permissions')
-            ->get();
-
-        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus', 'users'), $this->dropdownService->getDropdownData());
+        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus'), $this->dropdownService->getDropdownData());
     }
 
 
@@ -148,6 +144,25 @@ class DashboardController extends Controller
     }
 
 
+
+    public function searchUsers(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        $users = User::whereNotIn('role', ['admin', 'shelf_stacker', 'supervisor', 'area_manager'])
+            ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"))
+            ->with('permissions')
+            ->limit(10)
+            ->get()
+            ->map(fn ($u) => [
+                'id'          => $u->id,
+                'name'        => $u->name,
+                'role'        => $u->role,
+                'permissions' => $u->getDirectPermissions()->pluck('name'),
+            ]);
+
+        return response()->json($users);
+    }
 
     public function editUserPermissions(User $user)
     {

@@ -174,49 +174,26 @@
           </div>
       </div>
   </div>
-{{-- User-level direct permissions --}}
+{{-- User-level direct permissions (search-based) --}}
 <div class="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
     <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-gray-800">صلاحيات المستخدمين الفردية</h2>
             <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">تخصيص إضافي لكل مستخدم</span>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المستخدم</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الدور</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">صلاحيات مباشرة</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($users as $u)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $u->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ __($u->role) }}</td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1 user-direct-perms" data-user-id="{{ $u->id }}">
-                                @forelse ($u->permissions as $perm)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">{{ __($perm->name) }}</span>
-                                @empty
-                                    <span class="text-gray-400 text-xs no-perms-label">لا توجد صلاحيات مباشرة</span>
-                                @endforelse
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button class="text-purple-600 hover:text-purple-900 edit-user-permissions-btn"
-                                data-user-id="{{ $u->id }}"
-                                data-user-name="{{ $u->name }}">
-                                تعديل
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <p class="text-sm text-gray-500 mb-4">ابحث عن مستخدم بالاسم لتعيين صلاحيات إضافية له فوق صلاحيات دوره.</p>
+
+        {{-- Search box --}}
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="userSearchInput" placeholder="ابحث باسم المستخدم..."
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+            <button id="userSearchBtn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md">
+                <i class="fas fa-search ml-1"></i> بحث
+            </button>
         </div>
+
+        {{-- Results --}}
+        <div id="userSearchResults" class="space-y-2"></div>
     </div>
 </div>
 
@@ -539,9 +516,51 @@
             });
         });
 
-        // ── User-level permissions ──────────────────────────────────────────
+        // ── User-level permissions (search-based) ──────────────────────────
         (function () {
             let currentUserId = null;
+
+            function renderUserCard(user) {
+                const permsHtml = user.permissions.length
+                    ? user.permissions.map(p => `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ml-1">${p}</span>`).join('')
+                    : '<span class="text-gray-400 text-xs">لا توجد صلاحيات مباشرة</span>';
+
+                return `
+                <div class="flex items-center justify-between border rounded-lg px-4 py-3 bg-gray-50 user-result-card" data-user-id="${user.id}" data-user-name="${user.name}">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                        <div class="text-xs text-gray-500 mb-1">${user.role}</div>
+                        <div class="flex flex-wrap gap-1 user-perms-badges">${permsHtml}</div>
+                    </div>
+                    <button class="mr-4 px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-md edit-user-permissions-btn flex-shrink-0"
+                        data-user-id="${user.id}" data-user-name="${user.name}">
+                        تعديل الصلاحيات
+                    </button>
+                </div>`;
+            }
+
+            function doSearch() {
+                const q = $('#userSearchInput').val().trim();
+                if (!q) return;
+
+                $('#userSearchBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin ml-1"></i> جاري البحث...');
+
+                $.get('/admin/users/search', { q }, function (users) {
+                    const $results = $('#userSearchResults');
+                    if (!users.length) {
+                        $results.html('<p class="text-sm text-gray-400 text-center py-4">لا توجد نتائج</p>');
+                        return;
+                    }
+                    $results.html(users.map(renderUserCard).join(''));
+                }).fail(function () {
+                    toastr.error('حدث خطأ أثناء البحث');
+                }).always(function () {
+                    $('#userSearchBtn').prop('disabled', false).html('<i class="fas fa-search ml-1"></i> بحث');
+                });
+            }
+
+            $('#userSearchBtn').on('click', doSearch);
+            $('#userSearchInput').on('keypress', function (e) { if (e.which === 13) doSearch(); });
 
             $(document).on('click', '.edit-user-permissions-btn', function () {
                 currentUserId = $(this).data('user-id');
@@ -550,7 +569,6 @@
                 $('#modalUserName').text(userName);
                 $('#userPermissionsForm').attr('action', `/admin/users/${currentUserId}/permissions`);
 
-                // Reset
                 $('#userPermissionsForm')[0].reset();
                 $('.user-select-all-group').prop('checked', false);
 
@@ -595,15 +613,14 @@
                         toastr.success(response.message);
                         $('#userPermissionsModal').modal('hide');
 
-                        // Update inline badges
-                        const cell = $(`.user-direct-perms[data-user-id="${currentUserId}"]`);
+                        // Update badges on the card in search results
+                        const card = $(`.user-result-card[data-user-id="${currentUserId}"] .user-perms-badges`);
                         if (response.permissions && response.permissions.length > 0) {
-                            const badges = response.permissions.map(p =>
-                                `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">${p}</span>`
-                            ).join('');
-                            cell.html(badges);
+                            card.html(response.permissions.map(p =>
+                                `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ml-1">${p}</span>`
+                            ).join(''));
                         } else {
-                            cell.html('<span class="text-gray-400 text-xs">لا توجد صلاحيات مباشرة</span>');
+                            card.html('<span class="text-gray-400 text-xs">لا توجد صلاحيات مباشرة</span>');
                         }
                     },
                     error: function (xhr) {
