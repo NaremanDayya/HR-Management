@@ -546,6 +546,7 @@
 {{--                                                </div>--}}
 {{--                                            </td>--}}
                                             <td>
+                                                @if ($selectedMonth == now()->month && $selectedYear == now()->year)
                                                 <button
                                                     onclick="openSalaryModal(
                             '{{ $employee['id'] }}',
@@ -557,6 +558,7 @@
                                                     class="action-btn view-btn">
                                                     <i class="fas fa-edit"></i> تعديل
                                                 </button>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -658,6 +660,12 @@
 
 @push('scripts')
     <script>
+        const _selectedMonth = {{ $selectedMonth }};
+        const _selectedYear  = {{ $selectedYear }};
+        const _nowMonth      = {{ now()->month }};
+        const _nowYear       = {{ now()->year }};
+        const _isCurrentMonth = (_selectedMonth === _nowMonth && _selectedYear === _nowYear);
+
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search');
             const projectSelect = document.getElementById('project');
@@ -806,15 +814,13 @@
                         ${employee.overtime_days || 0} يوم
                     </td>
                     <td>
-                        <button onclick="openSalaryModal(
+                        ${_isCurrentMonth ? `<button onclick="openSalaryModal(
                             '${employee.id}',
                             '${employee.name}',
                             '${employee.base_salary}',
                             '${employee.work_days || 26}',
                             this.parentNode.parentNode
-                        )" class="action-btn view-btn">
-                            <i class="fas fa-edit"></i> تعديل
-                        </button>
+                        )" class="action-btn view-btn"><i class="fas fa-edit"></i> تعديل</button>` : ''}
                     </td>
                 </tr>
             `;

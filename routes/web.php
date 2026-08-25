@@ -129,6 +129,8 @@ Route::middleware([
         Route::get('roles/{role}/permissions', [DashboardController::class, 'edit'])->name('admin.roles.permissions.edit');
         Route::put('roles/{role}/permissions', [DashboardController::class, 'update'])->name('admin.roles.permissions.update');
         Route::post('roles', [DashboardController::class, 'store'])->name('admin.roles.store');
+        Route::get('users/{user}/permissions', [DashboardController::class, 'editUserPermissions'])->name('admin.users.permissions.edit');
+        Route::put('users/{user}/permissions', [DashboardController::class, 'updateUserPermissions'])->name('admin.users.permissions.update');
     });
     Route::post('/admin/change-password', [DashboardController::class, 'changePassword'])->name('admin.change-password')->middleware('auth');
     Route::get('/admin/impersonate/{employee}', [EmployeeController::class, 'impersonate'])

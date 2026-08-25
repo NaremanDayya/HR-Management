@@ -80,7 +80,11 @@ class DashboardController extends Controller
             'admin_name' => User::where('role', 'admin')->value('name'),
         ];
 
-        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus'), $this->dropdownService->getDropdownData());
+        $users = User::whereNotIn('role', ['admin', 'shelf_stacker', 'supervisor', 'area_manager', 'project_manager'])
+            ->with('permissions')
+            ->get();
+
+        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus', 'users'), $this->dropdownService->getDropdownData());
     }
 
 
@@ -144,6 +148,29 @@ class DashboardController extends Controller
     }
 
 
+
+    public function editUserPermissions(User $user)
+    {
+        return response()->json([
+            'permissions' => $user->getDirectPermissions()->pluck('name'),
+        ]);
+    }
+
+    public function updateUserPermissions(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'permissions'   => 'sometimes|array',
+            'permissions.*' => 'string|exists:permissions,name',
+        ]);
+
+        $user->syncPermissions($validated['permissions'] ?? []);
+
+        return response()->json([
+            'success'     => true,
+            'message'     => 'تم تحديث صلاحيات المستخدم بنجاح',
+            'permissions' => $user->getDirectPermissions()->pluck('name'),
+        ]);
+    }
 
     public function edit(Role $role)
     {

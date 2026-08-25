@@ -174,6 +174,99 @@
           </div>
       </div>
   </div>
+{{-- User-level direct permissions --}}
+<div class="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
+    <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">صلاحيات المستخدمين الفردية</h2>
+            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">تخصيص إضافي لكل مستخدم</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المستخدم</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الدور</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">صلاحيات مباشرة</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach ($users as $u)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $u->name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ __($u->role) }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 user-direct-perms" data-user-id="{{ $u->id }}">
+                                @forelse ($u->permissions as $perm)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">{{ __($perm->name) }}</span>
+                                @empty
+                                    <span class="text-gray-400 text-xs no-perms-label">لا توجد صلاحيات مباشرة</span>
+                                @endforelse
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-purple-600 hover:text-purple-900 edit-user-permissions-btn"
+                                data-user-id="{{ $u->id }}"
+                                data-user-name="{{ $u->name }}">
+                                تعديل
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{-- User permissions modal --}}
+<div class="modal fade" id="userPermissionsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-gray-50">
+                <h5 class="modal-title font-bold text-gray-800">صلاحيات المستخدم: <span id="modalUserName" class="text-purple-600"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-sm text-gray-500 mb-4">هذه صلاحيات مباشرة تُضاف فوق صلاحيات الدور الذي ينتمي إليه المستخدم.</p>
+                <form id="userPermissionsForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach ($permissions as $group => $groupPermissions)
+                            <div class="border rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h6 class="font-medium text-gray-700">{{ __($group) }}</h6>
+                                    <div class="flex items-center">
+                                        <input id="user-select-all-{{ $group }}" class="form-checkbox h-4 w-4 text-purple-600 user-select-all-group" type="checkbox" data-group="{{ $group }}">
+                                        <label for="user-select-all-{{ $group }}" class="ml-2 text-sm text-gray-600">تحديد الكل</label>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    @foreach ($groupPermissions as $permission)
+                                        <div class="flex items-center">
+                                            <input id="user-perm-{{ $permission->id }}" class="form-checkbox h-4 w-4 text-purple-600 user-permission-checkbox" type="checkbox" name="permissions[]" value="{{ $permission->name }}" data-group="{{ $group }}">
+                                            <label for="user-perm-{{ $permission->id }}" class="ml-2 text-sm text-gray-700">{{ __($permission->name) }}</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-gray-50">
+                <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" data-dismiss="modal">إلغاء</button>
+                <button type="button" id="saveUserPermissionsBtn" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+                    <span class="submit-text">حفظ التغييرات</span>
+                    <span class="spinner-border spinner-border-sm d-none ml-2" role="status"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
     <script>
         let deleteRoleId = null;
@@ -445,5 +538,84 @@
                 $('#addRoleForm')[0].reset();
             });
         });
+
+        // ── User-level permissions ──────────────────────────────────────────
+        (function () {
+            let currentUserId = null;
+
+            $(document).on('click', '.edit-user-permissions-btn', function () {
+                currentUserId = $(this).data('user-id');
+                const userName = $(this).data('user-name');
+
+                $('#modalUserName').text(userName);
+                $('#userPermissionsForm').attr('action', `/admin/users/${currentUserId}/permissions`);
+
+                // Reset
+                $('#userPermissionsForm')[0].reset();
+                $('.user-select-all-group').prop('checked', false);
+
+                $.get(`/admin/users/${currentUserId}/permissions`, function (response) {
+                    if (response.permissions) {
+                        response.permissions.forEach(function (perm) {
+                            $(`input.user-permission-checkbox[value="${perm}"]`).prop('checked', true);
+                        });
+                        $('.user-select-all-group').each(function () {
+                            const group = $(this).data('group');
+                            const allChecked = $(`input.user-permission-checkbox[data-group="${group}"]:not(:checked)`).length === 0;
+                            $(this).prop('checked', allChecked);
+                        });
+                    }
+                });
+
+                $('#userPermissionsModal').modal('show');
+            });
+
+            $('.user-select-all-group').on('change', function () {
+                const group = $(this).data('group');
+                $(`input.user-permission-checkbox[data-group="${group}"]`).prop('checked', $(this).is(':checked'));
+            });
+
+            $(document).on('change', '.user-permission-checkbox', function () {
+                const group = $(this).data('group');
+                const allChecked = $(`input.user-permission-checkbox[data-group="${group}"]:not(:checked)`).length === 0;
+                $(`input.user-select-all-group[data-group="${group}"]`).prop('checked', allChecked);
+            });
+
+            $('#saveUserPermissionsBtn').on('click', function () {
+                const btn = $(this);
+                btn.prop('disabled', true);
+                btn.find('.submit-text').text('جاري الحفظ...');
+                btn.find('.spinner-border').removeClass('d-none');
+
+                $.ajax({
+                    url: $('#userPermissionsForm').attr('action'),
+                    type: 'POST',
+                    data: $('#userPermissionsForm').serialize(),
+                    success: function (response) {
+                        toastr.success(response.message);
+                        $('#userPermissionsModal').modal('hide');
+
+                        // Update inline badges
+                        const cell = $(`.user-direct-perms[data-user-id="${currentUserId}"]`);
+                        if (response.permissions && response.permissions.length > 0) {
+                            const badges = response.permissions.map(p =>
+                                `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">${p}</span>`
+                            ).join('');
+                            cell.html(badges);
+                        } else {
+                            cell.html('<span class="text-gray-400 text-xs">لا توجد صلاحيات مباشرة</span>');
+                        }
+                    },
+                    error: function (xhr) {
+                        toastr.error(xhr.responseJSON?.message || 'حدث خطأ أثناء حفظ الصلاحيات');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false);
+                        btn.find('.submit-text').text('حفظ التغييرات');
+                        btn.find('.spinner-border').addClass('d-none');
+                    }
+                });
+            });
+        })();
     </script>
 @endpush

@@ -80,12 +80,30 @@ class StoreEmployeeRequest extends FormRequest
             'gender' => 'required|in:female,male',
             'health_card' => 'required|string|max:255',
             'work_area' => 'required|string|max:255',
-            'id_card' => 'required|string|size:10|regex:/^[12][0-9]{9}$/|unique:users,id_card',
+            'id_card' => [
+                'required', 'string', 'size:10', 'regex:/^[12][0-9]{9}$/', 'unique:users,id_card',
+                function ($attribute, $value, $fail) {
+                    $blacklisted = Employee::whereHas('user', fn ($q) => $q->where('id_card', $value))
+                        ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
+                        ->exists();
+                    if ($blacklisted) {
+                        $fail('هذا الموظف مدرج في القائمة السوداء بسبب سوء الأداء ولا يمكن إعادة تسجيله.');
+                    }
+                },
+            ],
             'phone_number' => [
                 'required',
                 'string',
                 'digits:10',
                 Rule::unique('users', 'contact_info->phone_number'),
+                function ($attribute, $value, $fail) {
+                    $blacklisted = Employee::whereHas('user', fn ($q) => $q->where('contact_info->phone_number', $value))
+                        ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
+                        ->exists();
+                    if ($blacklisted) {
+                        $fail('هذا الموظف مدرج في القائمة السوداء بسبب سوء الأداء ولا يمكن إعادة تسجيله.');
+                    }
+                },
             ],
             'phone_type' => 'required|in:android,iphone',
             'nationality' => 'required|string|max:100',
