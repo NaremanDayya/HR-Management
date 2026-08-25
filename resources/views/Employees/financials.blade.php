@@ -441,7 +441,7 @@
                                         <th><i class="fas fa-university me-1 text-purple"></i> البنك</th>
                                         <th><i class="fas fa-business-time me-1 text-warning"></i> ساعات إضافية</th>
                                         <th><i class="fas fa-calendar-plus me-1 text-warning"></i> أيام إضافية</th>
-                                        <th>الإجراءات</th>
+                                        <th id="actionsHeader" @if($selectedMonth != now()->month || $selectedYear != now()->year) style="display:none" @endif>الإجراءات</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -829,6 +829,7 @@
                 });
 
                 tableBody.innerHTML = tableHTML;
+                document.getElementById('actionsHeader').style.display = _isCurrentMonth() ? '' : 'none';
             }
 
             // Helper function to get bank logo HTML
