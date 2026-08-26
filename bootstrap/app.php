@@ -13,7 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Public self-registration links are shared with candidates and may sit
+        // open for hours/days, long past session expiry — there's no logged-in
+        // session to protect here, so exempt them instead of hitting 419.
+        $middleware->validateCsrfTokens(except: [
+            'register-employee/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
