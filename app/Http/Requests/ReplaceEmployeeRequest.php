@@ -90,7 +90,7 @@ class ReplaceEmployeeRequest extends FormRequest
             'role' => 'nullable|string|max:100',
             'project' => 'nullable|string|max:255',
             'personal_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'salary' => 'required|numeric|min:0|max:999999.99',
+            'salary' => 'required|integer|min:0|max:999999',
             'english_level' => 'required|in:basic,intermediate,advanced',
             'certificate_type' => 'nullable|string|max:100|in:high_school,diploma,bachelor,master,phd',
             'marital_status' => 'required|in:single,married,divorced,widowed',

@@ -72,7 +72,7 @@ class UpdateEmployeeRequest extends FormRequest
             'Shoes_size' => 'nullable|string|max:10',
             'health_card' => 'nullable|boolean',
             'project' => 'nullable|exists:projects,id',
-            'salary' => 'nullable|numeric|min:0',
+            'salary' => 'nullable|integer|min:0',
             'english_level' => 'nullable|string|max:50',
             'marital_status' => 'nullable|string|max:50',
             'personal_image' => 'nullable|image|max:2048',

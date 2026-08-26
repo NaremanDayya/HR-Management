@@ -144,7 +144,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">الراتب</label>
-                    <input type="number" step="100" name="salary" class="form-control" value="{{ old('salary') }}" required>
+                    <input type="number" step="1" min="0" name="salary" class="form-control" value="{{ old('salary') }}" required>
                 </div>
                 @if ($role === 'shelf_stacker' && $supervisors->isNotEmpty())
                     <div class="col-md-6">
@@ -269,6 +269,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.querySelectorAll('input[name="salary"]').forEach(function (input) {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E') {
+                    e.preventDefault();
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const current = parseInt(this.value, 10) || 0;
+                    const next = e.key === 'ArrowUp' ? current + 100 : Math.max(current - 100, 0);
+                    this.value = next;
+                    this.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        });
+
         function calculateAge() {
             const birthdayInput = document.getElementById('birthday');
             const ageInput = document.getElementById('age');

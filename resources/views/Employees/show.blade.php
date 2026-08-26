@@ -885,7 +885,7 @@
                                         </select>
                                     
                                     @elseif($editableField === 'salary')
-                                        <input type="number" step="100" name="salary" value="{{ old('salary', $emp->salary) }}"
+                                        <input type="number" step="1" min="0" name="salary" value="{{ old('salary', (int) round($emp->salary)) }}"
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
                                     
                                     @elseif($editableField === 'job')
@@ -1481,6 +1481,20 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('input[name="salary"]').forEach(function (input) {
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E') {
+                            e.preventDefault();
+                        } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const current = parseInt(this.value, 10) || 0;
+                            const next = e.key === 'ArrowUp' ? current + 100 : Math.max(current - 100, 0);
+                            this.value = next;
+                            this.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    });
+                });
+
                 flatpickr("#edit_birthday", {
                     locale: "ar",
                     dateFormat: "Y-m-d",

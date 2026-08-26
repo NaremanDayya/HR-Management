@@ -412,7 +412,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">الراتب</label>
-                <input type="number" step="100" name="salary"
+                <input type="number" step="1" min="0" name="salary"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('salary') border-red-500 @enderror"
                     required>
                 @error('salary')
@@ -452,6 +452,20 @@
     </div>
 </div>
 <script>
+    document.querySelectorAll('input[name="salary"]').forEach(function (input) {
+        input.addEventListener('keydown', function (e) {
+            if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                const current = parseInt(this.value, 10) || 0;
+                const next = e.key === 'ArrowUp' ? current + 100 : Math.max(current - 100, 0);
+                this.value = next;
+                this.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    });
+
     const supervisors = @json($supervisors);
     const areaManagers = @json($area_managers);
 
