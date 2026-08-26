@@ -144,7 +144,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">الراتب</label>
-                    <input type="number" step="0.01" name="salary" class="form-control" value="{{ old('salary') }}" required>
+                    <input type="number" step="100" name="salary" class="form-control" value="{{ old('salary') }}" required>
                 </div>
                 @if ($role === 'shelf_stacker' && $supervisors->isNotEmpty())
                     <div class="col-md-6">

@@ -885,7 +885,7 @@
                                         </select>
                                     
                                     @elseif($editableField === 'salary')
-                                        <input type="number" step="0.01" name="salary" value="{{ old('salary', $emp->salary) }}" 
+                                        <input type="number" step="100" name="salary" value="{{ old('salary', $emp->salary) }}"
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
                                     
                                     @elseif($editableField === 'job')
