@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -86,6 +87,8 @@ class EmployeeActionController extends Controller
                     return $this->handleReplacementRequest($employeeIds, $request);
                 case 'temporary_assignment':
                     return $this->handleTemporaryAssignment($employeeIds, $request);
+                case 'role_upgrade':
+                    return $this->handleRoleUpgrade($employeeIds, $request);
 
                 default:
                     return response()->json([
@@ -477,6 +480,60 @@ class EmployeeActionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم تقديم طلب الاستبدال للموظفين المحددين',
+        ]);
+    }
+
+    public const UPGRADE_ROLE_LABELS = [
+        'shelf_stacker' => 'مصفف أرفف',
+        'supervisor' => 'مشرف',
+        'area_manager' => 'مشرف المشرفين',
+        'project_manager' => 'مدير مشروع',
+        'senior_project_manager' => 'مدير مديري المشاريع',
+        'operations_manager' => 'مدير العمليات',
+        'hr_assistant' => 'مساعد مدير موارد بشرية',
+        'hr_manager' => 'مدير موارد بشرية',
+    ];
+
+    private function handleRoleUpgrade(array $employeeIds, Request $request)
+    {
+        $validated = $request->validate([
+            'new_role' => ['required', Rule::in(array_keys(self::UPGRADE_ROLE_LABELS))],
+            'upgrade_reason' => 'nullable|string|max:500',
+        ]);
+
+        foreach ($employeeIds as $employeeId) {
+            $employee = Employee::with('user')->findOrFail($employeeId);
+
+            if (!$employee->user) {
+                continue;
+            }
+
+            if ($employee->user->role === $validated['new_role']) {
+                continue;
+            }
+
+            $empRequest = EmployeeRequest::create([
+                'employee_id' => $employeeId,
+                'request_type_id' => RequestType::getIdByKey('role_upgrade'),
+                'status' => 'pending',
+                'requester_type' => 'App\Models\User',
+                'requester_id' => Auth::id(),
+                'description' => $validated['upgrade_reason'] ?? null,
+                'payload' => [
+                    'current_role' => $employee->user->role,
+                    'new_role' => $validated['new_role'],
+                ],
+            ]);
+        }
+
+        if (isset($empRequest)) {
+            $admin = User::where('role', 'admin')->first();
+            $admin?->notify(new NewEmployeeRequestNotification($empRequest, 'role_upgrade'));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تقديم طلب الترقية للموظفين المحددين، بانتظار موافقة الأدمن',
         ]);
     }
 

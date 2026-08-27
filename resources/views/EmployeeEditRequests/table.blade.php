@@ -255,6 +255,17 @@
                                                             <span class="text-gray-400">— مقاس: {{ $uniformItemSize }}</span>
                                                         @endif
                                                     </div>
+                                                @elseif (($request->requestType->key ?? null) === 'role_upgrade' && $request->payload)
+                                                    @php
+                                                        $upgradeLabels = \App\Http\Controllers\EmployeeActionController::UPGRADE_ROLE_LABELS;
+                                                        $currentRole = $request->payload['current_role'] ?? null;
+                                                        $newRole = $request->payload['new_role'] ?? null;
+                                                    @endphp
+                                                    <div class="text-gray-500 text-xs mt-1">
+                                                        {{ $upgradeLabels[$currentRole] ?? $currentRole ?? '-' }}
+                                                        <i class="fas fa-arrow-left mx-1"></i>
+                                                        {{ $upgradeLabels[$newRole] ?? $newRole }}
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>

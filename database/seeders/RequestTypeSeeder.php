@@ -43,6 +43,10 @@ class RequestTypeSeeder extends Seeder
                 'key' => 'generate_health_card',
                 'label' => 'طلب إصدار بطاقة صحية',
             ],
+            [
+                'key' => 'role_upgrade',
+                'label' => 'طلب ترقية موظف',
+            ],
         ];
 
         foreach ($requestTypes as $type) {

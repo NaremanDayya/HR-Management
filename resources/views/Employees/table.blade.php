@@ -1234,6 +1234,41 @@
                                             </x-bulk-action-modal>
                                         </li>
                                         <li>
+                                            <x-bulk-action-modal action="role_upgrade"
+                                                                 modal-title="ترقية موظف"
+                                                                 confirm-text="طلب ترقية"
+                                                                 button-class="bg-purple-600"
+                                                                 modal-id="role-upgrade"
+                                                                 :has-form="true">
+
+                                                <div class="mb-4 text-right">
+                                                    <label class="block mb-2 font-semibold text-gray-700">
+                                                        الدور الجديد
+                                                    </label>
+                                                    <select name="new_role" required
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 rtl text-right">
+                                                        <option value="" selected disabled>اختر الدور الجديد</option>
+                                                        @foreach (\App\Http\Controllers\EmployeeActionController::UPGRADE_ROLE_LABELS as $roleValue => $roleLabel)
+                                                            <option value="{{ $roleValue }}">{{ $roleLabel }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-4 text-right">
+                                                    <label class="block mb-2 font-semibold text-gray-700">
+                                                        سبب الترقية (اختياري)
+                                                    </label>
+                                                    <textarea name="upgrade_reason" rows="3"
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 rtl text-right"
+                                                              placeholder="اكتب سبب الترقية هنا..."></textarea>
+                                                </div>
+
+                                                <p class="text-xs text-gray-500 text-right mb-2">
+                                                    سيتم إرسال هذا كطلب بانتظار موافقة الأدمن، ولن يتم تغيير الدور مباشرة.
+                                                </p>
+                                            </x-bulk-action-modal>
+                                        </li>
+                                        <li>
                                             <x-bulk-action-modal action="add_deduction" modal-title="إضافة خصم"
                                                                  confirm-text="تطبيق الخصم" button-class="bg-red-700"
                                                                  modal-id="add-deduction" :has-form="true">

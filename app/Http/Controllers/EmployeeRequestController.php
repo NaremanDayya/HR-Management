@@ -174,6 +174,13 @@ class EmployeeRequestController extends Controller
                     'edited_field' => null,
                     'used' => false,
                 ]);
+            } elseif ($editTypeKey === 'role_upgrade') {
+                $newRole = $editRequest->payload['new_role'] ?? null;
+                $employee = $editRequest->employee()->with('user')->first();
+
+                if ($newRole && $employee && $employee->user) {
+                    $employee->user->update(['role' => $newRole]);
+                }
             }
         }
         if ($editTypeKey === 'salary_advance') {
