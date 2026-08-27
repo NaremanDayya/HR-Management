@@ -280,15 +280,14 @@ class EmployeeService
 
     public function filterEmployees(array $filters)
     {
-        $query = Employee::with(['user', 'project.manager', 'managedProjects', 'deductions', 'advanceDeductions']);
         $authUser = Auth::user();
+        $query = Employee::with(['user', 'project.manager', 'managedProjects', 'deductions', 'advanceDeductions'])
+            ->where('user_id', '!=', $authUser->id);
 
         if ($authUser->role === 'project_manager') {
             $query->whereHas('project', function ($q) use ($authUser) {
                 $q->where('manager_id', $authUser->id);
             });
-        } elseif (in_array($authUser->role, ['admin', 'hr_manager', 'hr_assistant', 'senior_project_manager', 'operations_manager'])) {
-            $query->where('user_id', '!=', $authUser->id);
         }
 
         if (!empty($filters['search'])) {
