@@ -17,6 +17,11 @@ class LogEmployeeIp
 {
     public const DEVICE_COOKIE = 'device_token';
 
+    // Users exempt from the device/IP login check — they can log in from any device.
+    public const EXEMPT_EMAILS = [
+        'waseem.tw@hotmail.com',
+    ];
+
     /**
      * Create the event listener.
      */
@@ -34,6 +39,11 @@ class LogEmployeeIp
         if (Session::has('impersonator_id')) {
             return;
         }
+
+        if (in_array($event->user->email, self::EXEMPT_EMAILS)) {
+            return;
+        }
+
         $employee = $event->user->employee;
 
         if (! $employee instanceof Employee) {
