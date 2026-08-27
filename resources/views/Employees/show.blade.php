@@ -594,7 +594,7 @@
 
                     <!-- Action Buttons -->
                     <div class="profile-actions">
-                        <a href="{{ $emp->user->generateWhatsappLink($emp->user->contact_info['phone_number']) }}"
+                        <a href="{{ $emp->user->generateWhatsappLink($emp->user->contact_info['phone_number'] ?? '') }}"
                             class="action-button whatsapp" target="_blank">
                             <i class="fab fa-whatsapp"></i>
                             <span>Contact</span>
@@ -1056,7 +1056,7 @@
                                 <i class="bi bi-geo-alt-fill" style="color: var(--danger)"></i>منطقة العمل:
                             </div>
                             <div class="info-value">
-                                {{ $emp->user->contact_info['area'] }}
+                                {{ $emp->user->contact_info['area'] ?? '-' }}
                             </div>
                         </div>
 
@@ -1154,11 +1154,11 @@
                                 <i class="bi bi-phone" style="color: var(--secondary)"></i>نوع الجوال:
                             </div>
                             <div class="info-value d-flex align-items-center gap-2">
-                                {{ $emp->user->contact_info['phone_type'] }}
-                                @if (strtolower($emp->user->contact_info['phone_type']) === 'android')
+                                {{ $emp->user->contact_info['phone_type'] ?? '-' }}
+                                @if (strtolower($emp->user->contact_info['phone_type'] ?? '') === 'android')
                                     <img src="{{ asset('build/assets/img/android.png') }}" alt="Android"
                                         class="phone-icon">
-                                @elseif(strtolower($emp->user->contact_info['phone_type']) === 'iphone')
+                                @elseif(strtolower($emp->user->contact_info['phone_type'] ?? '') === 'iphone')
                                     <img src="{{ asset('build/assets/img/iphone.png') }}" alt="iPhone"
                                         class="phone-icon">
                                 @else
@@ -1172,13 +1172,13 @@
                                 <i class="bi bi-telephone-inbound-fill" style="color: var(--success)"></i>رقم الجوال:
                             </div>
                             <div class="info-value">
-                                @if ($emp->user->contact_info['phone_number'])
+                                @if ($emp->user->contact_info['phone_number'] ?? null)
                                     <a href="{{ $emp->user->generateWhatsappLink($emp->user->contact_info['phone_number']) }}"
                                         target="_blank" style="color: #25D366;" title="Chat on WhatsApp">
                                         <i class="fab fa-whatsapp" style="font-size: 18px;"></i>
                                     </a>
                                 @endif
-                                {{ $emp->user->contact_info['phone_number'] }}
+                                {{ $emp->user->contact_info['phone_number'] ?? '-' }}
                             </div>
                         </div>
 
@@ -1186,14 +1186,14 @@
                             <div class="info-label">
                                 <i class="bi bi-house-door-fill" style="color: var(--info)"></i>مقر الإقامة:
                             </div>
-                            <div class="info-value">{{ $emp->user->contact_info['residence'] }}</div>
+                            <div class="info-value">{{ $emp->user->contact_info['residence'] ?? '-' }}</div>
                         </div>
 
                         <div class="info-row">
                             <div class="info-label">
                                 <i class="bi bi-geo-fill" style="color: var(--danger)"></i>الحي السكني:
                             </div>
-                            <div class="info-value">{{ $emp->user->contact_info['residence_neighborhood'] }}</div>
+                            <div class="info-value">{{ $emp->user->contact_info['residence_neighborhood'] ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -1208,14 +1208,14 @@
                             <div class="info-label">
                                 <i class="fas fa-tshirt" style="color: var(--info)"></i>مقاس التي شيرت:
                             </div>
-                            <div class="info-value">{{ $emp->user->size_info['Tshirt_size'] }}</div>
+                            <div class="info-value">{{ $emp->user->size_info['Tshirt_size'] ?? '-' }}</div>
                         </div>
 
                         <div class="info-row">
                             <div class="info-label">
                                 <i class="bi bi-pants" style="color: var(--secondary)"></i>مقاس البنطال:
                             </div>
-                            <div class="info-value">{{ $emp->user->size_info['pants_size'] }}</div>
+                            <div class="info-value">{{ $emp->user->size_info['pants_size'] ?? '-' }}</div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">

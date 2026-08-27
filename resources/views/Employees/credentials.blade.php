@@ -294,7 +294,7 @@
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
                                             <img class="h-10 w-10 rounded-full"
-                                                src="{{$user->personal_image}}"
+                                                src="{{ $user->personal_image ?? asset('images/default-avatar.png') }}"
                                                 alt="">
                                         </div>
                                         <div class="mr-4">

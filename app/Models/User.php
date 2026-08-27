@@ -119,6 +119,7 @@ class User extends Authenticatable
         return match ($this->gender) {
             'male' => 'ذكر',
             'female' => 'أنثى',
+            default => 'غير محدد',
         };
     }
 
@@ -133,7 +134,7 @@ class User extends Authenticatable
     }
     private function generateSaudiNumber($phone)
     {
-        $phone = $this->contact_info['phone_number'];
+        $phone = $this->contact_info['phone_number'] ?? '';
         $digits = preg_replace('/\D/', '', $phone);
 
         if (Str::startsWith($digits, '05')) {
@@ -149,7 +150,7 @@ class User extends Authenticatable
 
     public function generateWhatsappLink($phone)
     {
-        $phone = $this->contact_info['phone_number'];
+        $phone = $this->contact_info['phone_number'] ?? '';
         $cleanNumber = $this->generateSaudiNumber($phone);
         return 'https://wa.me/' . ltrim($cleanNumber, '+');
     }
