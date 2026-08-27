@@ -47,6 +47,7 @@ class EmployeeRequestController extends Controller
         $pendedRequests = $requests->where('status','pending')->count();
         $approvedRequests = $requests->where('status','approved')->count();
         $rejectedRequests = $requests->where('status','rejected')->count();
+        $cancelledRequests = $requests->where('status','cancelled')->count();
         $allRequests = $requests->count();
 
         // Get projects for dropdown
@@ -57,8 +58,56 @@ class EmployeeRequestController extends Controller
         $requestTypes = RequestType::all();
         $role = Role::where('name', $user->role)->first();
 
-        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role','pendedRequests', 'approvedRequests', 'rejectedRequests', 'allRequests'));
+        return view('EmployeeEditRequests.table', compact('resources', 'requestTypes', 'projects', 'role','pendedRequests', 'approvedRequests', 'rejectedRequests', 'cancelledRequests', 'allRequests'));
     }
+    public function myRequests(Request $request)
+    {
+        $query = EmployeeRequest::with(['requestType', 'employee'])
+            ->where('requester_id', Auth::id())
+            ->where('requester_type', 'App\Models\User')
+            ->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->paginate(15)->withQueryString();
+
+        $counts = EmployeeRequest::where('requester_id', Auth::id())
+            ->where('requester_type', 'App\Models\User')
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('EmployeeEditRequests.my-requests', [
+            'requests' => $requests,
+            'pendingCount' => $counts['pending'] ?? 0,
+            'approvedCount' => $counts['approved'] ?? 0,
+            'rejectedCount' => $counts['rejected'] ?? 0,
+            'cancelledCount' => $counts['cancelled'] ?? 0,
+            'allCount' => $counts->sum(),
+        ]);
+    }
+
+    public function cancel($id)
+    {
+        $editRequest = EmployeeRequest::findOrFail($id);
+
+        abort_unless(
+            $editRequest->requester_type === 'App\Models\User' && (int) $editRequest->requester_id === Auth::id(),
+            403,
+            'لا يمكنك إلغاء طلب لم ترسله أنت.'
+        );
+        abort_unless($editRequest->status === 'pending', 422, 'لا يمكن إلغاء طلب تم البت فيه مسبقًا.');
+
+        $editRequest->update([
+            'status' => 'cancelled',
+            'response_date' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'تم إلغاء الطلب بنجاح.');
+    }
+
     public function storeEditRequest(Request $request)
     {
         $validated = $request->validate([

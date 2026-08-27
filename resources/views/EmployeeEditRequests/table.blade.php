@@ -70,6 +70,11 @@
                                 تم الرفض {{$rejectedRequests}}
                             </a>
 
+                            <a href="{{ route('employee-request.index', ['status' => 'cancelled'] + request()->except('page')) }}"
+                                class="px-4 py-2 text-sm font-medium rounded-full border bg-gray-100 border-gray-300 text-gray-600">
+                                ملغى {{$cancelledRequests}}
+                            </a>
+
                         </div>
 
                         <!-- Group 2: Dropdown Filters -->
@@ -377,6 +382,11 @@
                                                         قيد الانتظار
                                                     </span>
                                                 @endif
+                                            @elseif ($request->status === 'cancelled')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold rounded bg-gray-200 text-gray-600">
+                                                    ملغى من قبل المرسل
+                                                </span>
                                             @else
                                                 <span
                                                     class="px-2 py-1 text-xs font-semibold rounded

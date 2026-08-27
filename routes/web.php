@@ -160,6 +160,11 @@ Route::middleware(['auth'])->prefix('EmployeeEditRequest')->name('employee-reque
     Route::post('/{id}/status', [EmployeeRequestController::class, 'changeStatus'])->name('change-status');
 });
 
+Route::middleware(['auth'])->prefix('my-requests')->name('my-requests.')->group(function () {
+    Route::get('/', [EmployeeRequestController::class, 'myRequests'])->name('index');
+    Route::post('/{id}/cancel', [EmployeeRequestController::class, 'cancel'])->name('cancel');
+});
+
 Route::get('/bank-update-request/{employee}', [BankUpdateRequestController::class, 'showPublicForm'])->name('public.bank-update.show');
 Route::post('/bank-update-request/{employee}', [BankUpdateRequestController::class, 'storePublicForm'])->name('public.bank-update.store');
 
