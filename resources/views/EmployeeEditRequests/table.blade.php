@@ -232,6 +232,24 @@
                                                     <div class="text-gray-500 text-xs mt-1">
                                                         {{ \App\Models\EmployeeEditRequest::editableFields()[$request->edited_field] ?? $request->edited_field }}
                                                     </div>
+                                                @elseif (($request->requestType->key ?? null) === 'united_clothes' && $request->payload)
+                                                    @php
+                                                        $uniformItemLabels = [
+                                                            'tshirt' => 'تيشيرت',
+                                                            'pants' => 'بنطال',
+                                                            'shoes' => 'حذاء',
+                                                            'id_card' => 'بطاقة تعريف',
+                                                            'tool_bag' => 'حقيبة أدوات',
+                                                        ];
+                                                        $uniformItemType = $request->payload['type'] ?? null;
+                                                        $uniformItemSize = $request->payload['size'] ?? null;
+                                                    @endphp
+                                                    <div class="text-gray-500 text-xs mt-1">
+                                                        {{ $uniformItemLabels[$uniformItemType] ?? $uniformItemType }}
+                                                        @if ($uniformItemSize)
+                                                            <span class="text-gray-400">— مقاس: {{ $uniformItemSize }}</span>
+                                                        @endif
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>
