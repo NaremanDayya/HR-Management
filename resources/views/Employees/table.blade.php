@@ -1155,13 +1155,34 @@
                                                 </div>
 
                                                 <!-- Alert Reason -->
-                                                <div>
+                                                <div class="mb-4">
                                                     <label class="block mb-2 font-semibold text-gray-700 text-right">
                                                         سبب الإنذار
                                                     </label>
                                                     <textarea name="alert_reason" rows="3" required
                                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-right rtl"
                                                               placeholder="اكتب تفاصيل الإنذار هنا..."></textarea>
+                                                </div>
+
+                                                <!-- Delivery Channel -->
+                                                <div>
+                                                    <label class="block mb-2 font-semibold text-gray-700 text-right">
+                                                        إرسال عبر
+                                                    </label>
+                                                    <div class="flex items-center gap-4 justify-end">
+                                                        <label class="flex items-center gap-1">
+                                                            <span>واتساب</span>
+                                                            <input type="radio" name="alert_channel" value="whatsapp">
+                                                        </label>
+                                                        <label class="flex items-center gap-1">
+                                                            <span>البريد الإلكتروني</span>
+                                                            <input type="radio" name="alert_channel" value="email">
+                                                        </label>
+                                                        <label class="flex items-center gap-1">
+                                                            <span>كلاهما</span>
+                                                            <input type="radio" name="alert_channel" value="both" checked>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </x-bulk-action-modal>
 

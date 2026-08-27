@@ -485,8 +485,13 @@ class EmployeeActionController extends Controller
     {
         $validated = $request->validate([
             'alert_reason' => 'required|string|max:500',
-            'alert_title' => 'required|string'
+            'alert_title' => 'required|string',
+            'alert_channel' => 'nullable|in:whatsapp,email,both',
         ]);
+
+        $channel = $validated['alert_channel'] ?? 'both';
+        $sendWhatsapp = in_array($channel, ['whatsapp', 'both']);
+        $sendEmail = in_array($channel, ['email', 'both']);
 
         $successCount = 0;
         $failedCount = 0;
@@ -497,64 +502,89 @@ class EmployeeActionController extends Controller
             try {
                 $employee = Employee::with('user')->findOrFail($employeeId);
 
-                // Validate required data exists
                 if (!$employee->user) {
                     throw new \Exception('Employee user record not found');
                 }
 
-                if (!isset($employee->user->contact_info['phone_number'])) {
+                if ($sendWhatsapp && !isset($employee->user->contact_info['phone_number'])) {
                     throw new \Exception('Employee phone number missing');
                 }
 
-                if (!isset($manager->contact_info['phone_number'])) {
+                if ($sendWhatsapp && !isset($manager->contact_info['phone_number'])) {
                     throw new \Exception('Manager phone number missing');
                 }
 
-                // Prepare message first
+                if ($sendEmail && empty($employee->user->email)) {
+                    throw new \Exception('Employee email missing');
+                }
+
                 $messageData = [
                     'company_name' => $companyName,
                     'manager_name' => $manager->name,
                     'employee_name' => $employee->user->name,
-                    'manager_whatsapp' => $manager->contact_info['phone_number'],
+                    'manager_whatsapp' => $manager->contact_info['phone_number'] ?? null,
                     'alert_title' => $validated['alert_title'],
                     'alert_message' => $validated['alert_reason']
                 ];
 
                 $message = $this->whatsAppService->formatAlertMessage($messageData);
 
-
-
                 if (empty($message)) {
                     throw new \Exception('Failed to generate alert message');
                 }
 
-                $sendResult = $this->whatsAppService->send(
-                    $employee->user->contact_info['phone_number'],
-                    $message
-                );
-                if (!empty($employee->user->email)) {
-                    Mail::to($employee->user->email)->send(new AlertNotificationMail($messageData));
+                $whatsappOk = null;
+                $emailOk = null;
+                $messageSid = null;
+                $errors = [];
+
+                if ($sendWhatsapp) {
+                    $sendResult = $this->whatsAppService->send(
+                        $employee->user->contact_info['phone_number'],
+                        $message
+                    );
+                    $whatsappOk = $sendResult['success'];
+                    $messageSid = $sendResult['message_sid'] ?? null;
+                    if (!$whatsappOk) {
+                        $errors[] = 'WhatsApp: ' . ($sendResult['details'] ?? $sendResult['error'] ?? 'unknown error');
+                    }
                 }
+
+                if ($sendEmail) {
+                    try {
+                        Mail::to($employee->user->email)->send(new AlertNotificationMail($messageData));
+                        $emailOk = true;
+                    } catch (\Exception $mailException) {
+                        $emailOk = false;
+                        $errors[] = 'Email: ' . $mailException->getMessage();
+                    }
+                }
+
+                // Delivered if at least one of the requested channels succeeded.
+                $delivered = ($whatsappOk === true) || ($emailOk === true);
 
                 $alertData = [
                     'employee_id' => $employeeId,
                     'reason' => $validated['alert_reason'],
                     'title' => $validated['alert_title'],
                     'manager_id' => Auth::id(),
-                    'message_sent' => $message, // Ensure this is set
-                    'message_sid' => $sendResult['message_sid'] ?? null,
-                    'delivery_status' => $sendResult['success'] ? 'queued' : 'failed'
+                    'channel' => $channel,
+                    'message_sent' => $message,
+                    'message_sid' => $messageSid,
+                    'delivery_status' => $delivered ? 'queued' : 'failed',
+                    'error_message' => !empty($errors) ? implode(' | ', $errors) : null,
                 ];
 
                 $alert = Alert::create($alertData);
 
-                if ($sendResult['success']) {
+                if ($delivered) {
                     $successCount++;
                     Employee::where('id', $employeeId)->increment('alerts_number');
                 } else {
                     $failedCount++;
                     Log::error('Failed to send alert to employee ' . $employeeId, [
-                        'sendResult' => $sendResult,
+                        'whatsappOk' => $whatsappOk,
+                        'emailOk' => $emailOk,
                         'alertData' => $alertData
                     ]);
                 }
@@ -566,6 +596,7 @@ class EmployeeActionController extends Controller
                     'reason' => $validated['alert_reason'],
                     'title' => $validated['alert_title'],
                     'manager_id' => Auth::id(),
+                    'channel' => $channel,
                     'message_sent' => 'Failed to generate message: ' . $e->getMessage(),
                     'delivery_status' => 'failed',
                     'error_message' => $e->getMessage()
@@ -581,8 +612,12 @@ class EmployeeActionController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'تم إرسال الإنذار للموظفين المحددين',
+            'success' => $successCount > 0,
+            'message' => $failedCount === 0
+                ? 'تم إرسال الإنذار للموظفين المحددين'
+                : ($successCount === 0
+                    ? 'تعذر إرسال الإنذار لجميع الموظفين المحددين. يرجى مراجعة الإعدادات.'
+                    : "تم إرسال الإنذار لـ {$successCount} موظف، وتعذر الإرسال لـ {$failedCount} موظف."),
             'stats' => [
                 'total' => count($employeeIds),
                 'success' => $successCount,

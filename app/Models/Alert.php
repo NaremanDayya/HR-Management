@@ -15,6 +15,10 @@ class Alert extends Model
         'manager_id',
         'image_url',
         'message_sent',
+        'channel',
+        'message_sid',
+        'delivery_status',
+        'error_message',
     ];
     protected $casts = [
         'is_read' => 'boolean',

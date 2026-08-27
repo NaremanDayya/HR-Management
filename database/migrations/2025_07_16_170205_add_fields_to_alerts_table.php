@@ -11,9 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('alerts', function (Blueprint $table) {
-            $table->foreignId('manager_id')->constrained('users')->onDelete('cascade');
             $table->json('payload')->nullable()->after('reason');
-
         });
     }
 
@@ -23,10 +21,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('alerts', function (Blueprint $table) {
-             $table->dropColumn([
-                'manager_id',
-                'payload',
-            ]);
+             $table->dropColumn(['payload']);
         });
     }
 };

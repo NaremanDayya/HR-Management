@@ -71,7 +71,7 @@ class WhatsAppService
 
         // Add country code if missing
         if (!str_starts_with($number, '+')) {
-            $defaultCode = env('DEFAULT_COUNTRY_CODE', '+970');
+            $defaultCode = env('DEFAULT_COUNTRY_CODE', '+966');
             $number = $defaultCode . ltrim($number, '0');
         }
 
@@ -148,8 +148,8 @@ class WhatsAppService
         $cleanNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
 
         // Ensure it starts with country code (default to Saudi +966)
-        if (!str_starts_with($cleanNumber, '970')) {
-            $cleanNumber = '970' . ltrim($cleanNumber, '0');
+        if (!str_starts_with($cleanNumber, '966')) {
+            $cleanNumber = '966' . ltrim($cleanNumber, '0');
         }
 
         return "https://wa.me/$cleanNumber";
