@@ -447,6 +447,16 @@
                         </a>
                     @endif
 
+                    @if (Auth::user()->role === 'admin')
+                        <a href="{{ route('project-delete-requests.index') }}"
+                            class="{{ request()->routeIs('project-delete-requests.*') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
+                            <i class="fas fa-trash ml-2 group-hover:text-white transition-colors"></i>
+                            طلبات حذف المشاريع
+                            <span
+                                class="absolute bottom-0 left-0 w-full h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 {{ request()->routeIs('project-delete-requests.*') ? 'scale-x-100' : '' }}"></span>
+                        </a>
+                    @endif
+
                     <a href="{{ route('reports') }}"
                         class="{{ request()->routeIs('reports') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
                         <i class="fas fa-chart-bar ml-2 group-hover:text-white transition-colors"></i>

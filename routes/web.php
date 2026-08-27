@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EmployeeTemplateController;
 use App\Http\Controllers\PublicEmployeeRegistrationController;
+use App\Http\Controllers\ProjectDeleteRequestController;
 
 
 Route::get('/', function () {
@@ -166,6 +167,15 @@ Route::middleware(['auth'])->prefix('bank-update-requests')->name('bank-update-r
     Route::get('/', [BankUpdateRequestController::class, 'index'])->name('index');
     Route::post('/{bankUpdateRequest}/approve', [BankUpdateRequestController::class, 'approve'])->name('approve');
     Route::post('/{bankUpdateRequest}/reject', [BankUpdateRequestController::class, 'reject'])->name('reject');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/projects/{project}/delete-request', [ProjectDeleteRequestController::class, 'store'])->name('project-delete-requests.store');
+});
+Route::middleware(['auth'])->prefix('project-delete-requests')->name('project-delete-requests.')->group(function () {
+    Route::get('/', [ProjectDeleteRequestController::class, 'index'])->name('index');
+    Route::post('/{projectDeleteRequest}/approve', [ProjectDeleteRequestController::class, 'approve'])->name('approve');
+    Route::post('/{projectDeleteRequest}/reject', [ProjectDeleteRequestController::class, 'reject'])->name('reject');
 });
 Route::middleware(['auth', 'web', \App\Http\Middleware\MarkNotificationAsRead::class])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

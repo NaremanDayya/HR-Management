@@ -198,6 +198,9 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                                     <span class="text-blue-600 font-semibold">{{ $project->name }}</span>
+                                                    @if ($project->is_stopped)
+                                                        <span class="badge bg-secondary" title="{{ $project->stop_reason }}">متوقف</span>
+                                                    @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                                     @if ($project->manager)
@@ -241,15 +244,17 @@
                                                             data-bs-toggle="modal" data-bs-target="#editProjectModal">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <form action="{{ route('projects.destroy', $project->id) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger"
-                                                                onclick="return confirm('هل أنت متأكد من حذف هذا المشروع؟')">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
+                                                        @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']) && !$project->is_stopped)
+                                                            <form action="{{ route('project-delete-requests.store', $project->id) }}"
+                                                                method="POST" class="d-inline request-delete-project-form">
+                                                                @csrf
+                                                                <input type="hidden" name="reason">
+                                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                                    title="طلب حذف المشروع">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -433,6 +438,18 @@
                     ]
                 });
             }
+
+            // Request project delete — ask for a reason, then submit as an approval request
+            document.querySelectorAll('.request-delete-project-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const reason = prompt('سبب طلب حذف المشروع (اختياري):');
+                    if (reason === null) return; // cancelled
+                    if (!confirm('سيتم إرسال طلب حذف هذا المشروع لموافقة الأدمن. متابعة؟')) return;
+                    this.querySelector('input[name="reason"]').value = reason;
+                    this.submit();
+                });
+            });
 
             // Edit project modal setup
             document.querySelectorAll('.edit-project-btn').forEach(btn => {

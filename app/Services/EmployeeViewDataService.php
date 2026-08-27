@@ -123,8 +123,8 @@ class EmployeeViewDataService
                 '50' => '50',
             ],
             'projects' => in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])
-                ? Project::pluck('name', 'id')->toArray()
-                : Project::where('manager_id', Auth::id())->pluck('name', 'id')->toArray(),
+                ? Project::active()->pluck('name', 'id')->toArray()
+                : Project::active()->where('manager_id', Auth::id())->pluck('name', 'id')->toArray(),
 
             'projectAllowedRoles' => Project::all()->mapWithKeys(
                 fn($project) => [$project->id => $project->allowed_roles_or_default]

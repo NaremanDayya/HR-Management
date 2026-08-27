@@ -13,9 +13,13 @@ class Project extends Model
         'manager_id',
         'description',
         'allowed_roles',
+        'status',
+        'stop_reason',
+        'stopped_at',
     ];
     protected $casts = [
         'allowed_roles' => 'array',
+        'stopped_at' => 'datetime',
     ];
     public const SELF_REGISTRATION_ROLES = [
         'shelf_stacker' => 'مصفف أرفف',
@@ -29,6 +33,18 @@ class Project extends Model
     public function getAllowedRolesOrDefaultAttribute(): array
     {
         return $this->allowed_roles ?: array_keys(self::SELF_REGISTRATION_ROLES);
+    }
+    public function getIsStoppedAttribute(): bool
+    {
+        return $this->status === 'stopped';
+    }
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+    public function deleteRequests()
+    {
+        return $this->hasMany(ProjectDeleteRequest::class);
     }
     public function manager()
     {
