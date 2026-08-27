@@ -129,11 +129,13 @@
                             </div>
                             <!-- Buttons (left side) -->
                             <div class="d-flex align-items-center gap-2 flex-grow-0">
-                                <button class="btn btn-purple d-flex align-items-center gap-2" data-bs-toggle="modal"
-                                    data-bs-target="#createProjectModal">
-                                    <i class="fas fa-plus"></i>
-                                    <span>إضافة مشروع</span>
-                                </button>
+                                @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                                    <button class="btn btn-purple d-flex align-items-center gap-2" data-bs-toggle="modal"
+                                        data-bs-target="#createProjectModal">
+                                        <i class="fas fa-plus"></i>
+                                        <span>إضافة مشروع</span>
+                                    </button>
+                                @endif
 
                                 <div class="export-btn-group no-print d-flex gap-2">
                                     <button id="pdfExportBtn" class="btn export-btn"

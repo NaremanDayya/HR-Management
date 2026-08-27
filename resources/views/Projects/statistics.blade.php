@@ -46,12 +46,14 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3">
-                    <button
-                        class="btn d-flex align-items-center border-4 border-purple-600 gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-400 text-black shadow-lg hover:bg-purple-500"
-                        data-bs-toggle="modal" data-bs-target="#createProjectModal">
-                        <i class="fas fa-plus"></i>
-                        <span>إضافة مشروع</span>
-                    </button>
+                    @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                        <button
+                            class="btn d-flex align-items-center border-4 border-purple-600 gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple-400 text-black shadow-lg hover:bg-purple-500"
+                            data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                            <i class="fas fa-plus"></i>
+                            <span>إضافة مشروع</span>
+                        </button>
+                    @endif
 
                     <div class="export-btn-group no-print flex gap-2">
                         <button  id="pdfExportBtn"

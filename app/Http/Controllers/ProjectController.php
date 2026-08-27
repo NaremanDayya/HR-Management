@@ -36,6 +36,8 @@ class ProjectController extends Controller
     }
     public function store(ProjectRequest $request)
     {
+        abort_unless(in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']), 403, 'ليس لديك صلاحية لإضافة مشروع.');
+
         try {
             $validated = $request->validated();
 
