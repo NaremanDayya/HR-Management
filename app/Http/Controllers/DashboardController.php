@@ -80,7 +80,9 @@ class DashboardController extends Controller
             'admin_name' => User::where('role', 'admin')->value('name'),
         ];
 
-        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus'), $this->dropdownService->getDropdownData());
+        $role = Role::where('name', $user->role)->first();
+
+        return view('dashboard', compact('roles', 'permissions', 'statistics', 'accountStatus', 'role'), $this->dropdownService->getDropdownData());
     }
 
 

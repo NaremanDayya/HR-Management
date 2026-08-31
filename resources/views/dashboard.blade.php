@@ -423,7 +423,7 @@
 
         </div>
 
-        @if (Auth::user()->role === 'admin')
+        @if (Auth::user()->role === 'admin' || ($role && $role->hasPermissionTo('manage_privileges')) || Auth::user()->hasDirectPermission('manage_privileges'))
             @include('Employees.permissions')
         @endif
     </div>

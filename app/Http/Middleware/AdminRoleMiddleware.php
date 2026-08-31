@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Spatie\Permission\Models\Role;
 
 class AdminRoleMiddleware
 {
@@ -15,10 +16,18 @@ class AdminRoleMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->user()->role !== 'admin') {
-            abort(403);
+        $user = $request->user();
+
+        if ($user->role === 'admin') {
+            return $next($request);
         }
 
-        return $next($request);
+        $role = Role::where('name', $user->role)->first();
+
+        if (($role && $role->hasPermissionTo('manage_privileges')) || $user->hasDirectPermission('manage_privileges')) {
+            return $next($request);
+        }
+
+        abort(403);
     }
 }
