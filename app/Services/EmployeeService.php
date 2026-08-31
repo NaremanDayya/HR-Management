@@ -330,6 +330,12 @@ class EmployeeService
                     $q->where('account_status', $filters['account_status']);
                 });
             }
+        } else {
+            // Employees still pending/rejected from self-registration have their own
+            // dedicated review page — keep them out of the main roster by default.
+            $query->whereHas('user', function ($q) {
+                $q->whereNotIn('account_status', ['pending', 'rejected']);
+            });
         }
 
         if (!empty($filters['project'])) {

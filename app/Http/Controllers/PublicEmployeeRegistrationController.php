@@ -95,6 +95,10 @@ class PublicEmployeeRegistrationController extends Controller
             return app(EmployeeService::class)->create($data, 'pending');
         });
 
+        if (Employee::matchesBlacklist($data['name'], $data['id_card'] ?? null, $data['phone_number'] ?? null)) {
+            $employee->update(['is_blacklisted' => true]);
+        }
+
         $recipients = User::whereIn('role', ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])->get();
         if ($project->manager) {
             $recipients->push($project->manager);
@@ -178,6 +182,10 @@ class PublicEmployeeRegistrationController extends Controller
 
             return $employee;
         });
+
+        if (Employee::matchesBlacklist($data['name'], $data['id_card'] ?? null, $data['phone_number'] ?? null)) {
+            $employee->update(['is_blacklisted' => true]);
+        }
 
         $recipients = User::whereIn('role', ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])->get();
 

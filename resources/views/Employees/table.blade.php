@@ -687,23 +687,11 @@
                                     <i class="fas fa-calendar feature-icon"></i>
 
                                 </a>
-                                <a href="{{ route('employees.template') }}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    تحميل نموذج الموظفين
-                                </a>
                             @if (($role && $role->hasPermissionTo('add_employee')) || Auth::user()->role === 'admin')
-                                <button class="btn btn-purple" data-bs-toggle="modal"
-                                        data-bs-target="#createEmployeeModal">
-                                    <i class="fas fa-plus"></i> إضافة موظف
-                                </button>
-                                @if (!empty($projects))
-                                    <button class="btn btn-outline-purple" data-bs-toggle="modal"
-                                            data-bs-target="#selfRegistrationLinkModal">
-                                        <i class="fas fa-link"></i> رابط تسجيل الموظفين
-                                    </button>
-                                @endif
+                                <a href="{{ route('employees.pending-self-registrations') }}" class="btn btn-icon-only"
+                                   title="طلبات التسجيل الذاتي">
+                                    <i class="fas fa-user-clock feature-icon"></i>
+                                </a>
                             @endif
                             <div class="export-btn-group no-print">
                                 <button id="columnsBtn" class="export-btn columns-btn" onclick="openColumnsModal()">
@@ -1569,282 +1557,6 @@
             </div>
         </div>
 
-        <!-- Self Registration Link Modal -->
-        <style>
-            #selfRegistrationLinkModal .modal-content {
-                border: none;
-                border-radius: 18px;
-                overflow: hidden;
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-            }
-            #selfRegistrationLinkModal .reg-link-header {
-                background: linear-gradient(135deg, #740e0e 0%, #9a1e1e 100%);
-                color: #fff;
-                padding: 20px 44px 22px 44px;
-                position: relative;
-                min-height: auto;
-            }
-            #selfRegistrationLinkModal .reg-link-header h5 {
-                margin: 0;
-                font-weight: 700;
-                font-size: 1.15rem;
-                line-height: 1.5;
-                white-space: normal;
-            }
-            #selfRegistrationLinkModal .reg-link-header p {
-                margin: 8px 0 0;
-                font-size: 0.85rem;
-                line-height: 1.7;
-                opacity: 0.92;
-                white-space: normal;
-                word-wrap: break-word;
-            }
-            #selfRegistrationLinkModal .reg-link-header .btn-close {
-                position: absolute;
-                left: 16px;
-                top: 20px;
-                filter: brightness(0) invert(1);
-                opacity: 0.85;
-            }
-            #selfRegistrationLinkModal .reg-link-body {
-                padding: 24px;
-                background: #F8F9FB;
-            }
-            #selfRegistrationLinkModal .project-select-wrap label {
-                font-weight: 600;
-                font-size: 0.85rem;
-                color: #555;
-                margin-bottom: 6px;
-                display: block;
-            }
-            #selfRegistrationLinkModal .project-select-wrap select {
-                border-radius: 10px;
-                padding: 10px 14px;
-                border: 1px solid #e0e0e0;
-                font-weight: 600;
-            }
-            #selfRegistrationLinkModal .role-card {
-                background: #fff;
-                border-radius: 14px;
-                padding: 14px 16px;
-                margin-top: 14px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-                border: 1px solid #eee;
-            }
-            #selfRegistrationLinkModal .role-card-head {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 10px;
-            }
-            #selfRegistrationLinkModal .role-chip {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                font-size: 0.82rem;
-                font-weight: 700;
-                padding: 4px 12px;
-                border-radius: 30px;
-                color: #fff;
-            }
-            #selfRegistrationLinkModal .role-chip.shelf_stacker { background: #2a9d8f; }
-            #selfRegistrationLinkModal .role-chip.supervisor { background: #e07a2c; }
-            #selfRegistrationLinkModal .role-chip.area_manager { background: #5b5fc7; }
-            #selfRegistrationLinkModal .role-chip.project_manager { background: #740e0e; }
-            #selfRegistrationLinkModal .role-card.pm-link {
-                border: 1px dashed #740e0e;
-                background: #fff8f8;
-            }
-            #selfRegistrationLinkModal .divider-label {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: #999;
-                font-size: 0.78rem;
-                font-weight: 600;
-                margin: 22px 0 10px;
-            }
-            #selfRegistrationLinkModal .divider-label::before,
-            #selfRegistrationLinkModal .divider-label::after {
-                content: '';
-                flex: 1;
-                height: 1px;
-                background: #e3e3e3;
-            }
-            #selfRegistrationLinkModal .role-link-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            #selfRegistrationLinkModal .role-link-input {
-                flex: 1;
-                background: #F5F6F8;
-                border: 1px dashed #d8d8d8;
-                border-radius: 8px;
-                padding: 8px 12px;
-                font-size: 0.82rem;
-                color: #555;
-                direction: ltr;
-                text-align: left;
-                font-family: monospace;
-            }
-            #selfRegistrationLinkModal .copy-btn {
-                background: #740e0e;
-                color: #fff;
-                border: none;
-                border-radius: 8px;
-                padding: 8px 16px;
-                font-weight: 600;
-                font-size: 0.82rem;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                white-space: nowrap;
-                transition: background 0.2s ease;
-            }
-            #selfRegistrationLinkModal .copy-btn:hover { background: #5d0a0a; color: #fff; }
-            #selfRegistrationLinkModal .copy-btn.copied { background: #2a9d8f; }
-        </style>
-        <div class="modal fade" id="selfRegistrationLinkModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-md">
-                <div class="modal-content" x-data="selfRegLinkModal()">
-                    <div class="reg-link-header">
-                        <h5>🔗 رابط تسجيل الموظفين الذاتي</h5>
-                        <p>اختر المشروع والدور الوظيفي، ثم شارك الرابط مع الموظفين المعنيين ليعبّوا بياناتهم بنفسهم.</p>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="reg-link-body">
-                        <div class="project-select-wrap">
-                            <label>المشروع</label>
-                            <select class="form-select" x-model="projectId">
-                                @foreach ($projects as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="role-card pm-link" x-show="projectsMissingManager[projectId]">
-                            <div class="role-card-head">
-                                <span class="role-chip project_manager">
-                                    <span>🏢</span>
-                                    <span>مدير هذا المشروع</span>
-                                </span>
-                            </div>
-                            <p class="text-muted mb-2" style="font-size: 0.78rem;">
-                                هذا المشروع لا يوجد له مدير بعد. شارك هذا الرابط مع الشخص المعني — سيُعيَّن تلقائيًا
-                                كمديرٍ لهذا المشروع دون الحاجة لكتابة اسمه يدويًا.
-                            </p>
-                            <div class="role-link-row">
-                                <input type="text" readonly class="role-link-input"
-                                       :id="'self-reg-link-pm-' + projectId"
-                                       :value="'{{ url('/register-employee/project-manager') }}/' + projectId">
-                                <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'pm-' + projectId }"
-                                        x-on:click="copyProjectManagerLink()">
-                                    <span x-show="copiedRole !== 'pm-' + projectId">📋 نسخ</span>
-                                    <span x-show="copiedRole === 'pm-' + projectId">✅ تم النسخ</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <template x-for="(info, role) in roles" :key="role">
-                            <div class="role-card" x-show="isRoleAllowed(role)">
-                                <div class="role-card-head">
-                                    <span class="role-chip" :class="role">
-                                        <span x-text="info.icon"></span>
-                                        <span x-text="info.label"></span>
-                                    </span>
-                                </div>
-                                <div class="role-link-row">
-                                    <input type="text" readonly class="role-link-input"
-                                           :id="'self-reg-link-' + role"
-                                           :value="'{{ url('/register-employee') }}/' + projectId + '/' + role">
-                                    <button type="button" class="copy-btn" :class="{ copied: copiedRole === role }"
-                                            x-on:click="copyLink(role)">
-                                        <span x-show="copiedRole !== role">📋 نسخ</span>
-                                        <span x-show="copiedRole === role">✅ تم النسخ</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
-                            <div class="divider-label">رابط خاص بقسم الموارد البشرية</div>
-                            <div class="role-card pm-link">
-                                <div class="role-card-head">
-                                    <span class="role-chip project_manager">
-                                        <span>🏢</span>
-                                        <span>مدير مشروع جديد</span>
-                                    </span>
-                                </div>
-                                <p class="text-muted mb-2" style="font-size: 0.78rem;">
-                                    رابط مستقل لا يتبع مشروعًا محددًا — المتقدم يدخل اسم المشروع الجديد الذي سيديره بنفسه.
-                                </p>
-                                <div class="role-link-row">
-                                    <input type="text" readonly class="role-link-input"
-                                           id="self-reg-link-project_manager"
-                                           value="{{ url('/register-employee/project-manager') }}">
-                                    <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'project_manager' }"
-                                            x-on:click="copyLink('project_manager')">
-                                        <span x-show="copiedRole !== 'project_manager'">📋 نسخ</span>
-                                        <span x-show="copiedRole === 'project_manager'">✅ تم النسخ</span>
-                                    </button>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="divider-label">رابط تحديث البيانات البنكية</div>
-                        <div class="role-card">
-                            <p class="text-muted mb-2" style="font-size: 0.78rem;">
-                                اختر الموظف لإنشاء رابط خاص به لتعديل بياناته البنكية.
-                            </p>
-                            <select class="form-select mb-2" x-model="bankLinkEmployeeId">
-                                <option value="">اختر الموظف...</option>
-                                <template x-for="emp in (employeesByProject[projectId] || [])" :key="emp.id">
-                                    <option :value="emp.id" x-text="emp.name"></option>
-                                </template>
-                            </select>
-                            <div class="role-link-row" x-show="bankLinkEmployeeId">
-                                <input type="text" readonly class="role-link-input" id="bank-update-link"
-                                       :value="'{{ url('/bank-update-request') }}/' + bankLinkEmployeeId">
-                                <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'bank_update' }"
-                                        x-on:click="copyBankLink()">
-                                    <span x-show="copiedRole !== 'bank_update'">📋 نسخ</span>
-                                    <span x-show="copiedRole === 'bank_update'">✅ تم النسخ</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Create Employee Modal -->
-        <div class="modal fade" id="createEmployeeModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">إضافة موظف جديد</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form id="createEmployeeForm" action="{{ route('employees.store') }}" method="POST"
-                          enctype="multipart/form-data" class="space-y-6">
-                        @csrf
-                        @include('Employees.employee-form-fields')
-                        <div
-                            class="modal-footer bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-                            <button type="button"
-                                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                إلغاء
-                            </button>
-                            <button type="submit"
-                                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                إضافة الموظف
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <div class="flex flex-col space-y-4 md:space-y-0 md:flex-row md:flex-wrap md:items-center md:gap-4">
                 <!-- Search Input -->
@@ -2301,9 +2013,6 @@
                             <th class="text-center text-uppercase ">
                                 سبب التوقف
                             </th>
-                            <th class="no-print text-center text-uppercase ">
-                                مراجعة النموذج
-                            </th>
 
                         </tr>
                         </thead>
@@ -2660,25 +2369,6 @@
                     </span>
                                     @endif
                                 </td>
-                                <td class="no-print align-middle text-center">
-                                    @if ($employee['account_status'] === 'pending')
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <button type="button" class="btn btn-sm btn-success"
-                                                    onclick="reviewSelfSubmission({{ $employee['id'] }}, 'accept')">
-                                                <i class="fas fa-check"></i> قبول
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="reviewSelfSubmission({{ $employee['id'] }}, 'reject')">
-                                                <i class="fas fa-times"></i> رفض
-                                            </button>
-                                        </div>
-                                    @elseif ($employee['account_status'] === 'rejected')
-                                        <span class="badge bg-secondary">مرفوض</span>
-                                    @else
-                                        <span class="text-secondary">-</span>
-                                    @endif
-                                </td>
-
                             </tr>
                         @endforeach
                     </table>
@@ -2729,52 +2419,6 @@
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('selfRegLinkModal', () => ({
-                projectId: '{{ array_key_first($projects) }}',
-                copiedRole: null,
-                roles: {
-                    shelf_stacker: { label: 'مصفف أرفف', icon: '📦' },
-                    supervisor: { label: 'مشرف', icon: '🧑‍💼' },
-                    area_manager: { label: 'مشرف المشرفين', icon: '🧑‍✈️' }
-                },
-                projectAllowedRoles: @json($projectAllowedRoles ?? []),
-                employeesByProject: @json($employeesForBankLink ?? []),
-                projectsMissingManager: @json($projectsObjects->mapWithKeys(fn ($p) => [$p->id => is_null($p->manager_id)])),
-                bankLinkEmployeeId: '',
-                isRoleAllowed(role) {
-                    const allowed = this.projectAllowedRoles[this.projectId];
-                    return !allowed || allowed.includes(role);
-                },
-                copyLink(role) {
-                    const input = document.getElementById('self-reg-link-' + role);
-                    input.select();
-                    navigator.clipboard.writeText(input.value).then(() => {
-                        this.copiedRole = role;
-                        setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
-                    }).catch(() => document.execCommand('copy'));
-                },
-                copyProjectManagerLink() {
-                    const role = 'pm-' + this.projectId;
-                    const input = document.getElementById('self-reg-link-' + role);
-                    input.select();
-                    navigator.clipboard.writeText(input.value).then(() => {
-                        this.copiedRole = role;
-                        setTimeout(() => { if (this.copiedRole === role) this.copiedRole = null; }, 1800);
-                    }).catch(() => document.execCommand('copy'));
-                },
-                copyBankLink() {
-                    const input = document.getElementById('bank-update-link');
-                    input.select();
-                    navigator.clipboard.writeText(input.value).then(() => {
-                        this.copiedRole = 'bank_update';
-                        setTimeout(() => { if (this.copiedRole === 'bank_update') this.copiedRole = null; }, 1800);
-                    }).catch(() => document.execCommand('copy'));
-                }
-            }));
-        });
-    </script>
     <script>
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -3670,32 +3314,6 @@
             if (document.getElementById('deduction_amount').value) {
                 calculateDeductionPercentage();
             }
-        }
-
-function reviewSelfSubmission(employeeId, action) {
-            const confirmMsg = action === 'accept'
-                ? 'هل تريد قبول بيانات هذا الموظف وإضافته إلى المشروع؟'
-                : 'هل تريد رفض بيانات هذا الموظف؟';
-            if (!confirm(confirmMsg)) return;
-
-            fetch(`/employees/${employeeId}/review-submission`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                body: JSON.stringify({ action: action }),
-            })
-                .then(res => res.json())
-                .then(result => {
-                    if (result.success) {
-                        window.location.reload();
-                    } else {
-                        alert(result.message || 'حدث خطأ أثناء معالجة الطلب');
-                    }
-                })
-                .catch(() => alert('حدث خطأ أثناء الاتصال بالخادم'));
         }
 
         function calculatePercentage() {

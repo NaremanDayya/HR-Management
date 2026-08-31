@@ -65,6 +65,7 @@ Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess
     ->prefix('employees')->name('employees.')->group(function () {
         // Route::middleware(['auth'])->prefix('employees')->name('employees.')->group(function () {
         Route::get('/', [EmployeeController::class, 'index'])->name('index');
+        Route::get('/pending-self-registrations', [EmployeeController::class, 'pendingSelfRegistrations'])->name('pending-self-registrations');
         Route::get('/actions', [EmployeeController::class, 'actions'])->name('actions');
         Route::get('/alerts', [EmployeeController::class, 'allAlerts'])->name('alerts.all');
         Route::get('/advances', [EmployeeController::class, 'allAdvances'])->name('advances.all');

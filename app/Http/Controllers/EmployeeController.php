@@ -96,6 +96,50 @@ class EmployeeController extends Controller
         ], $this->dropdownService->getDropdownData()));
     }
 
+    public function pendingSelfRegistrations()
+    {
+        $query = Employee::with(['user', 'project.manager'])
+            ->whereHas('user', function ($q) {
+                $q->whereIn('account_status', ['pending', 'rejected']);
+            });
+
+        if (Auth::user()->role === 'project_manager') {
+            $query->whereHas('project', function ($q) {
+                $q->where('manager_id', Auth::id());
+            });
+        }
+
+        $employees = $query->latest()->get();
+        $resources = EmployeeResource::collection($employees);
+
+        $projectsObjects = Project::all();
+        $supervisors = Employee::whereHas('user', function ($query) {
+            $query->where('role', 'supervisor');
+        })
+            ->select('id', 'name', 'project_id')
+            ->get();
+        $area_managers = Employee::whereHas('user', function ($query) {
+            $query->where('role', 'area_manager');
+        })
+            ->select('id', 'name', 'project_id')
+            ->get();
+        $employeesForBankLink = Employee::select('id', 'name', 'project_id')
+            ->whereNotNull('project_id')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('project_id');
+
+        return view('Employees.pending-self-registrations', array_merge([
+            'employees' => $resources->toArray(request()),
+            'projectsObjects' => $projectsObjects,
+            'supervisors' => $supervisors,
+            'area_managers' => $area_managers,
+            'employeesForBankLink' => $employeesForBankLink,
+            'authRole' => Auth::user()->role,
+            'role' => Role::where('name', Auth::user()->role)->first(),
+        ], $this->dropdownService->getDropdownData()));
+    }
+
     public function Allfinancials(Request $request)
     {
         $filters = $request->only([

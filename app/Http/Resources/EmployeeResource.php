@@ -46,6 +46,8 @@ class EmployeeResource extends JsonResource
             'birthday' => $emp->user->birthday ? $emp->user->birthday->format('Y-m-d') : null,
             'age' => $emp->user->getAge(),
             'stop_reason' => $emp->stop_reason,
+            'is_blacklisted' => (bool) $emp->is_blacklisted,
+            'submitted_at' => $emp->created_at?->format('Y-m-d H:i'),
             'whats_app_link' => $emp->user->generateWhatsappLink($emp->user->contact_info['phone_number']),
             'account_status' => $emp->user->account_status ?? null,
             'personal_image' => $emp->user?->personal_image,

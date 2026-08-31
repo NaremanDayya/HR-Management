@@ -22,17 +22,6 @@ class PublicEmployeeRegistrationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                function ($attribute, $value, $fail) {
-                    // Blacklist is evaluated purely by name + stop_reason, regardless of
-                    // current account status, id_card, or phone number.
-                    $blacklisted = Employee::where('name', $value)
-                        ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
-                        ->exists();
-
-                    if ($blacklisted) {
-                        $fail('blacklisted_employee');
-                    }
-                },
             ],
             'email' => 'required|email|unique:users,email',
             'job' => 'required|string|max:255',
@@ -60,28 +49,12 @@ class PublicEmployeeRegistrationRequest extends FormRequest
             'work_area' => 'required|string|max:255',
             'id_card' => [
                 'required', 'string', 'size:10', 'regex:/^[12][0-9]{9}$/', 'unique:users,id_card',
-                function ($attribute, $value, $fail) {
-                    $blacklisted = Employee::whereHas('user', fn ($q) => $q->where('id_card', $value))
-                        ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
-                        ->exists();
-                    if ($blacklisted) {
-                        $fail('هذا الموظف مدرج في القائمة السوداء بسبب سوء الأداء ولا يمكن إعادة تسجيله.');
-                    }
-                },
             ],
             'phone_number' => [
                 'required',
                 'string',
                 'digits:10',
                 Rule::unique('users', 'contact_info->phone_number'),
-                function ($attribute, $value, $fail) {
-                    $blacklisted = Employee::whereHas('user', fn ($q) => $q->where('contact_info->phone_number', $value))
-                        ->whereIn('stop_reason', ['سوء اداء', 'سوء أداء'])
-                        ->exists();
-                    if ($blacklisted) {
-                        $fail('هذا الموظف مدرج في القائمة السوداء بسبب سوء الأداء ولا يمكن إعادة تسجيله.');
-                    }
-                },
             ],
             'phone_type' => 'required|in:android,iphone',
             'nationality' => 'required|string|max:100',
@@ -140,7 +113,6 @@ class PublicEmployeeRegistrationRequest extends FormRequest
             'salary.min' => 'الراتب لا يمكن أن يكون أقل من صفر',
             'salary.max' => 'الراتب لا يمكن أن يتجاوز 999,999.99',
             'english_level.required' => 'مستوى اللغة الإنجليزية مطلوب',
-            'blacklisted_employee' => 'لا يمكن إضافة هذا الموظف لأنه في القائمة السوداء بسبب سوء الأداء.',
             'email.unique' => 'الإيميل مستخدم من قبل',
             'id_card.unique' => 'رقم الهوية موجود لموظف اخر',
             'marital_status.required' => 'الحالة الاجتماعية مطلوبة',

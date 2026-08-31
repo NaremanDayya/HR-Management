@@ -50,13 +50,34 @@ class Employee extends Model
         'termination_date',
         'termination_notes',
         'work_days',
+        'is_blacklisted',
     ];
     protected $casts = [
         'joining_date' => 'date',
         'vehicle_info' => 'array',
         'payload' => 'array',
+        'is_blacklisted' => 'boolean',
 
     ];
+
+    public const BLACKLIST_STOP_REASONS = ['سوء اداء', 'سوء أداء'];
+
+    public static function matchesBlacklist(?string $name, ?string $idCard = null, ?string $phone = null): bool
+    {
+        return static::where(function ($query) use ($name, $idCard, $phone) {
+            $query->where('name', $name);
+
+            if ($idCard) {
+                $query->orWhereHas('user', fn ($q) => $q->where('id_card', $idCard));
+            }
+
+            if ($phone) {
+                $query->orWhereHas('user', fn ($q) => $q->where('contact_info->phone_number', $phone));
+            }
+        })
+            ->whereIn('stop_reason', self::BLACKLIST_STOP_REASONS)
+            ->exists();
+    }
 
     public function loginIps()
     {
