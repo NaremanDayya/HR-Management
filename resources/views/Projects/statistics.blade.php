@@ -128,19 +128,20 @@
                         </a>
 
                         <!-- Projects Dropdown -->
-                        <div class="relative group">
-                            <button
+                        <div class="relative" x-data="{ open: false }" @click.away="open = false" x-cloak>
+                            <button type="button" @click="open = !open"
                                 class="px-5 py-2.5 text-sm font-bold border-2 border-black rounded-full transition-all bg-white/10 text-black hover:bg-white/20 flex items-center">
                                 المشاريع
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
 
-                            <div
-                                class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block z-10">
+                            <div x-show="open" @click="open = false" x-transition
+                                class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                                 <div class="py-1 max-h-96 overflow-y-auto">
                                     @foreach ($projects as $project)
                                         <a href="{{ route('project.statistics', $project) }}"
