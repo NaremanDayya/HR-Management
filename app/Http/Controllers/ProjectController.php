@@ -62,6 +62,8 @@ class ProjectController extends Controller
 
     public function update(ProjectRequest $request, Project $project)
     {
+        abort_if(Auth::user()->role === 'project_manager', 403, 'ليس لديك صلاحية تعديل المشروع.');
+
         try {
             $validated = $request->validated();
 
@@ -278,13 +280,21 @@ class ProjectController extends Controller
     public function showStatistics(Project $project, Request $request)
     {
         $status = $request->get('account_status');
-        $projects = Project::withCount([
+        $authUser = Auth::user();
+
+        $projectsQuery = Project::withCount([
             'activeEmployees as active_employees_count',
             'inactiveEmployees as inactive_employees_count',
             'incomingTransfers',
             'outgoingTransfers'
-        ])->get();
-        $totalProjects = Project::count();
+        ]);
+
+        if ($authUser->role === 'project_manager') {
+            $projectsQuery->where('manager_id', $authUser->id);
+        }
+
+        $projects = $projectsQuery->get();
+        $totalProjects = $projects->count();
 
         $employeesByNationality = $this->getEmployeesByNationality($project, $status);
         $employeesByAgeGroup = $this->getEmployeesByAgeGroup($project, $status);

@@ -236,14 +236,16 @@
                                                             title="عرض موظفي المشروع">
                                                             <i class="fas fa-users"></i>
                                                         </a>
-                                                        <button class="btn btn-sm btn-warning edit-project-btn"
-                                                            data-id="{{ $project->id }}" data-name="{{ $project->name }}"
-                                                            data-description="{{ $project->description }}"
-                                                            data-manager-name="{{ $project->manager ? $project->manager->name : '' }}"
-                                                            data-allowed-roles="{{ json_encode($project->allowed_roles_or_default) }}"
-                                                            data-bs-toggle="modal" data-bs-target="#editProjectModal">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
+                                                        @if (Auth::user()->role !== 'project_manager')
+                                                            <button class="btn btn-sm btn-warning edit-project-btn"
+                                                                data-id="{{ $project->id }}" data-name="{{ $project->name }}"
+                                                                data-description="{{ $project->description }}"
+                                                                data-manager-name="{{ $project->manager ? $project->manager->name : '' }}"
+                                                                data-allowed-roles="{{ json_encode($project->allowed_roles_or_default) }}"
+                                                                data-bs-toggle="modal" data-bs-target="#editProjectModal">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        @endif
                                                         @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']) && !$project->is_stopped)
                                                             <form action="{{ route('project-delete-requests.store', $project->id) }}"
                                                                 method="POST" class="d-inline request-delete-project-form">

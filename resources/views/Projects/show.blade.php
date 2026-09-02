@@ -50,17 +50,19 @@
                 <div class="flex flex-col sm:flex-row items-center gap-3">
 
                     <div class="export-btn-group no-print flex gap-2">
-                        <button
-                            class="btn bg-purple-400 border-4 border-purple-600 text-black shadow-lg hover:bg-purple-500 edit-project-btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple text-purple-600 shadow-lg"
-                            data-id="{{ $project->id }}" data-name="{{ $project->name }}"
-                            data-description="{{ $project->description }}"
-                            data-manager-name="{{ $project->manager->name ?? '' }}"
-                            data-allowed-roles="{{ json_encode($project->allowed_roles_or_default) }}"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editProjectModal">
-                            <i class="fas fa-edit"></i>
-                            <span>تعديل المشروع</span>
-                        </button>
+                        @if (Auth::user()->role !== 'project_manager')
+                            <button
+                                class="btn bg-purple-400 border-4 border-purple-600 text-black shadow-lg hover:bg-purple-500 edit-project-btn d-flex align-items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 bg-purple text-purple-600 shadow-lg"
+                                data-id="{{ $project->id }}" data-name="{{ $project->name }}"
+                                data-description="{{ $project->description }}"
+                                data-manager-name="{{ $project->manager->name ?? '' }}"
+                                data-allowed-roles="{{ json_encode($project->allowed_roles_or_default) }}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editProjectModal">
+                                <i class="fas fa-edit"></i>
+                                <span>تعديل المشروع</span>
+                            </button>
+                        @endif
 
                         <button  id="pdfExportBtn"
                                  class=" px-4 py-2 rounded-lg flex items-center space-x-2 rtl:space-x-reverse transition-all">
