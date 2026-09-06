@@ -1257,6 +1257,41 @@
                                             </x-bulk-action-modal>
                                         </li>
                                         <li>
+                                            <x-bulk-action-modal action="change_project"
+                                                                 modal-title="نقل مشروع"
+                                                                 confirm-text="طلب نقل"
+                                                                 button-class="bg-teal-600"
+                                                                 modal-id="change-project"
+                                                                 :has-form="true">
+
+                                                <div class="mb-4 text-right">
+                                                    <label class="block mb-2 font-semibold text-gray-700">
+                                                        المشروع الجديد
+                                                    </label>
+                                                    <select name="new_project_id" required
+                                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 rtl text-right">
+                                                        <option value="" selected disabled>اختر المشروع الجديد</option>
+                                                        @foreach ($projects as $id => $name)
+                                                            <option value="{{ $id }}">{{ $name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-4 text-right">
+                                                    <label class="block mb-2 font-semibold text-gray-700">
+                                                        سبب النقل (اختياري)
+                                                    </label>
+                                                    <textarea name="change_project_reason" rows="3"
+                                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 rtl text-right"
+                                                              placeholder="اكتب سبب نقل المشروع هنا..."></textarea>
+                                                </div>
+
+                                                <p class="text-xs text-gray-500 text-right mb-2">
+                                                    سيتم إرسال هذا كطلب بانتظار موافقة الأدمن، ولن يتم نقل الموظف مباشرة.
+                                                </p>
+                                            </x-bulk-action-modal>
+                                        </li>
+                                        <li>
                                             <x-bulk-action-modal action="add_deduction" modal-title="إضافة خصم"
                                                                  confirm-text="تطبيق الخصم" button-class="bg-red-700"
                                                                  modal-id="add-deduction" :has-form="true">

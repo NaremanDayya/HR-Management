@@ -266,6 +266,12 @@
                                                         <i class="fas fa-arrow-left mx-1"></i>
                                                         {{ $upgradeLabels[$newRole] ?? $newRole }}
                                                     </div>
+                                                @elseif (($request->requestType->key ?? null) === 'change_project' && $request->payload)
+                                                    <div class="text-gray-500 text-xs mt-1">
+                                                        {{ $request->payload['current_project_name'] ?? 'بدون مشروع' }}
+                                                        <i class="fas fa-arrow-left mx-1"></i>
+                                                        {{ $request->payload['new_project_name'] ?? '-' }}
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>

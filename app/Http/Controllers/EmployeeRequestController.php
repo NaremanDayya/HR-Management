@@ -181,6 +181,12 @@ class EmployeeRequestController extends Controller
                 if ($newRole && $employee && $employee->user) {
                     $employee->user->update(['role' => $newRole]);
                 }
+            } elseif ($editTypeKey === 'change_project') {
+                $newProjectId = $editRequest->payload['new_project_id'] ?? null;
+
+                if ($newProjectId && $editRequest->employee) {
+                    $editRequest->employee->update(['project_id' => $newProjectId]);
+                }
             }
         }
         if ($editTypeKey === 'salary_advance') {

@@ -9,6 +9,7 @@ use App\Models\Deduction;
 use App\Models\Employee;
 use App\Models\EmployeeRequest;
 use App\Models\EmployeeWorkHistory;
+use App\Models\Project;
 use App\Models\RequestType;
 use App\Models\SalaryIncrease;
 use App\Models\TemporaryProjectAssignment;
@@ -89,6 +90,8 @@ class EmployeeActionController extends Controller
                     return $this->handleTemporaryAssignment($employeeIds, $request);
                 case 'role_upgrade':
                     return $this->handleRoleUpgrade($employeeIds, $request);
+                case 'change_project':
+                    return $this->handleChangeProject($employeeIds, $request);
 
                 default:
                     return response()->json([
@@ -534,6 +537,55 @@ class EmployeeActionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم تقديم طلب الترقية للموظفين المحددين، بانتظار موافقة الأدمن',
+        ]);
+    }
+
+    private function handleChangeProject(array $employeeIds, Request $request)
+    {
+        $validated = $request->validate([
+            'new_project_id' => 'required|exists:projects,id',
+            'change_project_reason' => 'nullable|string|max:500',
+        ]);
+
+        // Projects created in a prior year are filtered out by Project's YearScope by
+        // default — bypass it here so moving to/from an older-year project still works.
+        $newProject = Project::withoutGlobalScope(\App\Scopes\YearScope::class)->findOrFail($validated['new_project_id']);
+
+        foreach ($employeeIds as $employeeId) {
+            $employee = Employee::findOrFail($employeeId);
+
+            if ($employee->project_id == $newProject->id) {
+                continue;
+            }
+
+            $currentProjectName = $employee->project_id
+                ? Project::withoutGlobalScope(\App\Scopes\YearScope::class)->find($employee->project_id)?->name
+                : null;
+
+            $empRequest = EmployeeRequest::create([
+                'employee_id' => $employeeId,
+                'request_type_id' => RequestType::getIdByKey('change_project'),
+                'status' => 'pending',
+                'requester_type' => 'App\Models\User',
+                'requester_id' => Auth::id(),
+                'description' => $validated['change_project_reason'] ?? null,
+                'payload' => [
+                    'current_project_id' => $employee->project_id,
+                    'current_project_name' => $currentProjectName,
+                    'new_project_id' => $newProject->id,
+                    'new_project_name' => $newProject->name,
+                ],
+            ]);
+        }
+
+        if (isset($empRequest)) {
+            $admin = User::where('role', 'admin')->first();
+            $admin?->notify(new NewEmployeeRequestNotification($empRequest, 'change_project'));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تقديم طلب نقل المشروع للموظفين المحددين، بانتظار موافقة الأدمن',
         ]);
     }
 

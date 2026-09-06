@@ -47,6 +47,10 @@ class RequestTypeSeeder extends Seeder
                 'key' => 'role_upgrade',
                 'label' => 'طلب ترقية موظف',
             ],
+            [
+                'key' => 'change_project',
+                'label' => 'طلب نقل مشروع',
+            ],
         ];
 
         foreach ($requestTypes as $type) {
