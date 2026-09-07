@@ -3,9 +3,23 @@
 'modalTitle',
 'confirmText' => 'تأكيد',
 'buttonClass' => 'bg-green-600',
+'buttonColor' => '',
 'modalId',
 'hasForm' => false,
 ])
+@php
+$colorMap = [
+    'bg-green-600'  => '#16a34a',
+    'bg-red-600'    => '#dc2626',
+    'bg-red-700'    => '#b91c1c',
+    'bg-blue-600'   => '#2563eb',
+    'bg-yellow-600' => '#ca8a04',
+    'bg-teal-600'   => '#0d9488',
+    'bg-purple-600' => '#9333ea',
+    'bg-gray-600'   => '#4b5563',
+];
+$resolvedColor = $buttonColor ?: ($colorMap[$buttonClass] ?? '#16a34a');
+@endphp
 <div x-data="bulkActionModal('{{ $modalId }}', '{{ route('employees.action', ['action' => $action]) }}', {{ $hasForm ? 'true' : 'false' }})">
     <!-- Trigger -->
     <button class="dropdown-item text-start" @click="showModal = true">
@@ -35,7 +49,9 @@
                         @click="showModal = false">
                         إلغاء
                     </button>
-                    <button type="submit" class="{{ $buttonClass }} text-white px-4 py-2 rounded hover:opacity-90">
+                    <button type="submit"
+                        class="text-white px-4 py-2 rounded font-medium"
+                        style="background-color: {{ $resolvedColor }}; min-width: 90px;">
                         {{ $confirmText }}
                     </button>
                 </div>
