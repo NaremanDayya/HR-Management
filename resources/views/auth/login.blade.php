@@ -301,6 +301,12 @@
                 <p class="login-subtitle">سجل الدخول للوصول إلى حسابك</p>
             </div>
 
+            @if (session('error'))
+                <div class="error-message" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:14px;">
+                    <i class="fas fa-clock me-1"></i> {{ session('error') }}
+                </div>
+            @endif
+
             @error('email')
                 <div class="error-message">
                     {{ $message }}

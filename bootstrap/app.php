@@ -21,5 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Redirect to login with a friendly message instead of the 419 error page.
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'انتهت جلستك، يرجى تسجيل الدخول مجددًا.', 'redirect' => route('login')], 419);
+            }
+            return redirect()->route('login')->with('error', 'انتهت جلستك، يرجى تسجيل الدخول مجددًا.');
+        });
     })->create();

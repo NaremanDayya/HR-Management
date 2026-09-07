@@ -593,6 +593,27 @@
     @livewireScripts
     @wirechatAssets
     @stack('scripts')
+
+    <script>
+        // Intercept any AJAX 419 (session expired / CSRF mismatch) globally.
+        $(document).ajaxError(function (event, xhr) {
+            if (xhr.status === 419) {
+                const redirectUrl = xhr.responseJSON?.redirect || '{{ route("login") }}';
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'انتهت الجلسة',
+                    text: 'انتهت جلستك، سيتم توجيهك إلى صفحة تسجيل الدخول.',
+                    confirmButtonText: 'تسجيل الدخول',
+                    confirmButtonColor: '#740e0e',
+                    allowOutsideClick: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                }).then(function () {
+                    window.location.href = redirectUrl;
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
