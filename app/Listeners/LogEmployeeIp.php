@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Models\Employee;
 use App\Models\EmployeeLoginIp;
+use App\Models\PendingLoginAttempt;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -104,6 +105,26 @@ class LogEmployeeIp
             }
             return;
         }
+        // Record the attempt for admin review (skip if an identical pending entry
+        // already exists to avoid flooding the review queue on repeated attempts).
+        $alreadyPending = PendingLoginAttempt::where('employee_id', $employee->id)
+            ->where('status', 'pending')
+            ->where(function ($q) use ($currentIp, $currentDeviceToken) {
+                $q->where('ip_address', $currentIp)
+                    ->orWhere('device_token', $currentDeviceToken);
+            })
+            ->exists();
+
+        if (! $alreadyPending) {
+            PendingLoginAttempt::create([
+                'employee_id'  => $employee->id,
+                'ip_address'   => $currentIp,
+                'device_token' => $currentDeviceToken,
+                'status'       => 'pending',
+                'attempted_at' => now(),
+            ]);
+        }
+
         $admins = User::where('role', 'admin')->get();
 
         foreach ($admins as $admin) {

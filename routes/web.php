@@ -150,6 +150,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/employee-ips/{employeeLoginIp}/block', [EmployeeLoginIpController::class, 'block'])->name('admin.employee-ips.block');
     Route::post('/admin/employee-ips/{employeeLoginIp}/unblock', [EmployeeLoginIpController::class, 'unblock'])->name('admin.employee-ips.unblock');
     Route::post('/admin/employee-ips/{employee}/add-temp-ip', [EmployeeLoginIpController::class, 'addTemporaryIp'])->name('admin.employee-ips.add-temp-ip');
+    Route::post('/admin/pending-login-attempts/{attempt}/approve', [EmployeeLoginIpController::class, 'approvePending'])->name('admin.pending-attempts.approve');
+    Route::post('/admin/pending-login-attempts/{attempt}/reject', [EmployeeLoginIpController::class, 'rejectPending'])->name('admin.pending-attempts.reject');
 
 
 });
