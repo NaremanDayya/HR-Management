@@ -472,6 +472,20 @@
                         <span
                             class="absolute bottom-0 left-0 w-full h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 {{ request()->routeIs('reports') ? 'scale-x-100' : '' }}"></span>
                     </a>
+
+                    @if (in_array(Auth::user()->role, ['admin', 'hr_manager']))
+                        <a href="{{ route('admin.employee-ips.index') }}"
+                            class="{{ request()->routeIs('admin.employee-ips.*') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
+                            <i class="fas fa-shield-alt ml-2 group-hover:text-white transition-colors"></i>
+                            أجهزة الدخول
+                            @php $pendingIpCount = \App\Models\PendingLoginAttempt::where('status','pending')->count(); @endphp
+                            @if($pendingIpCount)
+                                <span style="background:#f59e0b;color:#fff;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px">{{ $pendingIpCount }}</span>
+                            @endif
+                            <span
+                                class="absolute bottom-0 left-0 w-full h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 {{ request()->routeIs('admin.employee-ips.*') ? 'scale-x-100' : '' }}"></span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </nav>
