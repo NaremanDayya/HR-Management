@@ -1657,15 +1657,7 @@
                     </ul>
                 </div>
                 <!-- Role Filter -->
-                @php
-                    if ($authRole === 'project_manager') {
-                        $filteredRoleLabels = $allowedForProjectManager;
-                    } elseif (in_array($authRole, ['hr_manager', 'hr_assistant'])) {
-                        $filteredRoleLabels = $allowedForHrManager;
-                    } else {
-                        $filteredRoleLabels = $roleLabels;
-                    }
-                @endphp
+                @php $filteredRoleLabels = $allowedRoles; @endphp
                 <div x-data="{
                     open: false,
                     selected: '{{ request('role') ?? '' }}',
@@ -2102,14 +2094,8 @@
                                     $new_emp_replacements_count = $employee['new_emp_replacements_count'] ?? 0;
                                 @endphp
                                 @php
-                                    $baseNationality = preg_replace('/(ة|ه)$/u', '', $employee['nationality']);
-                                    $flagCode = null;
-
-                                    if (isset($nationalityFlags[$employee['nationality']])) {
-                                        $flagCode = $nationalityFlags[$employee['nationality']];
-                                    } elseif (isset($nationalityFlags[$baseNationality])) {
-                                        $flagCode = $nationalityFlags[$baseNationality];
-                                    }
+                                    $normalizedNat = \App\Helpers\NationalityHelper::normalize($employee['nationality']);
+                                    $flagCode = $nationalityFlags[$normalizedNat] ?? null;
                                 @endphp
 
                                 <td class="align-middle text-center">

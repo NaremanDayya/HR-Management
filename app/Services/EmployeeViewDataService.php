@@ -13,63 +13,77 @@ class EmployeeViewDataService
     {
         $authRole = Auth::user()->role;
 
+        // Ordered hierarchy — highest first. Each role may filter/see only roles BELOW it.
+        $hierarchy = [
+            'admin',
+            'hr_manager',
+            'hr_assistant',
+            'senior_project_manager',
+            'project_manager',
+            'area_manager',
+            'supervisor',
+            'shelf_stacker',
+        ];
+
         $roleLabels = [
-            'project_manager' => 'مدير مشروع',
+            'admin'                  => 'مسؤول النظام',
+            'hr_manager'             => 'مدير موارد بشرية',
+            'hr_assistant'           => 'مساعد مدير موارد بشرية',
             'senior_project_manager' => 'مدير مديري المشاريع',
-            'operations_manager' => 'مدير العمليات',
-            'hr_manager' => 'مدير موارد بشرية',
-            'hr_assistant' => 'مساعد مدير موارد بشرية',
-//            'shelf_stacker' => 'مصفف أرفف',
-//            'area_manager' => 'مشرف المشرفين',
-//            'supervisor' => 'مشرف',
-        ];
-        $allowedForHrManager = [
-            'project_manager' => 'مدير مشروع',
-            'senior_project_manager' => 'مدير مديري المشاريع',
-            'hr_assistant' => 'مساعد مدير موارد بشرية',
-//            'shelf_stacker' => 'مصفف أرفف',
-//            'area_manager' => 'مشرف المشرفين',
-//            'supervisor' => 'مشرف',
+            'project_manager'        => 'مدير مشروع',
+            'area_manager'           => 'مشرف المشرفين',
+            'supervisor'             => 'مشرف',
+            'shelf_stacker'          => 'مصفف أرفف',
         ];
 
-        $allowedForProjectManager = [
-            'shelf_stacker' => 'مصفف أرفف',
-            'area_manager' => 'مشرف المشرفين',
-            'supervisor' => 'مشرف',
-        ];
+        // Compute roles strictly below the current user in the hierarchy
+        $currentIndex = array_search($authRole, $hierarchy);
+        $subordinateRoles = $currentIndex !== false
+            ? array_slice($hierarchy, $currentIndex + 1)
+            : [];
+
+        // Admin sees every non-admin role; others see only subordinate roles
+        $allowedRoles = $authRole === 'admin'
+            ? array_filter($roleLabels, fn ($key) => $key !== 'admin', ARRAY_FILTER_USE_KEY)
+            : array_intersect_key($roleLabels, array_flip($subordinateRoles));
+
+        // Legacy aliases kept for any view still referencing them
+        $allowedForProjectManager = array_intersect_key($roleLabels, array_flip(['area_manager', 'supervisor', 'shelf_stacker']));
+        $allowedForHrManager      = array_intersect_key($roleLabels, array_flip(['hr_assistant', 'senior_project_manager', 'project_manager', 'area_manager', 'supervisor', 'shelf_stacker']));
 
 
+        // Keys must match NationalityHelper::normalize() canonical output
         $nationalityFlags = [
-            'فلسطيني' => 'ps',
-            'سوري' => 'sy',
-            'مصري' => 'eg',
-            'أردني' => 'jo',
-            'لبناني' => 'lb',
-            'سوداني' => 'sd',
-            'عراقي' => 'iq',
-            'يمني' => 'ye',
-            'كويتي' => 'kw',
-            'قطري' => 'qa',
-            'إماراتي' => 'ae',
-            'سعودي' => 'sa',
-            'ليبي' => 'ly',
-            'جزائري' => 'dz',
-            'تونسي' => 'tn',
-            'مغربي' => 'ma',
-            'بحريني' => 'bh',
-            'موريتاني' => 'mr',
-            'صومالي' => 'so',
-            'فلبيني' => 'ph',
-            'هندي' => 'in',
-            'تركي' => 'tr',
-            'باكستاني' => 'pk',
-            'بنغالي' => 'bd',
-            'نيجيري' => 'ng',
-            'اثيوبي' => 'et',
-            'بورما' => 'mm',
-            'ارتيري' => 'er',
-            'نيبالي' => 'np',
-            'سيريلانكي' => 'lk',
+            'فلسطين'    => 'ps',
+            'سوريا'     => 'sy',
+            'مصر'       => 'eg',
+            'الأردن'    => 'jo',
+            'لبنان'     => 'lb',
+            'السودان'   => 'sd',
+            'العراق'    => 'iq',
+            'اليمن'     => 'ye',
+            'الكويت'    => 'kw',
+            'قطر'       => 'qa',
+            'الإمارات'  => 'ae',
+            'سعودي'     => 'sa',
+            'ليبيا'     => 'ly',
+            'الجزائر'   => 'dz',
+            'تونس'      => 'tn',
+            'المغرب'    => 'ma',
+            'البحرين'   => 'bh',
+            'موريتانيا' => 'mr',
+            'الصومال'   => 'so',
+            'الفلبين'   => 'ph',
+            'الهند'     => 'in',
+            'تركيا'     => 'tr',
+            'باكستان'   => 'pk',
+            'بنغلاديش'  => 'bd',
+            'نيجيريا'   => 'ng',
+            'إثيوبيا'   => 'et',
+            'ميانمار'   => 'mm',
+            'إريتريا'   => 'er',
+            'نيبال'     => 'np',
+            'سريلانكا'  => 'lk',
         ];
 
 
@@ -162,6 +176,7 @@ class EmployeeViewDataService
                 ->values(),
             'nationalityFlags' => $nationalityFlags,
             'roleLabels' => $roleLabels,
+            'allowedRoles' => $allowedRoles,
             'roles' => Role::where('name', '!=', 'admin')
                 ->get()
                 ->mapWithKeys(fn($role) => [$role->name => $roleLabels[$role->name] ?? $role->name]),
