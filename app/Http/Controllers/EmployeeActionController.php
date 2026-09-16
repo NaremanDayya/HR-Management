@@ -615,16 +615,26 @@ class EmployeeActionController extends Controller
                     throw new \Exception('Employee user record not found');
                 }
 
-                if ($sendWhatsapp && !isset($employee->user->contact_info['phone_number'])) {
-                    throw new \Exception('Employee phone number missing');
+                $errors = [];
+                $doWhatsapp = $sendWhatsapp;
+                $doEmail    = $sendEmail;
+
+                // Downgrade channel if required data is missing (don't abort the whole alert)
+                if ($doWhatsapp && (
+                    !isset($employee->user->contact_info['phone_number']) ||
+                    !isset($manager->contact_info['phone_number'])
+                )) {
+                    $doWhatsapp = false;
+                    $errors[] = 'WhatsApp skipped: phone number missing for employee or manager';
                 }
 
-                if ($sendWhatsapp && !isset($manager->contact_info['phone_number'])) {
-                    throw new \Exception('Manager phone number missing');
+                if ($doEmail && empty($employee->user->email)) {
+                    $doEmail = false;
+                    $errors[] = 'Email skipped: employee email missing';
                 }
 
-                if ($sendEmail && empty($employee->user->email)) {
-                    throw new \Exception('Employee email missing');
+                if (!$doWhatsapp && !$doEmail) {
+                    throw new \Exception('No valid delivery channel available (missing phone and email)');
                 }
 
                 $messageData = [
@@ -645,9 +655,8 @@ class EmployeeActionController extends Controller
                 $whatsappOk = null;
                 $emailOk = null;
                 $messageSid = null;
-                $errors = [];
 
-                if ($sendWhatsapp) {
+                if ($doWhatsapp) {
                     $sendResult = $this->whatsAppService->send(
                         $employee->user->contact_info['phone_number'],
                         $message
@@ -659,7 +668,7 @@ class EmployeeActionController extends Controller
                     }
                 }
 
-                if ($sendEmail) {
+                if ($doEmail) {
                     try {
                         Mail::to($employee->user->email)->send(new AlertNotificationMail($messageData));
                         $emailOk = true;
