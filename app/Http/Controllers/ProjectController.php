@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\NationalityHelper;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Employee;
 use App\Models\Project;
@@ -198,22 +199,27 @@ class ProjectController extends Controller
         $query = DB::table('employees')
             ->join('users', 'employees.user_id', '=', 'users.id')
             ->select('users.nationality', DB::raw('COUNT(*) as count'))
-            ->groupBy('users.nationality');
+            ->whereNotIn('users.account_status', ['pending', 'rejected']);
 
         if (!empty($status)) {
             $query->where('users.account_status', $status);
         }
 
-        // Filter by project IDs if provided
         if ($projectIds) {
             $query->whereIn('employees.project_id', $projectIds);
         }
 
         $results = $query->get();
 
-        return $results->mapWithKeys(function ($item) {
-            return [$item->nationality => $item->count];
-        });
+        // Normalize nationality variants then re-aggregate
+        $normalized = [];
+        foreach ($results as $item) {
+            $key = NationalityHelper::normalize($item->nationality);
+            $normalized[$key] = ($normalized[$key] ?? 0) + $item->count;
+        }
+        arsort($normalized);
+
+        return collect($normalized)->mapWithKeys(fn ($count, $nat) => [$nat => $count]);
     }
 
     public function getEmployeeSalariesStats(Request $request, $projectIds = null)
@@ -345,20 +351,16 @@ class ProjectController extends Controller
     }
     public function getEmployeesByNationality(Project $project, $status = null)
     {
-        $query = $project->employees()->with('user');
+        $query = $project->employees()->with('user')
+            ->whereHas('user', fn ($q) => $q->whereNotIn('account_status', ['pending', 'rejected']));
 
         if (!empty($status)) {
-            $query->whereHas('user', function ($q) use ($status) {
-                $q->where('account_status', $status);
-            });
+            $query->whereHas('user', fn ($q) => $q->where('account_status', $status));
         }
 
         $employees = $query->get();
 
-        // Group employees by nationality
-        return $employees->groupBy(function ($employee) {
-            return $employee->user->nationality ?? 'غير محدد';
-        });
+        return $employees->groupBy(fn ($employee) => NationalityHelper::normalize($employee->user->nationality ?? null));
     }
 
     public function getEmployeesByAgeGroup(Project $project, $status = null)

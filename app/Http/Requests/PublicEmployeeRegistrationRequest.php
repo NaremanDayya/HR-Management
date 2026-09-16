@@ -49,12 +49,24 @@ class PublicEmployeeRegistrationRequest extends FormRequest
             'work_area' => 'required|string|max:255',
             'id_card' => [
                 'required', 'string', 'size:10', 'regex:/^[12][0-9]{9}$/', 'unique:users,id_card',
+                function ($attribute, $value, $fail) {
+                    if (Employee::whereHas('user', fn ($q) => $q->where('id_card', $value))
+                        ->whereIn('stop_reason', Employee::BLACKLIST_STOP_REASONS)->exists()) {
+                        $fail('لا يمكن إتمام التسجيل. يرجى التواصل مع الإدارة.');
+                    }
+                },
             ],
             'phone_number' => [
                 'required',
                 'string',
                 'digits:10',
                 Rule::unique('users', 'contact_info->phone_number'),
+                function ($attribute, $value, $fail) {
+                    if (Employee::whereHas('user', fn ($q) => $q->where('contact_info->phone_number', $value))
+                        ->whereIn('stop_reason', Employee::BLACKLIST_STOP_REASONS)->exists()) {
+                        $fail('لا يمكن إتمام التسجيل. يرجى التواصل مع الإدارة.');
+                    }
+                },
             ],
             'phone_type' => 'required|in:android,iphone',
             'nationality' => 'required|string|max:100',
@@ -126,23 +138,37 @@ class PublicEmployeeRegistrationRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $birthday = $this->input('birthday');
-            $age = $this->input('age');
+            $birthday     = $this->input('birthday');
+            $age          = $this->input('age');
             $phone_number = $this->input('phone_number');
+            $email        = $this->input('email');
+            $name         = $this->input('name');
+
             if ($birthday && $age) {
                 $calculatedAge = Carbon::parse($birthday)->age;
                 if ($calculatedAge != $age) {
                     $validator->errors()->add('age', 'العمر لا يتطابق مع تاريخ الميلاد المدخل.');
                 }
             }
+
             if ($phone_number) {
                 $exists = DB::table('users')
                     ->where('contact_info->phone_number', $phone_number)
                     ->exists();
-
                 if ($exists) {
                     $validator->errors()->add('phone_number', 'رقم الجوال مستخدم من قبل.');
                 }
+            }
+
+            // Block blacklisted employees by email or name
+            if ($email && Employee::whereHas('user', fn ($q) => $q->where('email', $email))
+                ->whereIn('stop_reason', Employee::BLACKLIST_STOP_REASONS)->exists()) {
+                $validator->errors()->add('email', 'لا يمكن إتمام التسجيل. يرجى التواصل مع الإدارة.');
+            }
+
+            if ($name && Employee::where('name', $name)
+                ->whereIn('stop_reason', Employee::BLACKLIST_STOP_REASONS)->exists()) {
+                $validator->errors()->add('name', 'لا يمكن إتمام التسجيل. يرجى التواصل مع الإدارة.');
             }
         });
     }

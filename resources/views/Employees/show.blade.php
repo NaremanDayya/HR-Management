@@ -175,6 +175,9 @@
         color: var(--dark);
         font-weight: 700;
         letter-spacing: -0.5px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
     }
 
     .role-badge {

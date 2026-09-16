@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\NationalityHelper;
 use App\Models\Employee;
 use App\Models\Project;
 use App\Models\User;
@@ -64,7 +65,8 @@ class DashboardController extends Controller
             'nationalities_count' => $employees
                 ->pluck('user')
                 ->filter()
-                ->pluck('nationality')
+                ->filter(fn ($u) => ! in_array($u->account_status, ['pending', 'rejected']))
+                ->map(fn ($u) => NationalityHelper::normalize($u->nationality))
                 ->unique()
                 ->count(),
             'managedProjectIds' => $managedProjectIds->count(),
@@ -113,7 +115,8 @@ class DashboardController extends Controller
     {
         return $employees->pluck('user')
             ->filter()
-            ->groupBy('nationality')
+            ->filter(fn ($u) => ! in_array($u->account_status, ['pending', 'rejected']))
+            ->groupBy(fn ($u) => NationalityHelper::normalize($u->nationality))
             ->map->count()
             ->sortDesc();
     }

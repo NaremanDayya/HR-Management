@@ -2118,8 +2118,10 @@
 
                                         <a href="{{ route('employees.show', $employee['id']) }}"
                                            class="text-decoration-none text-sm fw-bold mb-0"
-                                           style="color: {{ $isBadPerformance ? '#dc3545' : ($employee['replaced_old_employee_id'] ? '#6f40c1' : '#212529') }};">
-
+                                           style="color: {{ $isBadPerformance ? '#dc3545' : ($employee['replaced_old_employee_id'] ? '#6f40c1' : '#212529') }};
+                                                  display:inline-block;max-width:160px;overflow:hidden;
+                                                  text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
+                                           title="{{ $employee['name'] }}">
                                             {{ $employee['name'] }}
                                         </a>
                                         @if(Auth::user()->role === 'admin')
