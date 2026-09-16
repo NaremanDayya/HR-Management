@@ -199,7 +199,8 @@ class ProjectController extends Controller
         $query = DB::table('employees')
             ->join('users', 'employees.user_id', '=', 'users.id')
             ->select('users.nationality', DB::raw('COUNT(*) as count'))
-            ->whereNotIn('users.account_status', ['pending', 'rejected']);
+            ->whereNotIn('users.account_status', ['pending', 'rejected'])
+            ->groupBy('users.nationality');
 
         if (!empty($status)) {
             $query->where('users.account_status', $status);
