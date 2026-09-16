@@ -62,9 +62,9 @@ class Employee extends Model
 
     public const BLACKLIST_STOP_REASONS = ['سوء اداء', 'سوء أداء'];
 
-    public static function matchesBlacklist(?string $name, ?string $idCard = null, ?string $phone = null): bool
+    public static function matchesBlacklist(?string $name, ?string $idCard = null, ?string $phone = null, ?string $email = null): bool
     {
-        return static::where(function ($query) use ($name, $idCard, $phone) {
+        return static::where(function ($query) use ($name, $idCard, $phone, $email) {
             $query->where('name', $name);
 
             if ($idCard) {
@@ -73,6 +73,10 @@ class Employee extends Model
 
             if ($phone) {
                 $query->orWhereHas('user', fn ($q) => $q->where('contact_info->phone_number', $phone));
+            }
+
+            if ($email) {
+                $query->orWhereHas('user', fn ($q) => $q->where('email', $email));
             }
         })
             ->whereIn('stop_reason', self::BLACKLIST_STOP_REASONS)
