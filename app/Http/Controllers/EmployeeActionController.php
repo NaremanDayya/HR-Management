@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\AlertNotificationMail;
 use App\Models\Advance;
 use App\Models\Alert;
 use App\Models\Deduction;
@@ -21,8 +20,8 @@ use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
@@ -637,74 +636,61 @@ class EmployeeActionController extends Controller
                     throw new \Exception('No valid delivery channel available (missing phone and email)');
                 }
 
-                $messageData = [
-                    'company_name' => $companyName,
-                    'manager_name' => $manager->name,
-                    'employee_name' => $employee->user->name,
-                    'manager_whatsapp' => $manager->contact_info['phone_number'] ?? null,
-                    'alert_title' => $validated['alert_title'],
-                    'alert_message' => $validated['alert_reason']
+                $payload = [
+                    'secret'           => env('N8N_WEBHOOK_SECRET'),
+                    'channel'          => $channel,
+                    'send_email'       => $doEmail,
+                    'send_whatsapp'    => $doWhatsapp,
+                    'employee_name'    => $employee->user->name,
+                    'employee_email'   => $employee->user->email ?? null,
+                    'employee_phone'   => $employee->user->contact_info['phone_number'] ?? null,
+                    'manager_name'     => $manager->name,
+                    'manager_phone'    => $manager->contact_info['phone_number'] ?? null,
+                    'alert_title'      => $validated['alert_title'],
+                    'alert_message'    => $validated['alert_reason'],
+                    'alert_date'       => now()->format('Y-m-d'),
+                    'company_name'     => $companyName,
+                    'from_email'       => env('MAIL_FROM_ADDRESS', 'hr@ghg-hr.com'),
+                    'from_name'        => env('MAIL_FROM_NAME', 'نظام الموارد البشرية'),
                 ];
 
-                $message = $this->whatsAppService->formatAlertMessage($messageData);
+                $webhookUrl = env('N8N_WEBHOOK_URL');
 
-                if (empty($message)) {
-                    throw new \Exception('Failed to generate alert message');
+                if (empty($webhookUrl)) {
+                    throw new \Exception('N8N_WEBHOOK_URL is not configured');
                 }
 
-                $whatsappOk = null;
-                $emailOk = null;
+                $response = Http::timeout(15)->post($webhookUrl, $payload);
+
+                $n8nOk = $response->successful() && ($response->json('success') === true);
+
+                $delivered = $n8nOk;
                 $messageSid = null;
 
-                if ($doWhatsapp) {
-                    $sendResult = $this->whatsAppService->send(
-                        $employee->user->contact_info['phone_number'],
-                        $message
-                    );
-                    $whatsappOk = $sendResult['success'];
-                    $messageSid = $sendResult['message_sid'] ?? null;
-                    if (!$whatsappOk) {
-                        $errors[] = 'WhatsApp: ' . ($sendResult['details'] ?? $sendResult['error'] ?? 'unknown error');
-                    }
+                if (!$n8nOk) {
+                    $errors[] = 'n8n webhook error: ' . ($response->json('message') ?? $response->body());
                 }
-
-                if ($doEmail) {
-                    try {
-                        Mail::to($employee->user->email)->send(new AlertNotificationMail($messageData));
-                        $emailOk = true;
-                    } catch (\Exception $mailException) {
-                        $emailOk = false;
-                        $errors[] = 'Email: ' . $mailException->getMessage();
-                    }
-                }
-
-                // Delivered if at least one of the requested channels succeeded.
-                $delivered = ($whatsappOk === true) || ($emailOk === true);
 
                 $alertData = [
-                    'employee_id' => $employeeId,
-                    'reason' => $validated['alert_reason'],
-                    'title' => $validated['alert_title'],
-                    'manager_id' => Auth::id(),
-                    'channel' => $channel,
-                    'message_sent' => $message,
-                    'message_sid' => $messageSid,
+                    'employee_id'     => $employeeId,
+                    'reason'          => $validated['alert_reason'],
+                    'title'           => $validated['alert_title'],
+                    'manager_id'      => Auth::id(),
+                    'channel'         => $channel,
+                    'message_sent'    => json_encode($payload, JSON_UNESCAPED_UNICODE),
+                    'message_sid'     => $messageSid,
                     'delivery_status' => $delivered ? 'queued' : 'failed',
-                    'error_message' => !empty($errors) ? implode(' | ', $errors) : null,
+                    'error_message'   => !empty($errors) ? implode(' | ', $errors) : null,
                 ];
 
-                $alert = Alert::create($alertData);
+                Alert::create($alertData);
 
                 if ($delivered) {
                     $successCount++;
                     Employee::where('id', $employeeId)->increment('alerts_number');
                 } else {
                     $failedCount++;
-                    Log::error('Failed to send alert to employee ' . $employeeId, [
-                        'whatsappOk' => $whatsappOk,
-                        'emailOk' => $emailOk,
-                        'alertData' => $alertData
-                    ]);
+                    Log::error('Failed to send alert to employee ' . $employeeId, $alertData);
                 }
             } catch (\Exception $e) {
                 $failedCount++;
