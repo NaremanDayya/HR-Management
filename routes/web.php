@@ -20,6 +20,10 @@ use App\Http\Controllers\PublicEmployeeRegistrationController;
 use App\Http\Controllers\ProjectDeleteRequestController;
 
 
+Route::get('/privacy', function () {
+    return view('privacy');
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
