@@ -385,7 +385,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 @foreach ($statistics['nationalities']->take(5) as $nationality => $count)
                     @php
-                        $baseNationality = preg_replace('/(ة|ه)$/u', '', $nationality);
+                        $baseNationality = $nationality;
                         $flagCode = null;
 
                         if (isset($nationalityFlags[$nationality])) {

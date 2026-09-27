@@ -95,9 +95,39 @@
                         <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>أنثى</option>
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6" x-data="{
+                    open: false,
+                    search: '',
+                    selected: '{{ old('nationality') }}',
+                    nationalities: ['سوريا','اليمن','مصر','السودان','باكستان','نيجيريا','الهند','الأردن','العراق','لبنان','فلسطين','بنغلاديش','المغرب','تونس','إثيوبيا','سعودي','إريتريا','الصومال','أفغانستان','إندونيسيا','الفلبين','سريلانكا','نيبال','كينيا','غانا','السنغال','أخرى'],
+                    get filtered() { return this.search ? this.nationalities.filter(n => n.includes(this.search)) : this.nationalities; }
+                }" style="position:relative;">
                     <label class="form-label">الجنسية</label>
-                    <input type="text" name="nationality" class="form-control" value="{{ old('nationality') }}" required>
+                    <input type="hidden" name="nationality" :value="selected" required>
+                    <div @click="open=!open"
+                         class="form-control d-flex justify-content-between align-items-center"
+                         style="cursor:pointer; text-align:right;">
+                        <span x-text="selected || 'اختر الجنسية'" :style="selected ? 'color:#212529' : 'color:#adb5bd'"></span>
+                        <svg style="width:16px;height:16px;color:#6c757d;flex-shrink:0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div x-show="open" @click.outside="open=false" x-transition
+                         style="position:absolute;z-index:9999;width:100%;margin-top:2px;background:#fff;border:1px solid #dee2e6;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="padding:8px;border-bottom:1px solid #dee2e6;">
+                            <input x-model="search" type="text" placeholder="ابحث عن جنسية..."
+                                   class="form-control form-control-sm" style="text-align:right;" @click.stop>
+                        </div>
+                        <ul style="max-height:200px;overflow-y:auto;margin:0;padding:0;list-style:none;">
+                            <template x-for="n in filtered" :key="n">
+                                <li @click="selected=n; open=false; search=''"
+                                    style="padding:8px 16px;cursor:pointer;text-align:right;font-size:14px;"
+                                    :style="selected===n ? 'background:#e8f0fe;color:#1a56db;font-weight:600' : 'color:#212529'"
+                                    @mouseover="$el.style.background=selected===n?'#e8f0fe':'#f8f9fa'"
+                                    @mouseout="$el.style.background=selected===n?'#e8f0fe':''"
+                                    x-text="n"></li>
+                            </template>
+                            <li x-show="filtered.length===0" style="padding:8px 16px;color:#adb5bd;text-align:right;font-size:14px;">لا توجد نتائج</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">مقر الإقامة</label>

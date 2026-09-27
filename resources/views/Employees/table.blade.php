@@ -850,6 +850,16 @@
                                                            placeholder="اختر التاريخ" required>
                                                 </div>
 
+                                                <div class="mb-4 text-right">
+                                                    <label class="flex items-center gap-2 cursor-pointer justify-end">
+                                                        <span class="text-sm font-medium text-gray-700">إضافة الموظف إلى القائمة السوداء</span>
+                                                        <input type="checkbox" name="add_to_blacklist" value="1"
+                                                               id="blacklist-checkbox"
+                                                               class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                                    </label>
+                                                    <p class="text-xs text-gray-400 mt-1 text-right">سيتم منع هذا الموظف من إعادة التسجيل مستقبلاً</p>
+                                                </div>
+
                                             </x-bulk-action-modal>
                                         </li>
                                         @if (($role && $role->hasPermissionTo('change_employees_password')) || Auth::user()->role === 'admin')

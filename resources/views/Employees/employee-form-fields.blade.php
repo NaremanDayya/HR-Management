@@ -50,11 +50,37 @@
                 @enderror
             </div>
 
-            <div>
+            <div x-data="{
+                open: false,
+                search: '',
+                selected: '{{ old('nationality', $employee->user->nationality ?? '') }}',
+                nationalities: ['سوريا','اليمن','مصر','السودان','باكستان','نيجيريا','الهند','الأردن','العراق','لبنان','فلسطين','بنغلاديش','المغرب','تونس','إثيوبيا','سعودي','إريتريا','الصومال','أفغانستان','إندونيسيا','الفلبين','سريلانكا','نيبال','كينيا','غانا','السنغال','أخرى'],
+                get filtered() { return this.search ? this.nationalities.filter(n => n.includes(this.search)) : this.nationalities; }
+            }" class="relative">
                 <label class="block text-sm font-medium text-gray-700 mb-1">الجنسية</label>
-                <input type="text" name="nationality"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('nationality') border-red-500 @enderror"
-                    required>
+                <input type="hidden" name="nationality" :value="selected" required>
+                <div @click="open=!open"
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 cursor-pointer flex justify-between items-center @error('nationality') border-red-500 @enderror"
+                     :class="open ? 'ring-2 ring-blue-500 border-blue-500' : ''">
+                    <span x-text="selected || 'اختر الجنسية'" :class="selected ? 'text-gray-900' : 'text-gray-400'"></span>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div x-show="open" @click.outside="open=false" x-transition
+                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <div class="p-2 border-b">
+                        <input x-model="search" type="text" placeholder="ابحث عن جنسية..."
+                               class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-right" @click.stop>
+                    </div>
+                    <ul class="max-h-48 overflow-y-auto">
+                        <template x-for="n in filtered" :key="n">
+                            <li @click="selected=n; open=false; search=''"
+                                class="px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 text-right"
+                                :class="selected===n ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'"
+                                x-text="n"></li>
+                        </template>
+                        <li x-show="filtered.length===0" class="px-4 py-2 text-sm text-gray-400 text-right">لا توجد نتائج</li>
+                    </ul>
+                </div>
                 @error('nationality')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror

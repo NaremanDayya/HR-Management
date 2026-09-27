@@ -74,6 +74,17 @@ class NationalityHelper
         'سعودية'    => 'سعودي',
     ];
 
+    public static function variantsFor(string $canonical): array
+    {
+        $variants = [$canonical];
+        foreach (self::$map as $variant => $canon) {
+            if ($canon === $canonical) {
+                $variants[] = $variant;
+            }
+        }
+        return array_unique($variants);
+    }
+
     public static function normalize(?string $nationality): string
     {
         if (! $nationality) {

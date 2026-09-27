@@ -345,8 +345,10 @@ class EmployeeService
             $query->where('health_card', $filters['health_card']);
         }
         if (!empty($filters['nationality'])) {
-            $query->whereHas('user', function ($q) use ($filters) {
-                $q->where('nationality', $filters['nationality']);
+            $canonical = \App\Helpers\NationalityHelper::normalize($filters['nationality']);
+            $variants  = \App\Helpers\NationalityHelper::variantsFor($canonical);
+            $query->whereHas('user', function ($q) use ($variants) {
+                $q->whereIn('nationality', $variants);
             });
         }
 

@@ -148,7 +148,10 @@ class EmployeeActionController extends Controller
             'stop_date' => 'required|date',
             'other_stop_reason' => 'nullable|string|max:255',
             'stop_description' => 'nullable|string|max:500',
+            'add_to_blacklist' => 'nullable|in:1',
         ]);
+
+        $addToBlacklist = !empty($validated['add_to_blacklist']);
 
         $finalReason = ($validated['stop_reason'] === 'آخر' && !empty($validated['other_stop_reason']))
             ? $validated['other_stop_reason']
@@ -172,6 +175,7 @@ class EmployeeActionController extends Controller
                 $employee->update([
                     'stop_reason' => $finalReason,
                     'payload' => $payload,
+                    'is_blacklisted' => $addToBlacklist,
                     'updated_at' => now(),
                 ]);
                 EmployeeWorkHistory::create([
