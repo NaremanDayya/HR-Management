@@ -291,6 +291,35 @@
                 </div>
             </div>
 
+            <h5 class="section-title">اليونيفورم</h5>
+            <div class="row g-3" x-data="{ hasUniform: '{{ old('has_uniform', 'no') }}' }">
+                <div class="col-md-12">
+                    <label class="form-label">هل لديك يونيفورم حالياً؟</label>
+                    <div class="d-flex gap-4 mt-1">
+                        <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                            <input type="radio" name="has_uniform" value="yes" x-model="hasUniform"
+                                   {{ old('has_uniform') === 'yes' ? 'checked' : '' }}>
+                            <span>نعم</span>
+                        </label>
+                        <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                            <input type="radio" name="has_uniform" value="no" x-model="hasUniform"
+                                   {{ old('has_uniform', 'no') === 'no' ? 'checked' : '' }}>
+                            <span>لا</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4" x-show="hasUniform === 'yes'">
+                    <label class="form-label">عدد التيشيرتات</label>
+                    <input type="number" name="uniform_tshirt_count" class="form-control" min="0" max="10"
+                           value="{{ old('uniform_tshirt_count', 0) }}">
+                </div>
+                <div class="col-md-4" x-show="hasUniform === 'yes'">
+                    <label class="form-label">تاريخ الاستلام</label>
+                    <input type="date" name="uniform_received_at" class="form-control"
+                           value="{{ old('uniform_received_at') }}">
+                </div>
+            </div>
+
             <button type="submit" class="submit-btn w-100 mt-4">
                 إرسال البيانات <i class="fas fa-paper-plane mr-2"></i>
             </button>

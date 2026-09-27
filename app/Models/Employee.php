@@ -89,6 +89,16 @@ class Employee extends Model
     }
 
 
+    public function uniform()
+    {
+        return $this->hasOne(Uniform::class);
+    }
+
+    public function uniformRequests()
+    {
+        return $this->hasMany(UniformRequest::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

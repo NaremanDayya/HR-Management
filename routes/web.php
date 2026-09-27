@@ -161,6 +161,13 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::middleware(['auth'])->prefix('uniforms')->name('uniforms.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\UniformController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\UniformController::class, 'store'])->name('store');
+    Route::post('/request', [\App\Http\Controllers\UniformController::class, 'submitRequest'])->name('request');
+    Route::post('/requests/{uniformRequest}/review', [\App\Http\Controllers\UniformController::class, 'reviewRequest'])->name('review');
+});
+
 Route::middleware(['auth'])->prefix('EmployeeEditRequest')->name('employee-request.')->group(function () {
     Route::post('/', [EmployeeRequestController::class, 'storeEditRequest'])->name('store');
     Route::get('/', [EmployeeRequestController::class, 'index'])->name('index');

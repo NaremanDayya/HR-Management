@@ -99,6 +99,17 @@ class PublicEmployeeRegistrationController extends Controller
             $employee->update(['is_blacklisted' => true]);
         }
 
+        if (($data['has_uniform'] ?? 'no') === 'yes' && !empty($data['uniform_received_at'])) {
+            \App\Models\Uniform::create([
+                'employee_id'    => $employee->id,
+                'tshirt_count'   => $data['uniform_tshirt_count'] ?? 0,
+                'hat_count'      => 0,
+                'id_card_count'  => 0,
+                'tool_bag_count' => 0,
+                'received_at'    => $data['uniform_received_at'],
+            ]);
+        }
+
         $recipients = User::whereIn('role', ['admin', 'hr_manager', 'hr_assistant', 'operations_manager'])->get();
         if ($project->manager) {
             $recipients->push($project->manager);
