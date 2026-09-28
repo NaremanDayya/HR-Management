@@ -893,87 +893,37 @@
                                         @endif
                                         <li>
                                             <x-bulk-action-modal action="uniform" modal-title="طلب يونيفورم"
-                                                                 confirm-text="يونيفورم" button-class="bg-blue-600"
+                                                                 confirm-text="تقديم الطلب" button-class="bg-blue-600"
                                                                  modal-id="uniform" :has-form="true">
-                                                <div class="space-y-4">
-                                                    <!-- Header -->
-                                                    <div class="text-right">
-                                                        <h3 class="text-lg font-medium text-gray-800">اختيار عناصر
-                                                            اليونيفورم
-                                                        </h3>
+                                                <div class="space-y-4 text-right">
+                                                    <p class="text-sm text-gray-500">حدد الكميات المطلوبة للموظفين المختارين (اترك 0 للعناصر غير المطلوبة)</p>
+                                                    <div class="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-1">تيشيرت</label>
+                                                            <input type="number" name="tshirt_count" value="0" min="0"
+                                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500">
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-1">قبعة</label>
+                                                            <input type="number" name="hat_count" value="0" min="0"
+                                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500">
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-1">بطاقة تعريف</label>
+                                                            <input type="number" name="id_card_count" value="0" min="0"
+                                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500">
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-1">حقيبة أدوات</label>
+                                                            <input type="number" name="tool_bag_count" value="0" min="0"
+                                                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500">
+                                                        </div>
                                                     </div>
-
-                                                    <!-- Checkbox Group -->
-                                                    <div class="space-y-3">
-                                                        <!-- T-shirt Option -->
-                                                        <label
-                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
-                                                            <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="uniform_types[]"
-                                                                       value="tshirt"
-                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                            </div>
-                                                            <div class="mr-3 text-right">
-                                                                <span
-                                                                    class="block text-sm font-medium text-gray-800">تيشيرت</span>
-                                                            </div>
-                                                        </label>
-
-                                                        <!-- Pants Option -->
-                                                        <label
-                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
-                                                            <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="uniform_types[]"
-                                                                       value="pants"
-                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                            </div>
-                                                            <div class="mr-3 text-right">
-                                                                <span
-                                                                    class="block text-sm font-medium text-gray-800">بنطال</span>
-                                                            </div>
-                                                        </label>
-
-                                                        <!-- Shoes Option -->
-                                                        <label
-                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
-                                                            <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="uniform_types[]"
-                                                                       value="shoes"
-                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                            </div>
-                                                            <div class="mr-3 text-right">
-                                                                <span
-                                                                    class="block text-sm font-medium text-gray-800">حذاء</span>
-                                                            </div>
-                                                        </label>
-
-                                                        <!-- ID Card Option -->
-                                                        <label
-                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
-                                                            <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="uniform_types[]"
-                                                                       value="id_card"
-                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                            </div>
-                                                            <div class="mr-3 text-right">
-                                                                <span
-                                                                    class="block text-sm font-medium text-gray-800">بطاقة تعريف</span>
-                                                            </div>
-                                                        </label>
-
-                                                        <!-- Tool Bag Option -->
-                                                        <label
-                                                            class="relative flex items-start py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200 cursor-pointer">
-                                                            <div class="flex items-center h-5">
-                                                                <input type="checkbox" name="uniform_types[]"
-                                                                       value="tool_bag"
-                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                                            </div>
-                                                            <div class="mr-3 text-right">
-                                                                <span
-                                                                    class="block text-sm font-medium text-gray-800">حقيبة أدوات</span>
-                                                            </div>
-                                                        </label>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات (اختياري)</label>
+                                                        <textarea name="notes" rows="2"
+                                                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500"
+                                                                  placeholder="أي تفاصيل إضافية..."></textarea>
                                                     </div>
                                                 </div>
                                             </x-bulk-action-modal>

@@ -204,45 +204,41 @@ class EmployeeActionController extends Controller
     private function handleUniform(array $employeeIds, Request $request)
     {
         $validated = $request->validate([
-            'uniform_types' => 'required|array|min:1',
-            'uniform_types.*' => 'in:tshirt,pants,shoes,id_card,tool_bag',
+            'tshirt_count'   => 'nullable|integer|min:0',
+            'hat_count'      => 'nullable|integer|min:0',
+            'id_card_count'  => 'nullable|integer|min:0',
+            'tool_bag_count' => 'nullable|integer|min:0',
+            'notes'          => 'nullable|string|max:500',
         ]);
 
-        $uniformTypes = $validated['uniform_types'];
+        $tshirt   = (int) ($validated['tshirt_count'] ?? 0);
+        $hat      = (int) ($validated['hat_count'] ?? 0);
+        $idCard   = (int) ($validated['id_card_count'] ?? 0);
+        $toolBag  = (int) ($validated['tool_bag_count'] ?? 0);
+
+        if ($tshirt + $hat + $idCard + $toolBag === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'يجب تحديد كمية واحدة على الأقل',
+            ], 422);
+        }
 
         foreach ($employeeIds as $employeeId) {
-            $employee = Employee::with('user')->findOrFail($employeeId);
-
-            foreach ($uniformTypes as $type) {
-                $sizeKey = match ($type) {
-                    'tshirt' => 'Tshirt_size',
-                    'pants' => 'pants_size',
-                    'shoes' => 'Shoes_size',
-                    default => null,
-                };
-
-                $size = $sizeKey ? ($employee->user->size_info[$sizeKey] ?? 'one size') : null;
-
-                $empRequest = EmployeeRequest::create([
-                    'employee_id' => $employeeId,
-                    'request_type_id' => RequestType::getIdByKey('united_clothes'),
-                    'status' => 'pending',
-                    'requester_type' => 'App\Models\User',
-                    'requester_id' => Auth::id(),
-                    'payload' => [
-                        'size' => $size,
-                        'type' => $type,
-                        'quantity' => 1,
-                    ],
-                ]);
-            }
+            \App\Models\UniformRequest::create([
+                'employee_id'    => $employeeId,
+                'type'           => 'request',
+                'tshirt_count'   => $tshirt,
+                'hat_count'      => $hat,
+                'id_card_count'  => $idCard,
+                'tool_bag_count' => $toolBag,
+                'status'         => 'pending',
+                'notes'          => $validated['notes'] ?? null,
+            ]);
         }
-        $admin = User::where('role', 'admin')->first();
-        $admin->notify(new NewEmployeeRequestNotification($empRequest, 'united_clothes'));
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تقديم طلب اليونيفورم للموظفين المحددين',
+            'message' => 'تم تقديم طلب اليونيفورم للموظفين المحددين بنجاح',
         ]);
     }
 
