@@ -13,9 +13,16 @@ class UniformController extends Controller
     public function index()
     {
         $employees = Employee::with(['user', 'uniform', 'uniformRequests'])
-            ->whereHas('user', fn($q) => $q->where('account_status', 'active'))
-            ->orderBy('joining_date')
-            ->get();
+            ->whereHas('user', fn($q) => $q
+                ->where('account_status', 'active')
+                ->whereIn('role', ['shelf_stacker', 'supervisor', 'area_manager'])
+            )
+            ->get()
+            ->sortBy(fn($e) => [
+                $e->uniform ? 0 : 1,
+                $e->uniform?->received_at?->format('Y-m-d') ?? '9999-99-99',
+            ])
+            ->values();
 
         $requests = UniformRequest::with(['employee.user'])
             ->latest()
