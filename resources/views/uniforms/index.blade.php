@@ -32,7 +32,21 @@
         </div>
 
         {{-- TABLE TAB --}}
-        <div x-show="tab==='table'" class="p-6">
+        <div x-show="tab==='table'" class="p-6" x-data="{ search: '', filter: 'all' }">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+                <div class="relative flex-1 max-w-sm">
+                    <input type="text" x-model="search" placeholder="بحث باسم الموظف..."
+                           class="w-full border border-gray-300 rounded-lg pr-9 pl-3 py-2 text-sm focus:ring-2 focus:ring-red-400">
+                    <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                </div>
+                <select x-model="filter"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-400">
+                    <option value="all">كل الموظفين</option>
+                    <option value="due">مضى أكثر من سنة على آخر استلام</option>
+                    <option value="not_due">لم يمض عليه سنة بعد</option>
+                    <option value="none">لا يوجد يونيفورم مسجل</option>
+                </select>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-right">
                     <thead>
@@ -55,9 +69,11 @@
                             $uniform = $employee->uniform;
                             $eligible = $uniform && $uniform->isEligibleForFree();
                             $daysLeft = $uniform ? $uniform->daysUntilEligible() : null;
+                            $statusKey = !$uniform ? 'none' : ($eligible ? 'due' : 'not_due');
                         @endphp
                         <tr class="hover:bg-gray-50 transition-colors"
-                            x-data="uniformRow({{ $employee->id }}, {{ $uniform ? "'" . $uniform->received_at->format('Y-m-d') . "'" : 'null' }})">
+                            x-data="uniformRow({{ $employee->id }}, {{ $uniform ? "'" . $uniform->received_at->format('Y-m-d') . "'" : 'null' }})"
+                            x-show="(filter === 'all' || filter === '{{ $statusKey }}') && @js($employee->user->name).toLowerCase().includes(search.toLowerCase())">
                             <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3">
                                 <div class="font-medium text-gray-900">{{ $employee->user->name }}</div>
