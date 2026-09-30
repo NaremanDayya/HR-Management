@@ -101,7 +101,7 @@
                         <span class="text-xs font-semibold">جميع الموظفين</span>
                         <span
                             class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-blue-400 text-black">
-                            {{ $project->employees->count() }}
+                            {{ ($project->active_employees_count ?? 0) + ($project->inactive_employees_count ?? 0) }}
                         </span>
                     </div>
 
@@ -160,7 +160,7 @@
                                                 <span>{{ $project->name }}</span>
                                                 <span
                                                     class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-gray-100 text-gray-600">
-                                                    {{ $project->employees->count() }}
+                                                    {{ ($project->active_employees_count ?? 0) + ($project->inactive_employees_count ?? 0) }}
                                                 </span>
                                             </div>
                                         </a>
