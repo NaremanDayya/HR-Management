@@ -477,6 +477,39 @@
         </div>
     </div>
 </div>
+
+{{-- Uniform Section --}}
+<div class="mt-6 border-t pt-6" x-data="{ hasUniform: '{{ old('has_uniform', 'no') }}' }">
+    <h3 class="text-base font-semibold text-gray-700 mb-4 text-right">اليونيفورم</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-3">
+            <label class="block text-sm font-medium text-gray-700 mb-2 text-right">هل لدى الموظف يونيفورم حالياً؟</label>
+            <div class="flex gap-6 justify-end">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <span class="text-sm text-gray-700">لا</span>
+                    <input type="radio" name="has_uniform" value="no" x-model="hasUniform"
+                           class="w-4 h-4 text-blue-600">
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <span class="text-sm text-gray-700">نعم</span>
+                    <input type="radio" name="has_uniform" value="yes" x-model="hasUniform"
+                           class="w-4 h-4 text-blue-600">
+                </label>
+            </div>
+        </div>
+        <div x-show="hasUniform === 'yes'" x-cloak>
+            <label class="block text-sm font-medium text-gray-700 mb-1 text-right">عدد التيشيرتات</label>
+            <input type="number" name="uniform_tshirt_count" value="{{ old('uniform_tshirt_count', 1) }}" min="0"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-right focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div x-show="hasUniform === 'yes'" x-cloak>
+            <label class="block text-sm font-medium text-gray-700 mb-1 text-right">تاريخ الاستلام</label>
+            <input type="date" name="uniform_received_at" value="{{ old('uniform_received_at') }}"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+</div>
+
 <script>
     document.querySelectorAll('input[name="salary"]').forEach(function (input) {
         input.addEventListener('keydown', function (e) {

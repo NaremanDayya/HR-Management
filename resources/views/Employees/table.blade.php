@@ -1534,6 +1534,13 @@
                                 <span class="column-name">الجنسية</span>
                             </label>
                         </div>
+                        <div class="column-item">
+                            <label class="column-checkbox">
+                                <input type="checkbox" value="age" checked>
+                                <span class="checkmark"></span>
+                                <span class="column-name">العمر</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="columns-modal-footer">
@@ -3149,6 +3156,18 @@
                 'nationality': {
                     header: 'الجنسية',
                     accessor: e => e.nationality
+                },
+                'age': {
+                    header: 'العمر',
+                    accessor: e => {
+                        if (!e.birthday) return '-';
+                        const birth = new Date(e.birthday);
+                        const today = new Date();
+                        let age = today.getFullYear() - birth.getFullYear();
+                        const m = today.getMonth() - birth.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+                        return age;
+                    }
                 }
             };
 

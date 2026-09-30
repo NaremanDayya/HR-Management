@@ -318,6 +318,18 @@ class EmployeeController extends Controller
 
         try {
             $employee = $this->employeeService->create($data);
+
+            if (($data['has_uniform'] ?? 'no') === 'yes' && !empty($data['uniform_received_at'])) {
+                \App\Models\Uniform::create([
+                    'employee_id'    => $employee->id,
+                    'tshirt_count'   => $data['uniform_tshirt_count'] ?? 0,
+                    'hat_count'      => 0,
+                    'id_card_count'  => 0,
+                    'tool_bag_count' => 0,
+                    'received_at'    => $data['uniform_received_at'],
+                ]);
+            }
+
             $admin = User::where('role', 'admin')->first();
             Notification::send($admin, new NewEmployeeNotification($employee));
             return response()->json([
