@@ -24,7 +24,7 @@ class ProjectController extends Controller
     {
         $authUser = Auth::user();
 
-        $query = Project::with('manager', 'employees')->latest();
+        $query = Project::with('manager')->withCount(['activeEmployees', 'inactiveEmployees'])->latest();
 
         if ($authUser->role === 'project_manager') {
             $query->where('manager_id', $authUser->id);
@@ -310,11 +310,10 @@ class ProjectController extends Controller
 
         // Add employee roles statistics
         $employeesByRole = $project->employees()
-            ->when($status === 'active', function ($q) {
-                $q->where('account_status', 'active');
-            })
-            ->when($status === 'inactive', function ($q) {
-                $q->where('account_status', 'inactive');
+            ->whereHas('user', function ($q) use ($status) {
+                $q->whereNotIn('role', ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant']);
+                if ($status === 'active') $q->where('account_status', 'active');
+                if ($status === 'inactive') $q->where('account_status', 'inactive');
             })
             ->with('user')
             ->get()
@@ -352,8 +351,13 @@ class ProjectController extends Controller
     }
     public function getEmployeesByNationality(Project $project, $status = null)
     {
+        $excludedRoles = ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant'];
+
         $query = $project->employees()->with('user')
-            ->whereHas('user', fn ($q) => $q->whereNotIn('account_status', ['pending', 'rejected']));
+            ->whereHas('user', fn ($q) => $q
+                ->whereNotIn('account_status', ['pending', 'rejected'])
+                ->whereNotIn('role', $excludedRoles)
+            );
 
         if (!empty($status)) {
             $query->whereHas('user', fn ($q) => $q->where('account_status', $status));
@@ -366,7 +370,10 @@ class ProjectController extends Controller
 
     public function getEmployeesByAgeGroup(Project $project, $status = null)
     {
-        $query = $project->employees()->with('user');
+        $excludedRoles = ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant'];
+
+        $query = $project->employees()->with('user')
+            ->whereHas('user', fn ($q) => $q->whereNotIn('role', $excludedRoles));
 
         if (!empty($status)) {
             $query->whereHas('user', function ($q) use ($status) {
@@ -385,7 +392,11 @@ class ProjectController extends Controller
 
     public function getEmployeesByAccountStatus(Project $project)
     {
-        $employees = $project->employees()->with('user')->get();
+        $excludedRoles = ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant'];
+
+        $employees = $project->employees()->with('user')
+            ->whereHas('user', fn ($q) => $q->whereNotIn('role', $excludedRoles))
+            ->get();
 
         return $employees->groupBy(function ($employee) {
             return $employee->user->account_status ?? 'غير محدد';
@@ -394,7 +405,10 @@ class ProjectController extends Controller
 
     public function getEmployeesSalaries(Project $project, $status = null)
     {
-        $query = $project->employees()->with('user');
+        $excludedRoles = ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant'];
+
+        $query = $project->employees()->with('user')
+            ->whereHas('user', fn ($q) => $q->whereNotIn('role', $excludedRoles));
 
         if (!empty($status)) {
             $query->whereHas('user', function ($q) use ($status) {

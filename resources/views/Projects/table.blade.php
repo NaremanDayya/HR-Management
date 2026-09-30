@@ -221,7 +221,7 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                                     <span class="badge bg-primary">
-                                                        {{ $project->employees->count() }}
+                                                        {{ ($project->active_employees_count ?? 0) + ($project->inactive_employees_count ?? 0) }}
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 text-center max-w-xs">
