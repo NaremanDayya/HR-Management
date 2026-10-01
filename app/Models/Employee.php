@@ -51,13 +51,24 @@ class Employee extends Model
         'termination_notes',
         'work_days',
         'is_blacklisted',
+        'passport_number',
+        'passport_issue_date',
+        'id_expiry_date',
+        'driver_license_number',
+        'medical_insurance',
+        'wives_count',
+        'languages',
+        'residential_address',
     ];
     protected $casts = [
-        'joining_date' => 'date',
-        'vehicle_info' => 'array',
-        'payload' => 'array',
-        'is_blacklisted' => 'boolean',
-
+        'joining_date'       => 'date',
+        'passport_issue_date'=> 'date',
+        'id_expiry_date'     => 'date',
+        'vehicle_info'       => 'array',
+        'payload'            => 'array',
+        'languages'          => 'array',
+        'residential_address'=> 'array',
+        'is_blacklisted'     => 'boolean',
     ];
 
     public const BLACKLIST_STOP_REASONS = ['سوء اداء', 'سوء أداء'];
@@ -97,6 +108,81 @@ class Employee extends Model
     public function uniformRequests()
     {
         return $this->hasMany(UniformRequest::class);
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
+    /** Total leave days accrued from joining_date to today based on Saudi labor law. */
+    public function getTotalAccruedLeaveDays(): float
+    {
+        if (!$this->joining_date) return 0;
+
+        $joining = $this->joining_date;
+        $today   = \Carbon\Carbon::now();
+        $fiveYearMark = $joining->copy()->addYears(5);
+
+        if ($today <= $fiveYearMark) {
+            // All service under 5 years: 21 days/year
+            return $joining->diffInDays($today) * (21 / 365);
+        }
+
+        // Service spans the 5-year mark
+        $daysUnder5 = $joining->diffInDays($fiveYearMark);
+        $daysOver5  = $fiveYearMark->diffInDays($today);
+
+        return ($daysUnder5 * (21 / 365)) + ($daysOver5 * (30 / 365));
+    }
+
+    /** Total approved leave days taken. */
+    public function getTotalLeaveDaysTaken(): int
+    {
+        return $this->leaveRequests()
+            ->where('status', 'approved')
+            ->sum('days_count');
+    }
+
+    /** Remaining leave balance (accrued - taken), floored to 0. */
+    public function getLeaveDaysRemaining(): float
+    {
+        return max(0, floor($this->getTotalAccruedLeaveDays()) - $this->getTotalLeaveDaysTaken());
+    }
+
+    /** Annual leave entitlement for the current service year (21 or 30 days). */
+    public function getAnnualLeaveEntitlement(): int
+    {
+        if (!$this->joining_date) return 21;
+        return $this->joining_date->diffInYears(\Carbon\Carbon::now()) >= 5 ? 30 : 21;
+    }
+
+    /** Flight ticket entitlement: 50% salary (<5 years), 100% salary (>=5 years). */
+    public function getFlightTicketEntitlement(): array
+    {
+        if (!$this->joining_date || !$this->salary) {
+            return ['label' => 'غير محدد', 'amount' => 0, 'type' => 'none'];
+        }
+        $years = $this->joining_date->diffInYears(\Carbon\Carbon::now());
+        if ($years < 5) {
+            return ['label' => 'نصف الراتب', 'amount' => $this->salary * 0.5, 'type' => 'half'];
+        }
+        return ['label' => 'راتب كامل', 'amount' => $this->salary, 'type' => 'full'];
+    }
+
+    /** Days until id_expiry_date (negative = already expired). */
+    public function getIdExpiryDays(): ?int
+    {
+        if (!$this->id_expiry_date) return null;
+        return (int) \Carbon\Carbon::now()->diffInDays($this->id_expiry_date, false);
+    }
+
+    /** Days until passport expires (passport does not have separate expiry — use id_expiry_date for iqama/visa). */
+    public function getPassportExpiry(): ?string
+    {
+        // Passport expiry is not tracked separately; this returns passport_issue_date + 5 years as a rough estimate
+        // but we rely on id_expiry_date for the actual residency/visa expiry.
+        return null;
     }
 
     public function user()

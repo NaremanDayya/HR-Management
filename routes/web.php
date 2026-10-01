@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EmployeeTemplateController;
 use App\Http\Controllers\PublicEmployeeRegistrationController;
 use App\Http\Controllers\ProjectDeleteRequestController;
+use App\Http\Controllers\SponsorshipController;
+use App\Http\Controllers\LeaveController;
 
 
 Route::get('/privacy', function () {
@@ -160,6 +162,18 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+
+Route::middleware(['auth'])->prefix('sponsorship')->name('sponsorship.')->group(function () {
+    Route::get('/', [SponsorshipController::class, 'index'])->name('index');
+    Route::get('/{employee}', [SponsorshipController::class, 'profile'])->name('profile');
+});
+
+Route::middleware(['auth'])->prefix('leaves')->name('leaves.')->group(function () {
+    Route::get('/', [LeaveController::class, 'index'])->name('index');
+    Route::post('/', [LeaveController::class, 'store'])->name('store');
+    Route::put('/{leaveRequest}', [LeaveController::class, 'update'])->name('update');
+    Route::delete('/{leaveRequest}', [LeaveController::class, 'destroy'])->name('destroy');
+});
 
 Route::middleware(['auth'])->prefix('uniforms')->name('uniforms.')->group(function () {
     Route::get('/', [\App\Http\Controllers\UniformController::class, 'index'])->name('index');

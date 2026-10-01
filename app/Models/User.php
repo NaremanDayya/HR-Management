@@ -48,6 +48,9 @@ class User extends Authenticatable
         'personal_image',
         'contact_info',
         'size_info',
+        'tshirt_size',
+        'trousers_size',
+        'shoes_size',
     ];
 
     protected $hidden = [

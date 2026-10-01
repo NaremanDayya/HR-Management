@@ -446,6 +446,15 @@
                     </a>
 
                     @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                        <a href="{{ route('sponsorship.index') }}"
+                            class="{{ request()->routeIs('sponsorship.*') || request()->routeIs('leaves.*') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
+                            <i class="fas fa-passport ml-2 group-hover:text-white transition-colors"></i>
+                            الكفالة
+                            <span class="absolute bottom-0 left-0 w-full h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 {{ request()->routeIs('sponsorship.*') || request()->routeIs('leaves.*') ? 'scale-x-100' : '' }}"></span>
+                        </a>
+                    @endif
+
+                    @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
                         <a href="{{ route('uniforms.index') }}"
                             class="{{ request()->routeIs('uniforms.*') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
                             <i class="fas fa-tshirt ml-2 group-hover:text-white transition-colors"></i>
