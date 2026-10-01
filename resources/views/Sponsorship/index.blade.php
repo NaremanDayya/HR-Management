@@ -1,395 +1,439 @@
 @extends('layouts.master')
-
 @section('title', 'الكفالة والموظفون')
 
+<style>
+    #sponsorshipTable th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+        font-weight: 700;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+    #sponsorshipTable td {
+        font-size: 15px;
+        font-weight: 500;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .table-responsive::-webkit-scrollbar { height: 6px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: rgba(0,0,0,.2); border-radius: 3px; }
+
+    .expiry-expired  { color: #dc3545; font-weight: 700; }
+    .expiry-soon     { color: #fd7e14; font-weight: 700; }
+    .expiry-warning  { color: #ffc107; font-weight: 600; }
+    .expiry-ok       { color: #198754; font-weight: 600; }
+
+    .stat-card { border-radius: 12px; padding: 18px 20px; border: 1px solid #e9ecef; background: #fff; }
+    .stat-card .stat-number { font-size: 28px; font-weight: 800; line-height: 1; }
+    .stat-card .stat-label  { font-size: 13px; font-weight: 600; color: #6c757d; margin-top: 4px; }
+
+    .lang-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .lang-row input, .lang-row select {
+        flex: 1; padding: 8px 12px; border: 1px solid #ced4da;
+        border-radius: 6px; font-size: 14px;
+    }
+    .lang-row .remove-lang {
+        width: 32px; height: 32px; border-radius: 6px;
+        border: 1px solid #f0bcbc; background: #fff5f5;
+        color: #dc3545; cursor: pointer; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+    }
+</style>
+
 @section('content')
-<div class="min-h-screen bg-gray-50" dir="rtl">
-<div class="max-w-screen-xl mx-auto py-8 px-4 sm:px-6">
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
 
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">ملف الكفالة والموظفون</h1>
-            <p class="text-base text-gray-500 mt-1">إدارة بيانات الكفالة، الإقامات، جوازات السفر، وتذاكر السفر</p>
-        </div>
-        <div class="flex gap-3">
-            <a href="{{ route('leaves.index') }}"
-               class="inline-flex items-center gap-2 bg-white border border-gray-300 hover:border-gray-400 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
-                <i class="fas fa-calendar-alt text-green-500"></i>
-                سجل الإجازات
-            </a>
-            <button onclick="openAddModal()"
-                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition">
-                <i class="fas fa-plus"></i>
-                إضافة بيانات كفالة
-            </button>
-        </div>
-    </div>
+                {{-- Card Header --}}
+                <div class="card-header p-2 position-relative z-index-2 d-flex align-items-center justify-content-between w-100">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 flex-grow-1">
+                        <h6 class="text-black text-capitalize ps-3 mb-0" style="font-size:25px; font-weight:800;">
+                            ملف الكفالة والموظفون
+                        </h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 ms-3">
+                        <a href="{{ route('leaves.index') }}"
+                           class="btn btn-outline-success btn-sm d-flex align-items-center gap-1">
+                            <i class="fas fa-calendar-alt"></i> سجل الإجازات
+                        </a>
+                        <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                                data-bs-toggle="modal" data-bs-target="#sponsorshipModal">
+                            <i class="fas fa-plus"></i> إضافة بيانات كفالة
+                        </button>
+                    </div>
+                </div>
 
-    {{-- Stats --}}
-    @php
-        $expired      = $employees->filter(fn($e) => $e->id_expiry_date && $e->id_expiry_date->isPast());
-        $expiringSoon = $employees->filter(fn($e) => $e->id_expiry_date && !$e->id_expiry_date->isPast() && $e->id_expiry_date->diffInDays(now()) <= 90);
-        $over5years   = $employees->filter(fn($e) => $e->joining_date && $e->joining_date->diffInYears(now()) >= 5);
-    @endphp
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-users text-blue-500 text-lg"></i>
-            </div>
-            <div>
-                <div class="text-2xl font-extrabold text-gray-900">{{ $employees->count() }}</div>
-                <div class="text-sm text-gray-500 font-medium">إجمالي الموظفين</div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-red-200 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-exclamation-triangle text-red-500 text-lg"></i>
-            </div>
-            <div>
-                <div class="text-2xl font-extrabold text-red-600">{{ $expired->count() }}</div>
-                <div class="text-sm text-gray-500 font-medium">إقامة منتهية</div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-amber-200 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-clock text-amber-500 text-lg"></i>
-            </div>
-            <div>
-                <div class="text-2xl font-extrabold text-amber-600">{{ $expiringSoon->count() }}</div>
-                <div class="text-sm text-gray-500 font-medium">تنتهي خلال 3 أشهر</div>
-            </div>
-        </div>
-        <div class="bg-white rounded-2xl border border-green-200 shadow-sm p-5 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-star text-green-500 text-lg"></i>
-            </div>
-            <div>
-                <div class="text-2xl font-extrabold text-green-600">{{ $over5years->count() }}</div>
-                <div class="text-sm text-gray-500 font-medium">أكثر من 5 سنوات</div>
-            </div>
-        </div>
-    </div>
+                {{-- Stats Row --}}
+                @php
+                    $expired      = $employees->filter(fn($e) => $e->id_expiry_date && $e->id_expiry_date->isPast());
+                    $expiringSoon = $employees->filter(fn($e) => $e->id_expiry_date && !$e->id_expiry_date->isPast() && $e->id_expiry_date->diffInDays(now()) <= 90);
+                    $over5years   = $employees->filter(fn($e) => $e->joining_date && $e->joining_date->diffInYears(now()) >= 5);
+                @endphp
+                <div class="d-flex gap-3 px-3 pt-3 pb-1 flex-wrap">
+                    <div class="stat-card flex-fill text-center">
+                        <div class="stat-number text-primary">{{ $employees->count() }}</div>
+                        <div class="stat-label">إجمالي الموظفين</div>
+                    </div>
+                    <div class="stat-card flex-fill text-center">
+                        <div class="stat-number text-danger">{{ $expired->count() }}</div>
+                        <div class="stat-label">إقامة منتهية</div>
+                    </div>
+                    <div class="stat-card flex-fill text-center">
+                        <div class="stat-number" style="color:#fd7e14;">{{ $expiringSoon->count() }}</div>
+                        <div class="stat-label">تنتهي خلال 3 أشهر</div>
+                    </div>
+                    <div class="stat-card flex-fill text-center">
+                        <div class="stat-number text-success">{{ $over5years->count() }}</div>
+                        <div class="stat-label">أكثر من 5 سنوات</div>
+                    </div>
+                </div>
 
-    {{-- Filters --}}
-    <form method="GET" action="{{ route('sponsorship.index') }}"
-          class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6">
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="ابحث بالاسم أو الهوية..."
-                   class="col-span-2 md:col-span-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                {{-- Filters --}}
+                <form method="GET" action="{{ route('sponsorship.index') }}" class="px-3 py-3">
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                               placeholder="ابحث بالاسم أو الهوية..."
+                               class="form-control form-control-sm" style="max-width:220px;">
 
-            <select name="project_id" class="border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500">
-                <option value="">كل المشاريع</option>
-                @foreach($projects as $p)
-                    <option value="{{ $p->id }}" @selected(request('project_id') == $p->id)>{{ $p->name }}</option>
-                @endforeach
-            </select>
+                        <select name="project_id" class="form-select form-select-sm" style="max-width:180px;">
+                            <option value="">كل المشاريع</option>
+                            @foreach($projects as $p)
+                                <option value="{{ $p->id }}" @selected(request('project_id') == $p->id)>{{ $p->name }}</option>
+                            @endforeach
+                        </select>
 
-            <select name="id_expiry" class="border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500">
-                <option value="">انتهاء الإقامة / الهوية</option>
-                <option value="expired" @selected(request('id_expiry')=='expired')>منتهية الآن</option>
-                <option value="1month"  @selected(request('id_expiry')=='1month')>خلال شهر</option>
-                <option value="3months" @selected(request('id_expiry')=='3months')>خلال 3 أشهر</option>
-                <option value="6months" @selected(request('id_expiry')=='6months')>خلال 6 أشهر</option>
-            </select>
+                        <select name="id_expiry" class="form-select form-select-sm" style="max-width:200px;">
+                            <option value="">انتهاء الإقامة / الهوية</option>
+                            <option value="expired" @selected(request('id_expiry')=='expired')>منتهية الآن</option>
+                            <option value="1month"  @selected(request('id_expiry')=='1month')>خلال شهر</option>
+                            <option value="3months" @selected(request('id_expiry')=='3months')>خلال 3 أشهر</option>
+                            <option value="6months" @selected(request('id_expiry')=='6months')>خلال 6 أشهر</option>
+                        </select>
 
-            <select name="service_years" class="border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500">
-                <option value="">سنوات الخدمة</option>
-                <option value="under5" @selected(request('service_years')=='under5')>أقل من 5 سنوات</option>
-                <option value="near5"  @selected(request('service_years')=='near5')>قريب من 5 سنوات</option>
-                <option value="over5"  @selected(request('service_years')=='over5')>أكثر من 5 سنوات</option>
-            </select>
+                        <select name="service_years" class="form-select form-select-sm" style="max-width:200px;">
+                            <option value="">سنوات الخدمة</option>
+                            <option value="under5" @selected(request('service_years')=='under5')>أقل من 5 سنوات</option>
+                            <option value="near5"  @selected(request('service_years')=='near5')>قريب من 5 سنوات</option>
+                            <option value="over5"  @selected(request('service_years')=='over5')>أكثر من 5 سنوات</option>
+                        </select>
 
-            <div class="flex gap-2">
-                <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition">
-                    <i class="fas fa-filter ml-1"></i> فلترة
-                </button>
-                <a href="{{ route('sponsorship.index') }}"
-                   class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3.5 py-2.5 rounded-xl text-sm transition">
-                    <i class="fas fa-times"></i>
-                </a>
-            </div>
-        </div>
-    </form>
+                        <button type="submit" class="btn btn-primary btn-sm px-3">
+                            <i class="fas fa-filter me-1"></i> فلترة
+                        </button>
+                        <a href="{{ route('sponsorship.index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </form>
 
-    {{-- Table --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-right">
-                <thead>
-                    <tr class="bg-gray-50 border-b-2 border-gray-200">
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">الموظف</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">رقم الهوية</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">الجوال</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">تاريخ الالتحاق</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">مدة الخدمة</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">تذكرة السفر</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">انتهاء الإقامة / الهوية</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">رقم الجواز</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">رصيد الإجازة</th>
-                        <th class="px-5 py-4 font-bold text-gray-700 text-sm whitespace-nowrap">المشروع</th>
-                        <th class="px-5 py-4"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($employees as $employee)
-                        @php
-                            $user         = $employee->user;
-                            $expiryDays   = $employee->getIdExpiryDays();
-                            $serviceYears = $employee->joining_date ? (int)$employee->joining_date->diffInYears(now()) : null;
-                            $ticket       = $employee->getFlightTicketEntitlement();
-                            $leaveRem     = $employee->getLeaveDaysRemaining();
+                {{-- Table --}}
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive px-3">
+                        <table class="table align-items-center mb-0 employee-table" id="sponsorshipTable">
+                            <thead class="thead">
+                                <tr>
+                                    <th class="text-end pe-3">الموظف</th>
+                                    <th class="text-center">رقم الهوية</th>
+                                    <th class="text-center">الجوال</th>
+                                    <th class="text-center">تاريخ الالتحاق</th>
+                                    <th class="text-center">مدة الخدمة</th>
+                                    <th class="text-center">تذكرة السفر</th>
+                                    <th class="text-center">انتهاء الإقامة / الهوية</th>
+                                    <th class="text-center">رقم الجواز</th>
+                                    <th class="text-center">رصيد الإجازة</th>
+                                    <th class="text-center">المشروع</th>
+                                    <th class="text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="tbody">
+                                @forelse($employees as $employee)
+                                    @php
+                                        $user         = $employee->user;
+                                        $expiryDays   = $employee->getIdExpiryDays();
+                                        $serviceYears = $employee->joining_date ? (int)$employee->joining_date->diffInYears(now()) : null;
+                                        $ticket       = $employee->getFlightTicketEntitlement();
+                                        $leaveRem     = $employee->getLeaveDaysRemaining();
 
-                            $expiryCell = match(true) {
-                                $expiryDays === null => ['text' => '—',              'badge' => '',           'cls' => 'text-gray-400'],
-                                $expiryDays < 0      => ['text' => $employee->id_expiry_date->format('Y/m/d'), 'badge' => 'منتهية', 'cls' => 'text-red-600 font-bold'],
-                                $expiryDays <= 30    => ['text' => $employee->id_expiry_date->format('Y/m/d'), 'badge' => "باقي {$expiryDays} يوم", 'cls' => 'text-red-500 font-semibold'],
-                                $expiryDays <= 90    => ['text' => $employee->id_expiry_date->format('Y/m/d'), 'badge' => "باقي {$expiryDays} يوم", 'cls' => 'text-amber-600 font-semibold'],
-                                $expiryDays <= 180   => ['text' => $employee->id_expiry_date->format('Y/m/d'), 'badge' => '',           'cls' => 'text-yellow-600'],
-                                default              => ['text' => $employee->id_expiry_date->format('Y/m/d'), 'badge' => '',           'cls' => 'text-green-600'],
-                            };
-                        @endphp
-                        <tr class="hover:bg-blue-50/30 transition group">
-                            <td class="px-5 py-4">
-                                <a href="{{ route('sponsorship.profile', $employee) }}"
-                                   class="flex items-center gap-3 group/link">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex-shrink-0 overflow-hidden shadow-sm">
-                                        @if($user?->personal_image)
-                                            <img src="{{ $user->personal_image }}" class="w-full h-full object-cover">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center text-blue-700 font-extrabold text-base">
-                                                {{ mb_substr($employee->name, 0, 1) }}
+                                        $expiryCls = match(true) {
+                                            $expiryDays === null => '',
+                                            $expiryDays < 0      => 'expiry-expired',
+                                            $expiryDays <= 30    => 'expiry-expired',
+                                            $expiryDays <= 90    => 'expiry-soon',
+                                            $expiryDays <= 180   => 'expiry-warning',
+                                            default              => 'expiry-ok',
+                                        };
+                                    @endphp
+                                    <tr>
+                                        {{-- Employee --}}
+                                        <td class="text-end pe-3">
+                                            <a href="{{ route('sponsorship.profile', $employee) }}"
+                                               class="d-flex align-items-center gap-2 text-decoration-none">
+                                                <div style="width:42px;height:42px;border-radius:50%;overflow:hidden;background:#e8eaf6;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                                                    @if($user?->personal_image)
+                                                        <img src="{{ $user->personal_image }}" style="width:100%;height:100%;object-fit:cover;">
+                                                    @else
+                                                        <span style="font-weight:800;font-size:16px;color:#3949ab;">{{ mb_substr($employee->name,0,1) }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="employee-name">{{ $employee->name }}</div>
+                                                    <div class="text-muted" style="font-size:12px;">{{ $employee->job ?? '' }}</div>
+                                                </div>
+                                            </a>
+                                        </td>
+
+                                        {{-- ID --}}
+                                        <td class="text-center employee-detail font-monospace">{{ $user?->id_card ?? '—' }}</td>
+
+                                        {{-- Phone --}}
+                                        <td class="text-center employee-detail font-monospace">{{ $user?->contact_info['phone_number'] ?? '—' }}</td>
+
+                                        {{-- Joining date --}}
+                                        <td class="text-center employee-detail">{{ $employee->joining_date?->format('Y/m/d') ?? '—' }}</td>
+
+                                        {{-- Service years --}}
+                                        <td class="text-center">
+                                            @if($serviceYears !== null)
+                                                <span style="font-size:18px;font-weight:800;">{{ $serviceYears }}</span>
+                                                <span class="text-muted" style="font-size:13px;"> سنة</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Flight ticket --}}
+                                        <td class="text-center">
+                                            @if($ticket['type'] !== 'none')
+                                                <div>
+                                                    <span class="badge {{ $ticket['type'] === 'full' ? 'bg-success' : 'bg-warning text-dark' }}" style="font-size:12px;">{{ $ticket['label'] }}</span>
+                                                    <div class="text-muted" style="font-size:12px;font-weight:600;">{{ number_format($ticket['amount'],0) }} ر.س</div>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- ID Expiry --}}
+                                        <td class="text-center">
+                                            @if($employee->id_expiry_date)
+                                                <div class="{{ $expiryCls }}">{{ $employee->id_expiry_date->format('Y/m/d') }}</div>
+                                                @if($expiryDays !== null && $expiryDays < 0)
+                                                    <div style="font-size:11px;font-weight:700;color:#dc3545;">منتهية</div>
+                                                @elseif($expiryDays !== null && $expiryDays <= 90)
+                                                    <div style="font-size:11px;font-weight:700;color:#fd7e14;">باقي {{ $expiryDays }} يوم</div>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Passport --}}
+                                        <td class="text-center employee-detail font-monospace">{{ $employee->passport_number ?? '—' }}</td>
+
+                                        {{-- Leave balance --}}
+                                        <td class="text-center">
+                                            @if($employee->joining_date)
+                                                <span style="font-size:20px;font-weight:800;">{{ (int)$leaveRem }}</span>
+                                                <span class="text-muted" style="font-size:12px;"> يوم</span>
+                                                <div class="text-muted" style="font-size:11px;">من {{ $employee->getAnnualLeaveEntitlement() }} يوم/سنة</div>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Project --}}
+                                        <td class="text-center employee-detail">{{ $employee->project?->name ?? '—' }}</td>
+
+                                        {{-- Actions --}}
+                                        <td class="text-center">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="{{ route('sponsorship.profile', $employee) }}"
+                                                   class="btn btn-sm btn-outline-primary" title="عرض الملف">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-secondary"
+                                                        title="تعديل بيانات الكفالة"
+                                                        onclick="openEditModal(
+                                                            {{ $employee->id }},
+                                                            {{ json_encode(route('sponsorship.update-data', $employee)) }},
+                                                            {{ json_encode([
+                                                                'passport_number'       => $employee->passport_number,
+                                                                'passport_issue_date'   => $employee->passport_issue_date?->format('Y-m-d'),
+                                                                'id_expiry_date'        => $employee->id_expiry_date?->format('Y-m-d'),
+                                                                'driver_license_number' => $employee->driver_license_number,
+                                                                'medical_insurance'     => $employee->medical_insurance,
+                                                                'wives_count'           => $employee->wives_count,
+                                                                'residential_address'   => $employee->residential_address,
+                                                                'languages'             => $employee->languages,
+                                                            ]) }},
+                                                            {{ json_encode([
+                                                                'tshirt_size'   => $employee->user?->tshirt_size,
+                                                                'trousers_size' => $employee->user?->trousers_size,
+                                                                'shoes_size'    => $employee->user?->shoes_size,
+                                                            ]) }}
+                                                        )">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
                                             </div>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-gray-900 text-sm group-hover/link:text-blue-600 transition">{{ $employee->name }}</div>
-                                        <div class="text-xs text-gray-400 font-medium">{{ $employee->job ?? '' }}</div>
-                                    </div>
-                                </a>
-                            </td>
-                            <td class="px-5 py-4 font-mono font-semibold text-gray-700 text-sm">{{ $user?->id_card ?? '—' }}</td>
-                            <td class="px-5 py-4 font-mono text-gray-600 text-sm">{{ $user?->contact_info['phone_number'] ?? '—' }}</td>
-                            <td class="px-5 py-4 text-gray-700 font-medium whitespace-nowrap">{{ $employee->joining_date?->format('Y/m/d') ?? '—' }}</td>
-                            <td class="px-5 py-4 whitespace-nowrap">
-                                @if($serviceYears !== null)
-                                    <span class="font-bold text-gray-900 text-base">{{ $serviceYears }}</span>
-                                    <span class="text-gray-400 text-sm font-medium"> سنة</span>
-                                @else
-                                    <span class="text-gray-400">—</span>
-                                @endif
-                            </td>
-                            <td class="px-5 py-4 whitespace-nowrap">
-                                @if($ticket['type'] !== 'none')
-                                    <div class="inline-flex flex-col">
-                                        <span class="text-xs font-bold {{ $ticket['type'] === 'full' ? 'text-green-600' : 'text-amber-600' }}">{{ $ticket['label'] }}</span>
-                                        <span class="text-xs text-gray-500 font-semibold">{{ number_format($ticket['amount'], 0) }} ر.س</span>
-                                    </div>
-                                @else
-                                    <span class="text-gray-400">—</span>
-                                @endif
-                            </td>
-                            <td class="px-5 py-4 whitespace-nowrap">
-                                @if($employee->id_expiry_date)
-                                    <div class="flex flex-col gap-0.5">
-                                        <span class="{{ $expiryCell['cls'] }} text-sm">{{ $expiryCell['text'] }}</span>
-                                        @if($expiryCell['badge'])
-                                            <span class="text-xs {{ $expiryDays < 0 ? 'text-red-500' : 'text-amber-500' }} font-bold">{{ $expiryCell['badge'] }}</span>
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="text-gray-400 font-medium">—</span>
-                                @endif
-                            </td>
-                            <td class="px-5 py-4 font-mono text-gray-600 text-sm">{{ $employee->passport_number ?? '—' }}</td>
-                            <td class="px-5 py-4 whitespace-nowrap">
-                                @if($employee->joining_date)
-                                    <div class="flex flex-col gap-0.5">
-                                        <span class="font-extrabold text-gray-900 text-base">{{ (int)$leaveRem }}</span>
-                                        <span class="text-xs text-gray-400 font-medium">من {{ $employee->getAnnualLeaveEntitlement() }} يوم/سنة</span>
-                                    </div>
-                                @else
-                                    <span class="text-gray-400">—</span>
-                                @endif
-                            </td>
-                            <td class="px-5 py-4 text-gray-600 font-medium whitespace-nowrap">{{ $employee->project?->name ?? '—' }}</td>
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-                                    <a href="{{ route('sponsorship.profile', $employee) }}"
-                                       class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition"
-                                       title="عرض الملف">
-                                        <i class="fas fa-eye text-xs"></i>
-                                    </a>
-                                    <button onclick="openEditModal({{ $employee->id }}, {{ json_encode($employee->only(['passport_number','passport_issue_date','id_expiry_date','driver_license_number','medical_insurance','wives_count','residential_address','languages'])) }}, {{ json_encode($employee->user?->only(['tshirt_size','trousers_size','shoes_size'])) }})"
-                                            class="w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 flex items-center justify-center transition"
-                                            title="تعديل بيانات الكفالة">
-                                        <i class="fas fa-edit text-xs"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="11" class="px-5 py-16 text-center">
-                                <i class="fas fa-users text-4xl text-gray-300 mb-4 block"></i>
-                                <p class="text-gray-500 font-semibold text-base">لا يوجد موظفون مطابقون للبحث</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="11" class="text-center py-5 text-muted">
+                                            <i class="fas fa-users fa-3x mb-3 d-block" style="opacity:.2;"></i>
+                                            لا يوجد موظفون مطابقون للبحث
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-
-</div>
 </div>
 
-{{-- Add / Edit Sponsorship Data Modal --}}
-<div id="sponsorshipModal" class="fixed inset-0 z-50 hidden" dir="rtl">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-2xl z-10">
-                <div>
-                    <h2 class="text-xl font-extrabold text-gray-900">بيانات الكفالة</h2>
-                    <p class="text-sm text-gray-500 mt-0.5" id="modalSubtitle">إضافة / تعديل بيانات الكفالة للموظف</p>
-                </div>
-                <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition">
-                    <i class="fas fa-times"></i>
-                </button>
+{{-- =================== SPONSORSHIP DATA MODAL =================== --}}
+<div class="modal fade" id="sponsorshipModal" tabindex="-1" aria-hidden="true" dir="rtl">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalTitle">بيانات الكفالة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="sponsorshipForm" class="p-6 space-y-6">
+            <form id="sponsorshipForm">
                 @csrf
-                @method('PUT')
+                <div class="modal-body p-4">
 
-                {{-- Employee selector (only shown in add mode) --}}
-                <div id="employeeSelectorWrap">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">الموظف <span class="text-red-500">*</span></label>
-                    <select id="modalEmployeeId" name="employee_id_select"
-                            class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">اختر موظفاً...</option>
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}" data-url="{{ route('sponsorship.update-data', $emp) }}">{{ $emp->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Documents Section --}}
-                <div>
-                    <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i class="fas fa-id-card text-blue-400"></i> الوثائق الرسمية
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">رقم جواز السفر</label>
-                            <input type="text" name="passport_number" id="f_passport_number"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="A12345678">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">تاريخ إصدار الجواز</label>
-                            <input type="date" name="passport_issue_date" id="f_passport_issue_date"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">انتهاء الإقامة / الهوية / التأشيرة</label>
-                            <input type="date" name="id_expiry_date" id="f_id_expiry_date"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">رقم رخصة القيادة</label>
-                            <input type="text" name="driver_license_number" id="f_driver_license_number"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
+                    {{-- Employee selector (add mode) --}}
+                    <div id="employeeSelectorWrap" class="mb-4">
+                        <label class="form-label fw-semibold">الموظف <span class="text-danger">*</span></label>
+                        <select id="modalEmployeeId" class="form-select">
+                            <option value="">اختر موظفاً...</option>
+                            @foreach($employees as $emp)
+                                <option value="{{ $emp->id }}"
+                                        data-url="{{ route('sponsorship.update-data', $emp) }}">
+                                    {{ $emp->name }} — {{ $emp->project?->name ?? 'بدون مشروع' }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
-                </div>
 
-                {{-- Personal Section --}}
-                <div>
-                    <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i class="fas fa-user text-purple-400"></i> بيانات شخصية
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">التأمين الطبي</label>
-                            <input type="text" name="medical_insurance" id="f_medical_insurance"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="اسم شركة التأمين">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">عدد الزوجات</label>
-                            <input type="number" name="wives_count" id="f_wives_count" min="0" max="4"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
+                    <div class="row g-4">
 
-                {{-- Address Section --}}
-                <div>
-                    <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i class="fas fa-map-marker-alt text-red-400"></i> العنوان السكني
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">المدينة</label>
-                            <input type="text" name="residential_address[city]" id="f_city"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        {{-- ===== SECTION: Residence & Passport ===== --}}
+                        <div class="col-12">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:12px;letter-spacing:.06em;">
+                                <i class="fas fa-id-card me-1 text-primary"></i> الوثائق الرسمية
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">رقم جواز السفر</label>
+                                    <input type="text" name="passport_number" id="f_passport_number"
+                                           class="form-control" placeholder="A12345678">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">تاريخ إصدار الجواز</label>
+                                    <input type="date" name="passport_issue_date" id="f_passport_issue_date" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">انتهاء الإقامة / الهوية / التأشيرة</label>
+                                    <input type="date" name="id_expiry_date" id="f_id_expiry_date" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">رقم رخصة القيادة</label>
+                                    <input type="text" name="driver_license_number" id="f_driver_license_number" class="form-control">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">الحي</label>
-                            <input type="text" name="residential_address[neighborhood]" id="f_neighborhood"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
 
-                {{-- Sizes Section --}}
-                <div>
-                    <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i class="fas fa-tshirt text-indigo-400"></i> مقاسات الملابس
-                    </h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">قميص</label>
-                            <input type="text" name="tshirt_size" id="f_tshirt_size" placeholder="مثال: XL"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        {{-- ===== SECTION: Personal ===== --}}
+                        <div class="col-12 border-top pt-4">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:12px;letter-spacing:.06em;">
+                                <i class="fas fa-user me-1 text-purple-500"></i> بيانات شخصية
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">التأمين الطبي</label>
+                                    <input type="text" name="medical_insurance" id="f_medical_insurance"
+                                           class="form-control" placeholder="اسم شركة التأمين أو رقم الوثيقة">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">عدد الزوجات</label>
+                                    <input type="number" name="wives_count" id="f_wives_count"
+                                           class="form-control" min="0" max="4" placeholder="0">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">بنطال</label>
-                            <input type="text" name="trousers_size" id="f_trousers_size" placeholder="مثال: 32"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1.5">حذاء</label>
-                            <input type="text" name="shoes_size" id="f_shoes_size" placeholder="مثال: 42"
-                                   class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                </div>
 
-                {{-- Languages Section --}}
-                <div>
-                    <h3 class="text-sm font-extrabold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <i class="fas fa-language text-teal-400"></i> اللغات
-                    </h3>
-                    <div id="languagesContainer" class="space-y-2"></div>
-                    <button type="button" onclick="addLanguageRow()"
-                            class="mt-2 text-sm text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1.5 transition">
-                        <i class="fas fa-plus-circle"></i> إضافة لغة
-                    </button>
-                </div>
+                        {{-- ===== SECTION: Address ===== --}}
+                        <div class="col-12 border-top pt-4">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:12px;letter-spacing:.06em;">
+                                <i class="fas fa-map-marker-alt me-1 text-danger"></i> العنوان السكني
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">المدينة</label>
+                                    <input type="text" name="residential_address[city]" id="f_city" class="form-control" placeholder="الرياض">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">الحي</label>
+                                    <input type="text" name="residential_address[neighborhood]" id="f_neighborhood" class="form-control" placeholder="اسم الحي">
+                                </div>
+                            </div>
+                        </div>
 
-                {{-- Actions --}}
-                <div class="flex gap-3 pt-2 border-t border-gray-100">
-                    <button type="submit"
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-sm">
-                        <i class="fas fa-save ml-2"></i> حفظ البيانات
-                    </button>
-                    <button type="button" onclick="closeModal()"
-                            class="px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl text-sm font-bold transition">
-                        إلغاء
+                        {{-- ===== SECTION: Sizes ===== --}}
+                        <div class="col-12 border-top pt-4">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:12px;letter-spacing:.06em;">
+                                <i class="fas fa-tshirt me-1 text-indigo-500"></i> مقاسات الملابس
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">قميص (T-shirt)</label>
+                                    <input type="text" name="tshirt_size" id="f_tshirt_size"
+                                           class="form-control" placeholder="مثال: XL أو 50">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">بنطال (Trousers)</label>
+                                    <input type="text" name="trousers_size" id="f_trousers_size"
+                                           class="form-control" placeholder="مثال: 32 أو M">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">حذاء (Shoes)</label>
+                                    <input type="text" name="shoes_size" id="f_shoes_size"
+                                           class="form-control" placeholder="مثال: 42">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ===== SECTION: Languages ===== --}}
+                        <div class="col-12 border-top pt-4">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:12px;letter-spacing:.06em;">
+                                <i class="fas fa-language me-1 text-teal-500"></i> اللغات
+                            </h6>
+                            <div id="languagesContainer"></div>
+                            <button type="button" onclick="addLangRow()"
+                                    class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-plus me-1"></i> إضافة لغة
+                            </button>
+                        </div>
+
+                    </div>{{-- /row --}}
+                </div>{{-- /modal-body --}}
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-1"></i> حفظ البيانات
                     </button>
                 </div>
             </form>
@@ -398,105 +442,113 @@
 </div>
 
 <script>
-let currentEmployeeUrl = null;
+let modalUrl = null;
 
-function openAddModal() {
-    document.getElementById('employeeSelectorWrap').style.display = 'block';
-    document.getElementById('modalSubtitle').textContent = 'اختر الموظف وأدخل بيانات الكفالة';
-    clearForm();
-    document.getElementById('sponsorshipModal').classList.remove('hidden');
-}
+// Called from edit buttons in the table rows
+function openEditModal(id, url, empData, userData) {
+    modalUrl = url;
 
-function openEditModal(id, empData, userData) {
+    // Hide employee selector (editing, not adding)
     document.getElementById('employeeSelectorWrap').style.display = 'none';
-    const sel = document.getElementById('modalEmployeeId');
-    const opt = sel.querySelector(`option[value="${id}"]`);
-    currentEmployeeUrl = opt ? opt.dataset.url : null;
-    document.getElementById('modalSubtitle').textContent = opt ? opt.textContent.trim() : '';
+    document.getElementById('modalTitle').textContent = 'تعديل بيانات الكفالة';
 
     // Fill fields
-    document.getElementById('f_passport_number').value      = empData.passport_number || '';
-    document.getElementById('f_passport_issue_date').value  = empData.passport_issue_date ? empData.passport_issue_date.substring(0,10) : '';
-    document.getElementById('f_id_expiry_date').value       = empData.id_expiry_date ? empData.id_expiry_date.substring(0,10) : '';
-    document.getElementById('f_driver_license_number').value= empData.driver_license_number || '';
-    document.getElementById('f_medical_insurance').value    = empData.medical_insurance || '';
-    document.getElementById('f_wives_count').value          = empData.wives_count || '';
-    document.getElementById('f_city').value                 = (empData.residential_address && empData.residential_address.city) ? empData.residential_address.city : '';
-    document.getElementById('f_neighborhood').value         = (empData.residential_address && empData.residential_address.neighborhood) ? empData.residential_address.neighborhood : '';
-    document.getElementById('f_tshirt_size').value          = (userData && userData.tshirt_size) ? userData.tshirt_size : '';
-    document.getElementById('f_trousers_size').value        = (userData && userData.trousers_size) ? userData.trousers_size : '';
-    document.getElementById('f_shoes_size').value           = (userData && userData.shoes_size) ? userData.shoes_size : '';
+    document.getElementById('f_passport_number').value       = empData.passport_number || '';
+    document.getElementById('f_passport_issue_date').value   = empData.passport_issue_date || '';
+    document.getElementById('f_id_expiry_date').value        = empData.id_expiry_date || '';
+    document.getElementById('f_driver_license_number').value = empData.driver_license_number || '';
+    document.getElementById('f_medical_insurance').value     = empData.medical_insurance || '';
+    document.getElementById('f_wives_count').value           = empData.wives_count || '';
+    document.getElementById('f_city').value                  = empData.residential_address?.city || '';
+    document.getElementById('f_neighborhood').value          = empData.residential_address?.neighborhood || '';
+    document.getElementById('f_tshirt_size').value           = userData?.tshirt_size || '';
+    document.getElementById('f_trousers_size').value         = userData?.trousers_size || '';
+    document.getElementById('f_shoes_size').value            = userData?.shoes_size || '';
 
     // Languages
     const container = document.getElementById('languagesContainer');
     container.innerHTML = '';
-    if (empData.languages && empData.languages.length) {
-        empData.languages.forEach(l => addLanguageRow(l.language, l.level));
+    if (empData.languages?.length) {
+        empData.languages.forEach(l => addLangRow(l.language, l.level));
     }
 
-    document.getElementById('sponsorshipModal').classList.remove('hidden');
+    const modal = new bootstrap.Modal(document.getElementById('sponsorshipModal'));
+    modal.show();
 }
 
-function closeModal() {
-    document.getElementById('sponsorshipModal').classList.add('hidden');
-    currentEmployeeUrl = null;
-}
+// Reset modal to "add" mode when opened via the button
+document.getElementById('sponsorshipModal').addEventListener('show.bs.modal', function(e) {
+    if (!modalUrl) {
+        document.getElementById('employeeSelectorWrap').style.display = 'block';
+        document.getElementById('modalTitle').textContent = 'إضافة بيانات كفالة';
+        document.getElementById('modalEmployeeId').value = '';
+        clearForm();
+    }
+});
+document.getElementById('sponsorshipModal').addEventListener('hidden.bs.modal', function() {
+    modalUrl = null;
+    document.getElementById('employeeSelectorWrap').style.display = 'block';
+    clearForm();
+});
 
 function clearForm() {
-    ['f_passport_number','f_passport_issue_date','f_id_expiry_date','f_driver_license_number',
-     'f_medical_insurance','f_wives_count','f_city','f_neighborhood',
-     'f_tshirt_size','f_trousers_size','f_shoes_size'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
+    ['f_passport_number','f_passport_issue_date','f_id_expiry_date',
+     'f_driver_license_number','f_medical_insurance','f_wives_count',
+     'f_city','f_neighborhood','f_tshirt_size','f_trousers_size','f_shoes_size']
+        .forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('languagesContainer').innerHTML = '';
-    document.getElementById('modalEmployeeId').value = '';
-    currentEmployeeUrl = null;
 }
 
-function addLanguageRow(lang = '', level = '') {
-    const div = document.createElement('div');
-    div.className = 'flex gap-2 items-center';
-    div.innerHTML = `
-        <input type="text" name="lang_name[]" value="${lang}" placeholder="اسم اللغة"
-               class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-        <select name="lang_level[]" class="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+function addLangRow(lang = '', level = '') {
+    const row = document.createElement('div');
+    row.className = 'lang-row';
+    row.innerHTML = `
+        <input type="text" name="lang_name[]" value="${lang}" placeholder="اسم اللغة (مثال: الإنجليزية)">
+        <select name="lang_level[]">
             <option value="">المستوى</option>
-            <option value="مبتدئ" ${level==='مبتدئ'?'selected':''}>مبتدئ</option>
-            <option value="متوسط" ${level==='متوسط'?'selected':''}>متوسط</option>
-            <option value="جيد" ${level==='جيد'?'selected':''}>جيد</option>
-            <option value="متقدم" ${level==='متقدم'?'selected':''}>متقدم</option>
-            <option value="طليق" ${level==='طليق'?'selected':''}>طليق</option>
+            <option value="مبتدئ"  ${level==='مبتدئ'?'selected':''}>مبتدئ</option>
+            <option value="متوسط"  ${level==='متوسط'?'selected':''}>متوسط</option>
+            <option value="جيد"    ${level==='جيد'?'selected':''}>جيد</option>
+            <option value="متقدم"  ${level==='متقدم'?'selected':''}>متقدم</option>
+            <option value="طليق"   ${level==='طليق'?'selected':''}>طليق</option>
         </select>
-        <button type="button" onclick="this.parentElement.remove()"
-                class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 flex items-center justify-center flex-shrink-0 transition">
-            <i class="fas fa-trash text-xs"></i>
+        <button type="button" class="remove-lang" onclick="this.parentElement.remove()">
+            <i class="fas fa-times" style="font-size:12px;"></i>
         </button>`;
-    document.getElementById('languagesContainer').appendChild(div);
+    document.getElementById('languagesContainer').appendChild(row);
 }
 
 document.getElementById('sponsorshipForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Resolve URL
-    let url = currentEmployeeUrl;
+    let url = modalUrl;
     if (!url) {
         const sel = document.getElementById('modalEmployeeId');
         const opt = sel.options[sel.selectedIndex];
-        if (!opt || !opt.value) { alert('يرجى اختيار موظف'); return; }
+        if (!opt?.value) { alert('يرجى اختيار موظف'); return; }
         url = opt.dataset.url;
     }
 
     const fd = new FormData(this);
     fetch(url, {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-HTTP-Method-Override': 'PUT' },
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'X-HTTP-Method-Override': 'PUT'
+        },
         body: fd,
     })
     .then(r => r.json())
     .then(res => {
-        if (res.success) { closeModal(); location.reload(); }
-        else { alert(res.message || 'حدث خطأ'); }
-    });
+        if (res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('sponsorshipModal'))?.hide();
+            location.reload();
+        } else {
+            alert(res.message || 'حدث خطأ');
+        }
+    })
+    .catch(() => alert('حدث خطأ في الاتصال'));
 });
 </script>
 @endsection
