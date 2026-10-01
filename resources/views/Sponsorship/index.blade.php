@@ -34,6 +34,10 @@
         flex: 1; padding: 8px 12px; border: 1px solid #ced4da;
         border-radius: 6px; font-size: 14px;
     }
+    #sponsorshipModal .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+    }
     .lang-row .remove-lang {
         width: 32px; height: 32px; border-radius: 6px;
         border: 1px solid #f0bcbc; background: #fff5f5;
