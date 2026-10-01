@@ -320,7 +320,9 @@
                     {{-- Employee selector (add mode) --}}
                     <div id="employeeSelectorWrap" class="mb-4">
                         <label class="form-label fw-semibold">الموظف <span class="text-danger">*</span></label>
-                        <select id="modalEmployeeId" class="form-select">
+                        <input type="text" id="employeeSearch" class="form-control mb-2"
+                               placeholder="ابحث باسم الموظف..." oninput="filterEmployees(this.value)">
+                        <select id="modalEmployeeId" class="form-select" size="5" style="height:auto;">
                             <option value="">اختر موظفاً...</option>
                             @foreach($employees as $emp)
                                 <option value="{{ $emp->id }}"
@@ -492,6 +494,8 @@ document.getElementById('sponsorshipModal').addEventListener('show.bs.modal', fu
 document.getElementById('sponsorshipModal').addEventListener('hidden.bs.modal', function() {
     modalUrl = null;
     document.getElementById('employeeSelectorWrap').style.display = 'block';
+    document.getElementById('employeeSearch').value = '';
+    filterEmployees('');
     clearForm();
 });
 
@@ -520,6 +524,16 @@ function addLangRow(lang = '', level = '') {
             <i class="fas fa-times" style="font-size:12px;"></i>
         </button>`;
     document.getElementById('languagesContainer').appendChild(row);
+}
+
+function filterEmployees(query) {
+    const q = query.trim().toLowerCase();
+    const opts = document.getElementById('modalEmployeeId').options;
+    for (let i = 0; i < opts.length; i++) {
+        const opt = opts[i];
+        if (!opt.value) { opt.style.display = ''; continue; }
+        opt.style.display = opt.text.toLowerCase().includes(q) ? '' : 'none';
+    }
 }
 
 document.getElementById('sponsorshipForm').addEventListener('submit', function(e) {
