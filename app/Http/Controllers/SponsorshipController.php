@@ -98,6 +98,45 @@ class SponsorshipController extends Controller
         return view('Sponsorship.index', compact('employees', 'projects'));
     }
 
+    public function updateData(Request $request, Employee $employee)
+    {
+        $this->authorizeHR();
+
+        $empData = $request->validate([
+            'passport_number'       => 'nullable|string|max:30',
+            'passport_issue_date'   => 'nullable|date',
+            'id_expiry_date'        => 'nullable|date',
+            'driver_license_number' => 'nullable|string|max:30',
+            'medical_insurance'     => 'nullable|string|max:100',
+            'wives_count'           => 'nullable|integer|min:0|max:4',
+            'residential_address'   => 'nullable|array',
+            'residential_address.city'         => 'nullable|string|max:100',
+            'residential_address.neighborhood' => 'nullable|string|max:100',
+        ]);
+
+        $userFields = $request->validate([
+            'tshirt_size'   => 'nullable|string|max:10',
+            'trousers_size' => 'nullable|string|max:10',
+            'shoes_size'    => 'nullable|string|max:10',
+        ]);
+
+        // languages handled separately
+        $languages = [];
+        $langNames  = $request->input('lang_name', []);
+        $langLevels = $request->input('lang_level', []);
+        foreach ($langNames as $i => $name) {
+            if ($name) {
+                $languages[] = ['language' => $name, 'level' => $langLevels[$i] ?? ''];
+            }
+        }
+        $empData['languages'] = $languages ?: null;
+
+        $employee->update($empData);
+        $employee->user?->update($userFields);
+
+        return response()->json(['success' => true, 'message' => 'تم تحديث بيانات الكفالة بنجاح']);
+    }
+
     public function profile(Employee $employee)
     {
         $this->authorizeHR();
