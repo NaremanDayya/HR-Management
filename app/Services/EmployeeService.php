@@ -51,6 +51,17 @@ class EmployeeService
         ]);
 
 
+        $isSponsor = !empty($data['is_sponsorship_employee']);
+
+        $languages = null;
+        if ($isSponsor && !empty($data['lang_name'])) {
+            $languages = collect($data['lang_name'])
+                ->map(fn ($name, $i) => ['language' => $name, 'level' => $data['lang_level'][$i] ?? ''])
+                ->filter(fn ($l) => $l['language'] !== '')
+                ->values()
+                ->toArray();
+        }
+
         $employee = Employee::create([
             'user_id' => $user->id,
             'name' => $data['name'],
@@ -71,6 +82,18 @@ class EmployeeService
             'owner_account_name' => $data['owner_account_name'],
             'iban' => 'SA' . $data['iban'],
             'bank_name' => $data['bank_name'],
+            'is_sponsorship_employee' => $isSponsor,
+            'passport_number'         => $isSponsor ? ($data['passport_number'] ?? null) : null,
+            'passport_issue_date'     => $isSponsor ? ($data['passport_issue_date'] ?? null) : null,
+            'id_expiry_date'          => $isSponsor ? ($data['id_expiry_date'] ?? null) : null,
+            'driver_license_number'   => $isSponsor ? ($data['driver_license_number'] ?? null) : null,
+            'medical_insurance'       => $isSponsor ? ($data['medical_insurance'] ?? null) : null,
+            'wives_count'             => $isSponsor ? ($data['wives_count'] ?? null) : null,
+            'residential_address'     => $isSponsor ? [
+                'city'         => $data['residential_city'] ?? null,
+                'neighborhood' => $data['residential_neighborhood'] ?? null,
+            ] : null,
+            'languages'               => $languages,
         ]);
         EmployeeWorkHistory::create([
             'employee_id' => $employee->id,

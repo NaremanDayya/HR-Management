@@ -51,6 +51,7 @@ class Employee extends Model
         'termination_notes',
         'work_days',
         'is_blacklisted',
+        'is_sponsorship_employee',
         'passport_number',
         'passport_issue_date',
         'id_expiry_date',

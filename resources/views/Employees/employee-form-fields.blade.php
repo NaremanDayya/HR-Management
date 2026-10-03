@@ -478,6 +478,126 @@
     </div>
 </div>
 
+{{-- ===== Sponsorship Employee Section ===== --}}
+<div class="mt-6 border-t pt-6"
+     x-data="{ isSponsor: {{ old('is_sponsorship_employee') ? 'true' : 'false' }} }">
+
+    {{-- Toggle Checkbox --}}
+    <label class="flex items-center gap-3 cursor-pointer w-fit mb-4"
+           onclick="this.querySelector('input').dispatchEvent(new Event('change'))">
+        <div class="relative">
+            <input type="checkbox" name="is_sponsorship_employee" value="1"
+                   x-model="isSponsor"
+                   class="sr-only peer"
+                   {{ old('is_sponsorship_employee') ? 'checked' : '' }}>
+            <div class="w-11 h-6 bg-gray-200 peer-checked:bg-purple-600 rounded-full transition-colors duration-200 peer-focus:ring-2 peer-focus:ring-purple-300"></div>
+            <div class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 peer-checked:right-0.5 peer-checked:translate-x-[-20px]"></div>
+        </div>
+        <div>
+            <p class="text-sm font-semibold text-gray-800">موظف كفالة</p>
+            <p class="text-xs text-gray-500">تفعيل هذا الخيار لإدخال بيانات الكفالة</p>
+        </div>
+    </label>
+
+    {{-- Sponsorship Extra Fields --}}
+    <div x-show="isSponsor" x-cloak x-transition
+         class="bg-purple-50 border border-purple-100 rounded-xl p-5 space-y-5">
+
+        <h3 class="text-sm font-bold text-purple-700 uppercase tracking-wide">
+            <i class="fas fa-passport me-1"></i> بيانات الكفالة
+        </h3>
+
+        {{-- Documents --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">رقم جواز السفر</label>
+                <input type="text" name="passport_number" value="{{ old('passport_number') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                       placeholder="A12345678">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ إصدار الجواز</label>
+                <input type="date" name="passport_issue_date" value="{{ old('passport_issue_date') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">انتهاء الإقامة / الهوية / التأشيرة</label>
+                <input type="date" name="id_expiry_date" value="{{ old('id_expiry_date') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">رقم رخصة القيادة</label>
+                <input type="text" name="driver_license_number" value="{{ old('driver_license_number') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">التأمين الطبي</label>
+                <input type="text" name="medical_insurance" value="{{ old('medical_insurance') }}"
+                       placeholder="شركة التأمين أو رقم الوثيقة"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">عدد الزوجات</label>
+                <input type="number" name="wives_count" value="{{ old('wives_count', 0) }}"
+                       min="0" max="4"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">المدينة السكنية</label>
+                <input type="text" name="residential_city" value="{{ old('residential_city') }}"
+                       placeholder="الرياض"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">الحي السكني</label>
+                <input type="text" name="residential_neighborhood" value="{{ old('residential_neighborhood') }}"
+                       placeholder="اسم الحي"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+            </div>
+        </div>
+
+        {{-- Languages --}}
+        <div>
+            <div class="flex items-center justify-between mb-3">
+                <label class="text-sm font-medium text-gray-700">اللغات</label>
+                <button type="button" onclick="addEmpLangRow()"
+                        class="text-xs font-bold text-purple-600 border border-purple-300 bg-white px-3 py-1 rounded-lg hover:bg-purple-50 transition">
+                    <i class="fas fa-plus me-1"></i> إضافة لغة
+                </button>
+            </div>
+            <div id="empLangsContainer" class="space-y-2"></div>
+            <p id="empLangsEmpty" class="text-xs text-gray-400 text-center py-2">لا توجد لغات مضافة</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function addEmpLangRow(lang = '', level = '') {
+    const container = document.getElementById('empLangsContainer');
+    document.getElementById('empLangsEmpty').style.display = 'none';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+    row.innerHTML = `
+        <input type="text" name="lang_name[]" value="${lang}" placeholder="اسم اللغة"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400">
+        <select name="lang_level[]"
+                class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-400 bg-white">
+            <option value="">المستوى</option>
+            <option value="مبتدئ" ${level==='مبتدئ'?'selected':''}>مبتدئ</option>
+            <option value="متوسط" ${level==='متوسط'?'selected':''}>متوسط</option>
+            <option value="جيد"   ${level==='جيد'?'selected':''}>جيد</option>
+            <option value="متقدم" ${level==='متقدم'?'selected':''}>متقدم</option>
+            <option value="طليق"  ${level==='طليق'?'selected':''}>طليق</option>
+        </select>
+        <button type="button"
+                onclick="this.parentElement.remove(); if(!document.getElementById('empLangsContainer').children.length) document.getElementById('empLangsEmpty').style.display='';"
+                class="w-8 h-8 flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 flex-shrink-0">
+            <i class="fas fa-times text-xs"></i>
+        </button>`;
+    container.appendChild(row);
+}
+</script>
+
 {{-- Uniform Section --}}
 <div class="mt-6 border-t pt-6" x-data="{ hasUniform: '{{ old('has_uniform', 'no') }}' }">
     <h3 class="text-base font-semibold text-gray-700 mb-4 text-right">اليونيفورم</h3>
