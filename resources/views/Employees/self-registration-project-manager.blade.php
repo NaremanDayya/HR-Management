@@ -259,6 +259,10 @@
                 </div>
             </div>
 
+            {{-- Sponsorship employee section --}}
+            <h5 class="section-title">كفالة الموظف</h5>
+            @include('partials.sponsorship-fields')
+
             <button type="submit" class="submit-btn w-100 mt-4">
                 إرسال البيانات <i class="fas fa-paper-plane mr-2"></i>
             </button>
