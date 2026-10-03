@@ -260,6 +260,25 @@
                         </select>
                     </div>
 
+                    {{-- Sponsorship employee toggle --}}
+                    <div style="margin-top:12px;">
+                        <label @click="isSponsor = !isSponsor"
+                               style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 14px;border-radius:10px;border:1.5px solid;transition:border-color .15s,background .15s;"
+                               :style="isSponsor ? 'border-color:#c4b5fd;background:#f5f3ff;' : 'border-color:#e5e7eb;background:#fafafa;'">
+                            {{-- track --}}
+                            <div style="position:relative;width:40px;height:22px;flex-shrink:0;">
+                                <div style="position:absolute;inset:0;border-radius:11px;transition:background .2s;"
+                                     :style="isSponsor ? 'background:#7c3aed;' : 'background:#d1d5db;'"></div>
+                                <div style="position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s;"
+                                     :style="isSponsor ? 'transform:translateX(18px);right:auto;left:2px;' : 'left:2px;'"></div>
+                            </div>
+                            <div>
+                                <p style="margin:0;font-size:14px;font-weight:700;" :style="isSponsor ? 'color:#6d28d9;' : 'color:#374151;'">موظف كفالة</p>
+                                <p style="margin:0;font-size:11px;color:#9ca3af;">سيُضاف <code>?sponsorship=1</code> للرابط لإظهار حقول الكفالة</p>
+                            </div>
+                        </label>
+                    </div>
+
                     <div class="role-card pm-link" x-show="projectsMissingManager[projectId]">
                         <div class="role-card-head">
                             <span class="role-chip project_manager">
@@ -274,7 +293,7 @@
                         <div class="role-link-row">
                             <input type="text" readonly class="role-link-input"
                                    :id="'self-reg-link-pm-' + projectId"
-                                   :value="'{{ url('/register-employee/project-manager') }}/' + projectId">
+                                   :value="'{{ url('/register-employee/project-manager') }}/' + projectId + (isSponsor ? '?sponsorship=1' : '')">
                             <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'pm-' + projectId }"
                                     x-on:click="copyProjectManagerLink()">
                                 <span x-show="copiedRole !== 'pm-' + projectId">📋 نسخ</span>
@@ -294,7 +313,7 @@
                             <div class="role-link-row">
                                 <input type="text" readonly class="role-link-input"
                                        :id="'self-reg-link-' + role"
-                                       :value="'{{ url('/register-employee') }}/' + projectId + '/' + role">
+                                       :value="'{{ url('/register-employee') }}/' + projectId + '/' + role + (isSponsor ? '?sponsorship=1' : '')">
                                 <button type="button" class="copy-btn" :class="{ copied: copiedRole === role }"
                                         x-on:click="copyLink(role)">
                                     <span x-show="copiedRole !== role">📋 نسخ</span>
@@ -319,7 +338,7 @@
                             <div class="role-link-row">
                                 <input type="text" readonly class="role-link-input"
                                        id="self-reg-link-project_manager"
-                                       value="{{ url('/register-employee/project-manager') }}">
+                                       :value="'{{ url('/register-employee/project-manager') }}' + (isSponsor ? '?sponsorship=1' : '')">
                                 <button type="button" class="copy-btn" :class="{ copied: copiedRole === 'project_manager' }"
                                         x-on:click="copyLink('project_manager')">
                                     <span x-show="copiedRole !== 'project_manager'">📋 نسخ</span>
@@ -387,6 +406,7 @@
             document.addEventListener('alpine:init', () => {
                 Alpine.data('selfRegLinkModal', () => ({
                     projectId: '{{ array_key_first($projects) }}',
+                    isSponsor: false,
                     copiedRole: null,
                     roles: {
                         shelf_stacker: { label: 'مصفف أرفف', icon: '📦' },
