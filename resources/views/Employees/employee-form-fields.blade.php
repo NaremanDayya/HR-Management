@@ -480,19 +480,25 @@
 
 {{-- ===== Sponsorship Employee Section ===== --}}
 <div class="mt-6 border-t pt-6"
-     x-data="{ isSponsor: {{ old('is_sponsorship_employee') ? 'true' : 'false' }} }">
+     x-data="{
+         isSponsor: {{ old('is_sponsorship_employee') ? 'true' : 'false' }},
+         get isMarried() {
+             const sel = document.querySelector('select[name=\'marital_status\']');
+             return sel ? sel.value === 'married' : false;
+         }
+     }"
+     x-init="
+         $watch('isSponsor', () => {});
+         const ms = document.querySelector('select[name=\'marital_status\']');
+         if (ms) ms.addEventListener('change', () => { $nextTick(() => {}); });
+     ">
 
-    {{-- Toggle Checkbox --}}
-    <label class="flex items-center gap-3 cursor-pointer w-fit mb-4"
-           onclick="this.querySelector('input').dispatchEvent(new Event('change'))">
-        <div class="relative">
-            <input type="checkbox" name="is_sponsorship_employee" value="1"
-                   x-model="isSponsor"
-                   class="sr-only peer"
-                   {{ old('is_sponsorship_employee') ? 'checked' : '' }}>
-            <div class="w-11 h-6 bg-gray-200 peer-checked:bg-purple-600 rounded-full transition-colors duration-200 peer-focus:ring-2 peer-focus:ring-purple-300"></div>
-            <div class="absolute top-0.5 right-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 peer-checked:right-0.5 peer-checked:translate-x-[-20px]"></div>
-        </div>
+    {{-- Checkbox --}}
+    <label class="inline-flex items-center gap-3 cursor-pointer mb-4 select-none">
+        <input type="checkbox" name="is_sponsorship_employee" value="1"
+               x-model="isSponsor"
+               class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+               {{ old('is_sponsorship_employee') ? 'checked' : '' }}>
         <div>
             <p class="text-sm font-semibold text-gray-800">موظف كفالة</p>
             <p class="text-xs text-gray-500">تفعيل هذا الخيار لإدخال بيانات الكفالة</p>
@@ -507,7 +513,7 @@
             <i class="fas fa-passport me-1"></i> بيانات الكفالة
         </h3>
 
-        {{-- Documents --}}
+        {{-- Text fields --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">رقم جواز السفر</label>
@@ -516,12 +522,7 @@
                        placeholder="A12345678">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ إصدار الجواز</label>
-                <input type="date" name="passport_issue_date" value="{{ old('passport_issue_date') }}"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">انتهاء الإقامة / الهوية / التأشيرة</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ انتهاء الجواز / الإقامة</label>
                 <input type="date" name="id_expiry_date" value="{{ old('id_expiry_date') }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
@@ -530,16 +531,13 @@
                 <input type="text" name="driver_license_number" value="{{ old('driver_license_number') }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">التأمين الطبي</label>
-                <input type="text" name="medical_insurance" value="{{ old('medical_insurance') }}"
-                       placeholder="شركة التأمين أو رقم الوثيقة"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-            </div>
-            <div>
+            {{-- Wives count — only when married --}}
+            <div x-data="{ married: '{{ old('marital_status') }}' === 'married' }"
+                 x-init="document.querySelector('select[name=\'marital_status\']')?.addEventListener('change', e => married = e.target.value === 'married')"
+                 x-show="married">
                 <label class="block text-sm font-medium text-gray-700 mb-1">عدد الزوجات</label>
-                <input type="number" name="wives_count" value="{{ old('wives_count', 0) }}"
-                       min="0" max="4"
+                <input type="number" name="wives_count" value="{{ old('wives_count', 1) }}"
+                       min="1" max="4"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
             </div>
             <div>
@@ -556,8 +554,30 @@
             </div>
         </div>
 
+        {{-- Document uploads --}}
+        <div class="border-t border-purple-200 pt-4">
+            <p class="text-sm font-bold text-purple-700 mb-3"><i class="fas fa-folder-open me-1"></i> أرشفة الوثائق</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">صورة جواز السفر</label>
+                    <input type="file" name="doc_passport" accept="image/*,application/pdf"
+                           class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400 bg-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">صورة الهوية / الإقامة</label>
+                    <input type="file" name="doc_id_card" accept="image/*,application/pdf"
+                           class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400 bg-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">صورة رخصة القيادة</label>
+                    <input type="file" name="doc_driver_license" accept="image/*,application/pdf"
+                           class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-400 bg-white">
+                </div>
+            </div>
+        </div>
+
         {{-- Languages --}}
-        <div>
+        <div class="border-t border-purple-200 pt-4">
             <div class="flex items-center justify-between mb-3">
                 <label class="text-sm font-medium text-gray-700">اللغات</label>
                 <button type="button" onclick="addEmpLangRow()"

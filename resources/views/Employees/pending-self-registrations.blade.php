@@ -260,21 +260,15 @@
                         </select>
                     </div>
 
-                    {{-- Sponsorship employee toggle --}}
+                    {{-- Sponsorship employee checkbox --}}
                     <div style="margin-top:12px;">
-                        <label @click="isSponsor = !isSponsor"
-                               style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 14px;border-radius:10px;border:1.5px solid;transition:border-color .15s,background .15s;"
+                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px 14px;border-radius:10px;border:1.5px solid;transition:border-color .15s,background .15s;"
                                :style="isSponsor ? 'border-color:#c4b5fd;background:#f5f3ff;' : 'border-color:#e5e7eb;background:#fafafa;'">
-                            {{-- track --}}
-                            <div style="position:relative;width:40px;height:22px;flex-shrink:0;">
-                                <div style="position:absolute;inset:0;border-radius:11px;transition:background .2s;"
-                                     :style="isSponsor ? 'background:#7c3aed;' : 'background:#d1d5db;'"></div>
-                                <div style="position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s;"
-                                     :style="isSponsor ? 'transform:translateX(18px);right:auto;left:2px;' : 'left:2px;'"></div>
-                            </div>
+                            <input type="checkbox" x-model="isSponsor"
+                                   style="width:18px;height:18px;margin-top:2px;accent-color:#7c3aed;cursor:pointer;flex-shrink:0;">
                             <div>
                                 <p style="margin:0;font-size:14px;font-weight:700;" :style="isSponsor ? 'color:#6d28d9;' : 'color:#374151;'">موظف كفالة</p>
-                                <p style="margin:0;font-size:11px;color:#9ca3af;">سيُضاف <code>?sponsorship=1</code> للرابط لإظهار حقول الكفالة</p>
+                                <p style="margin:0;font-size:11px;color:#9ca3af;">سيُضاف <code>?sponsorship=1</code> للرابط لإظهار حقول الكفالة في نموذج التسجيل</p>
                             </div>
                         </label>
                     </div>

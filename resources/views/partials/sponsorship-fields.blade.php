@@ -42,12 +42,7 @@
                            style="border-color:#c4b5fd;">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">تاريخ إصدار الجواز</label>
-                    <input type="date" name="passport_issue_date" value="{{ old('passport_issue_date') }}"
-                           class="form-control" style="border-color:#c4b5fd;">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">انتهاء الإقامة / الهوية / التأشيرة</label>
+                    <label class="form-label">تاريخ انتهاء الجواز / الإقامة</label>
                     <input type="date" name="id_expiry_date" value="{{ old('id_expiry_date') }}"
                            class="form-control" style="border-color:#c4b5fd;">
                 </div>
@@ -56,16 +51,11 @@
                     <input type="text" name="driver_license_number" value="{{ old('driver_license_number') }}"
                            class="form-control" style="border-color:#c4b5fd;">
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">التأمين الطبي</label>
-                    <input type="text" name="medical_insurance" value="{{ old('medical_insurance') }}"
-                           class="form-control" placeholder="شركة التأمين أو رقم الوثيقة"
-                           style="border-color:#c4b5fd;">
-                </div>
-                <div class="col-md-6">
+                {{-- Wives count — only when married --}}
+                <div class="col-md-6" id="wivesCountWrap" style="display:none;">
                     <label class="form-label">عدد الزوجات</label>
-                    <input type="number" name="wives_count" value="{{ old('wives_count', 0) }}"
-                           min="0" max="4" class="form-control" style="border-color:#c4b5fd;">
+                    <input type="number" name="wives_count" value="{{ old('wives_count', 1) }}"
+                           min="1" max="4" class="form-control" style="border-color:#c4b5fd;">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">المدينة السكنية</label>
@@ -73,9 +63,33 @@
                            class="form-control" placeholder="الرياض" style="border-color:#c4b5fd;">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">الحي السكني (للكفالة)</label>
+                    <label class="form-label">الحي السكني</label>
                     <input type="text" name="residential_neighborhood" value="{{ old('residential_neighborhood') }}"
                            class="form-control" placeholder="اسم الحي" style="border-color:#c4b5fd;">
+                </div>
+
+                {{-- Document uploads --}}
+                <div class="col-12 mt-2">
+                    <p style="font-size:13px;font-weight:700;color:#6d28d9;margin-bottom:10px;">
+                        <i class="fas fa-folder-open me-1"></i> أرشفة الوثائق
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">صورة جواز السفر</label>
+                            <input type="file" name="doc_passport" accept="image/*,application/pdf"
+                                   class="form-control" style="border-color:#c4b5fd;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">صورة الهوية / الإقامة</label>
+                            <input type="file" name="doc_id_card" accept="image/*,application/pdf"
+                                   class="form-control" style="border-color:#c4b5fd;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">صورة رخصة القيادة</label>
+                            <input type="file" name="doc_driver_license" accept="image/*,application/pdf"
+                                   class="form-control" style="border-color:#c4b5fd;">
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Languages --}}
@@ -127,6 +141,16 @@
 
     // restore old() state on page load (validation failure redirect)
     applyState(checkbox.checked);
+
+    // Wives count: show only when marital_status === 'married'
+    function syncWivesCount() {
+        var ms  = document.querySelector('select[name="marital_status"]');
+        var wrap = document.getElementById('wivesCountWrap');
+        if (wrap) wrap.style.display = (ms && ms.value === 'married') ? '' : 'none';
+    }
+    var ms = document.querySelector('select[name="marital_status"]');
+    if (ms) ms.addEventListener('change', syncWivesCount);
+    syncWivesCount();
 })();
 
 function addSponsorLangRow(lang, level) {

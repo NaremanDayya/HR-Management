@@ -84,16 +84,15 @@ class EmployeeService
             'bank_name' => $data['bank_name'],
             'is_sponsorship_employee' => $isSponsor,
             'passport_number'         => $isSponsor ? ($data['passport_number'] ?? null) : null,
-            'passport_issue_date'     => $isSponsor ? ($data['passport_issue_date'] ?? null) : null,
             'id_expiry_date'          => $isSponsor ? ($data['id_expiry_date'] ?? null) : null,
             'driver_license_number'   => $isSponsor ? ($data['driver_license_number'] ?? null) : null,
-            'medical_insurance'       => $isSponsor ? ($data['medical_insurance'] ?? null) : null,
             'wives_count'             => $isSponsor ? ($data['wives_count'] ?? null) : null,
             'residential_address'     => $isSponsor ? [
                 'city'         => $data['residential_city'] ?? null,
                 'neighborhood' => $data['residential_neighborhood'] ?? null,
             ] : null,
             'languages'               => $languages,
+            'sponsorship_documents'   => $isSponsor ? $this->storeSponsorshipDocs($data) : null,
         ]);
         EmployeeWorkHistory::create([
             'employee_id' => $employee->id,
@@ -126,6 +125,23 @@ class EmployeeService
         }
         Storage::append($csvPath, implode(',', $credentials) . "\n");
         return $employee;
+    }
+
+    private function storeSponsorshipDocs(array $data): array
+    {
+        $docs = [];
+        $map  = [
+            'doc_passport'       => 'passport',
+            'doc_id_card'        => 'id_card',
+            'doc_driver_license' => 'driver_license',
+        ];
+        foreach ($map as $field => $key) {
+            if (isset($data[$field]) && $data[$field] instanceof \Illuminate\Http\UploadedFile) {
+                $path = $data[$field]->store('employees/sponsorship_docs', 'public');
+                if ($path) $docs[$key] = $path;
+            }
+        }
+        return $docs;
     }
 
     public function updateEmployee(Employee $employee, array $data, ?UploadedFile $image = null): Employee

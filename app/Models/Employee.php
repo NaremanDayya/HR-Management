@@ -53,6 +53,7 @@ class Employee extends Model
         'is_blacklisted',
         'is_sponsorship_employee',
         'passport_number',
+        'sponsorship_documents',
         'passport_issue_date',
         'id_expiry_date',
         'driver_license_number',
@@ -67,9 +68,11 @@ class Employee extends Model
         'id_expiry_date'     => 'date',
         'vehicle_info'       => 'array',
         'payload'            => 'array',
-        'languages'          => 'array',
-        'residential_address'=> 'array',
-        'is_blacklisted'     => 'boolean',
+        'languages'              => 'array',
+        'residential_address'    => 'array',
+        'sponsorship_documents'  => 'array',
+        'is_blacklisted'         => 'boolean',
+        'is_sponsorship_employee'=> 'boolean',
     ];
 
     public const BLACKLIST_STOP_REASONS = ['سوء اداء', 'سوء أداء'];
