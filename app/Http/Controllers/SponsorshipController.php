@@ -137,6 +137,24 @@ class SponsorshipController extends Controller
         return response()->json(['success' => true, 'message' => 'تم تحديث بيانات الكفالة بنجاح']);
     }
 
+    public function uploadDoc(Request $request, Employee $employee)
+    {
+        $this->authorizeHR();
+
+        $request->validate([
+            'doc_key'  => 'required|in:passport,id_card,driver_license',
+            'doc_file' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+        ]);
+
+        $path = $request->file('doc_file')->store('employees/sponsorship_docs', 'public');
+
+        $docs = $employee->sponsorship_documents ?? [];
+        $docs[$request->doc_key] = $path;
+        $employee->update(['sponsorship_documents' => $docs]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function profile(Employee $employee)
     {
         $this->authorizeHR();

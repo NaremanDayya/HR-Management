@@ -167,6 +167,7 @@ Route::middleware(['auth'])->prefix('sponsorship')->name('sponsorship.')->group(
     Route::get('/', [SponsorshipController::class, 'index'])->name('index');
     Route::get('/{employee}', [SponsorshipController::class, 'profile'])->name('profile');
     Route::put('/{employee}/data', [SponsorshipController::class, 'updateData'])->name('update-data');
+    Route::post('/{employee}/docs', [SponsorshipController::class, 'uploadDoc'])->name('upload-doc');
 });
 
 Route::middleware(['auth'])->prefix('leaves')->name('leaves.')->group(function () {
