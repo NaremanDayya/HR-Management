@@ -117,6 +117,44 @@ class User extends Authenticatable
 
         return asset('images/default-avatar.png');
     }
+    public function getCoverUrlAttribute(): ?string
+    {
+        $path = $this->attributes['personal_image'] ?? null;
+
+        if ($path) {
+            if (filter_var($path, FILTER_VALIDATE_URL)) {
+                return $path;
+            }
+            try {
+                if (\Storage::disk('public')->exists($path)) {
+                    return \Storage::url($path);
+                }
+            } catch (\Exception $e) {}
+            try {
+                if (\Storage::disk('s3')->exists($path)) {
+                    return \Storage::disk('s3')->url($path);
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // No image — generate a colored SVG avatar with the first Arabic letter
+        $name    = $this->attributes['name'] ?? 'م';
+        $initial = mb_substr($name, 0, 1, 'UTF-8');
+
+        $palette = ['#6d28d9','#dc2626','#2563eb','#059669','#d97706','#db2777','#0891b2','#65a30d','#7c3aed','#b45309'];
+        $bg      = $palette[abs(crc32($name)) % count($palette)];
+
+        $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="50" fill="{$bg}"/>
+  <text x="50" y="50" font-family="Arial,Tahoma,sans-serif" font-size="46" font-weight="700"
+        fill="white" text-anchor="middle" dominant-baseline="central">{$initial}</text>
+</svg>
+SVG;
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+
     public function getGender()
     {
         return match ($this->gender) {
