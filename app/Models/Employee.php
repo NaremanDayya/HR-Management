@@ -61,6 +61,7 @@ class Employee extends Model
         'wives_count',
         'languages',
         'residential_address',
+        'flight_ticket',
     ];
     protected $casts = [
         'joining_date'       => 'date',
@@ -73,6 +74,7 @@ class Employee extends Model
         'sponsorship_documents'  => 'array',
         'is_blacklisted'         => 'boolean',
         'is_sponsorship_employee'=> 'boolean',
+        'flight_ticket'          => 'boolean',
     ];
 
     public const BLACKLIST_STOP_REASONS = ['سوء اداء', 'سوء أداء'];

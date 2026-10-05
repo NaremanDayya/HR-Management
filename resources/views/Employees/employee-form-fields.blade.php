@@ -478,6 +478,19 @@
     </div>
 </div>
 
+{{-- ===== Flight Ticket ===== --}}
+<div class="mt-6 border-t pt-6">
+    <label class="inline-flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" name="flight_ticket" value="1"
+               class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+               {{ old('flight_ticket') ? 'checked' : '' }}>
+        <div>
+            <p class="text-sm font-semibold text-gray-800"><i class="fas fa-plane me-1 text-blue-500"></i> يستحق تذكرة سفر</p>
+            <p class="text-xs text-gray-500">تفعيل إذا كان الموظف يستحق تذكرة سفر سنوية</p>
+        </div>
+    </label>
+</div>
+
 {{-- ===== Sponsorship Employee Section ===== --}}
 <div class="mt-6 border-t pt-6"
      x-data="{

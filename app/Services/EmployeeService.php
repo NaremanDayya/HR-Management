@@ -93,6 +93,7 @@ class EmployeeService
             ] : null,
             'languages'               => $languages,
             'sponsorship_documents'   => $isSponsor ? $this->storeSponsorshipDocs($data) : null,
+            'flight_ticket'           => !empty($data['flight_ticket']),
         ]);
         EmployeeWorkHistory::create([
             'employee_id' => $employee->id,

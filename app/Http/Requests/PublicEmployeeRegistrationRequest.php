@@ -89,6 +89,7 @@ class PublicEmployeeRegistrationRequest extends FormRequest
                 },
             ],
             'personal_image'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'flight_ticket'            => 'nullable|boolean',
             'is_sponsorship_employee'  => 'nullable|boolean',
             'passport_number'          => 'nullable|string|max:30',
             'id_expiry_date'           => 'nullable|date',

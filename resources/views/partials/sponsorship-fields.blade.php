@@ -4,6 +4,19 @@
     Plain JS only (no Alpine) so it works in the public self-registration pages.
 --}}
 
+{{-- Flight ticket checkbox --}}
+<div class="mt-4">
+    <label class="d-flex align-items-center gap-2" style="cursor:pointer;padding:12px 14px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;">
+        <input type="checkbox" name="flight_ticket" value="1"
+               {{ old('flight_ticket') ? 'checked' : '' }}
+               style="width:18px;height:18px;accent-color:#2563eb;cursor:pointer;flex-shrink:0;">
+        <div>
+            <p style="margin:0;font-weight:700;font-size:14px;color:#1e40af;"><i class="fas fa-plane me-1"></i> يستحق تذكرة سفر</p>
+            <p style="margin:0;font-size:12px;color:#6b7280;">تفعيل إذا كان الموظف يستحق تذكرة سفر سنوية</p>
+        </div>
+    </label>
+</div>
+
 <div class="mt-4" id="sponsorshipToggleSection">
     <div class="d-flex align-items-center gap-3 p-3 rounded-3"
          style="background:#f5f3ff;border:1.5px solid #ddd6fe;cursor:pointer;"
