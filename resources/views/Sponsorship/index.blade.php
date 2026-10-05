@@ -159,7 +159,7 @@
                                         $user         = $employee->user;
                                         $expiryDays   = $employee->getIdExpiryDays();
                                         $serviceYears = $employee->joining_date ? (int)$employee->joining_date->diffInYears(now()) : null;
-                                        $ticket       = $employee->getFlightTicketEntitlement();
+                                        $ticketDeserves = $serviceYears !== null && $serviceYears >= 1;
                                         $leaveRem     = $employee->getLeaveDaysRemaining();
 
                                         $expiryCls = match(true) {
@@ -211,13 +211,12 @@
 
                                         {{-- Flight ticket --}}
                                         <td class="text-center">
-                                            @if($ticket['type'] !== 'none')
-                                                <div>
-                                                    <span class="badge {{ $ticket['type'] === 'full' ? 'bg-success' : 'bg-warning text-dark' }}" style="font-size:12px;">{{ $ticket['label'] }}</span>
-                                                    <div class="text-muted" style="font-size:12px;font-weight:600;">{{ number_format($ticket['amount'],0) }} ر.س</div>
-                                                </div>
-                                            @else
+                                            @if($serviceYears === null)
                                                 <span class="text-muted">—</span>
+                                            @elseif($ticketDeserves)
+                                                <span class="badge bg-success" style="font-size:12px;"><i class="fas fa-check me-1"></i>يستحق</span>
+                                            @else
+                                                <span class="badge bg-secondary" style="font-size:12px;"><i class="fas fa-times me-1"></i>لا يستحق بعد</span>
                                             @endif
                                         </td>
 

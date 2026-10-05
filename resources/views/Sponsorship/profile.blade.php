@@ -185,7 +185,6 @@
 @php
     $user = $employee->user;
     $age  = $user?->birthday ? $user->birthday->age : null;
-    $ticket = $flightTicket;
 
     $expiryStatus = match(true) {
         $idExpiryDays === null => ['label'=>'غير محدد',         'cls'=>'bg-gray-100 text-gray-500',    'dot'=>'bg-gray-400'],
@@ -467,44 +466,43 @@
             </div>
         </div>
 
-        {{-- Flight ticket (sponsorship calculated) --}}
+        {{-- Flight ticket --}}
         <div class="unified-section">
             <div class="section-header">
                 <h2><i class="fas fa-plane" style="color:#3b82f6"></i> تذكرة السفر السنوية</h2>
             </div>
-            @if($ticket['type'] !== 'none')
-                <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:14px;padding:18px 20px;margin-bottom:12px;">
-                    <div>
-                        <div style="font-size:.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">الاستحقاق الحالي</div>
-                        <div style="font-size:1.15rem;font-weight:800;color:{{ $ticket['type']==='full' ? '#16a34a' : '#d97706' }};margin-top:3px;">
-                            {{ $ticket['label'] }}
+            @php $ticketDeserves = $serviceYears !== null && $serviceYears >= 1; @endphp
+            <div style="text-align:center;padding:24px 0;">
+                @if($serviceYears === null)
+                    <div style="font-size:2.5rem;margin-bottom:10px;">✈️</div>
+                    <div style="font-size:.9rem;font-weight:600;color:#94a3b8;">لا يوجد تاريخ التحاق</div>
+                @elseif($ticketDeserves)
+                    <div style="width:72px;height:72px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                        <i class="fas fa-check" style="font-size:2rem;color:#16a34a;"></i>
+                    </div>
+                    <div style="font-size:1.25rem;font-weight:800;color:#15803d;">يستحق تذكرة سفر</div>
+                    <div style="font-size:.82rem;color:#94a3b8;margin-top:6px;font-weight:600;">
+                        مدة الخدمة: {{ $serviceYears }} سنة {{ $serviceMonths ? "و {$serviceMonths} شهر" : '' }}
+                    </div>
+                    @if($serviceYears >= 5)
+                        <div style="margin-top:10px;display:inline-block;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:6px 16px;font-size:.78rem;font-weight:700;color:#16a34a;">
+                            <i class="fas fa-star me-1"></i> تذكرة كاملة (خدمة +5 سنوات)
                         </div>
+                    @else
+                        <div style="margin-top:10px;display:inline-block;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:6px 16px;font-size:.78rem;font-weight:700;color:#a16207;">
+                            <i class="fas fa-clock me-1"></i> يستحق تذكرة كاملة بعد {{ 5 - $serviceYears }} سنة
+                        </div>
+                    @endif
+                @else
+                    <div style="width:72px;height:72px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+                        <i class="fas fa-times" style="font-size:2rem;color:#94a3b8;"></i>
                     </div>
-                    <div style="text-align:left;">
-                        <div style="font-size:1.7rem;font-weight:900;color:#1e293b;">{{ number_format($ticket['amount'],0) }}</div>
-                        <div style="font-size:.75rem;font-weight:700;color:#94a3b8;">ر.س سنوياً</div>
-                    </div>
-                </div>
-                @if($ticket['type']==='half' && $serviceYears !== null && $serviceYears < 5)
-                    <div style="text-align:center;font-size:.78rem;font-weight:600;color:#94a3b8;background:#f8fafc;border-radius:10px;padding:8px;">
-                        <i class="fas fa-clock me-1 text-amber-500"></i>
-                        يستحق تذكرة كاملة بعد {{ 5 - $serviceYears }} سنة
-                        {{ $serviceMonths ? "و {$serviceMonths} شهر" : '' }}
+                    <div style="font-size:1.1rem;font-weight:800;color:#64748b;">لا يستحق بعد</div>
+                    <div style="font-size:.82rem;color:#94a3b8;margin-top:6px;font-weight:600;">
+                        يستحق التذكرة بعد إتمام سنة كاملة في الخدمة
                     </div>
                 @endif
-                <div style="margin-top:12px;padding:12px 16px;border-radius:12px;border:1.5px solid #dbeafe;background:#eff6ff;">
-                    <div style="font-size:.72rem;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:4px;">مدة الخدمة</div>
-                    <div style="font-size:.92rem;font-weight:700;color:#1e40af;">
-                        {{ $serviceYears ?? '—' }} سنة {{ $serviceMonths ? "و {$serviceMonths} شهر" : '' }}
-                        <span style="font-size:.75rem;color:#64748b;">من تاريخ الالتحاق</span>
-                    </div>
-                </div>
-            @else
-                <div style="text-align:center;padding:32px 0;color:#94a3b8;">
-                    <i class="fas fa-plane" style="font-size:2rem;margin-bottom:10px;display:block;opacity:.3;"></i>
-                    <p style="font-weight:600;">لا تتوفر بيانات كافية</p>
-                </div>
-            @endif
+            </div>
         </div>
 
         {{-- Document Archive --}}
