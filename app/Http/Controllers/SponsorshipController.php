@@ -105,6 +105,7 @@ class SponsorshipController extends Controller
         $empData = $request->validate([
             'passport_number'       => 'nullable|string|max:30',
             'passport_issue_date'   => 'nullable|date',
+            'passport_expiry_date'  => 'nullable|date',
             'id_expiry_date'        => 'nullable|date',
             'driver_license_number' => 'nullable|string|max:30',
             'medical_insurance'     => 'nullable|string|max:100',
@@ -142,7 +143,7 @@ class SponsorshipController extends Controller
         $this->authorizeHR();
 
         $request->validate([
-            'doc_key'  => 'required|in:passport,id_card,driver_license',
+            'doc_key'  => 'required|in:passport,id_card,driver_license,application_form',
             'doc_file' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
         ]);
 

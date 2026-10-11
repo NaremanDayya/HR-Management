@@ -180,7 +180,7 @@ class EmployeeActionController extends Controller
                 ]);
                 EmployeeWorkHistory::create([
                     'employee_id' => $id,
-                    'start_date' => $employee->joining_date,
+                    'start_date' => $employee->joining_date ?? $validated['stop_date'],
                     'end_date' => $validated['stop_date'] ?? now(),
                     'status' => 'stopped',
                     'stop_reason' => $finalReason,

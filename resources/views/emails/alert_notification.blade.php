@@ -46,7 +46,7 @@
 
         .alert-box {
             background-color: #fef2f2;
-            border-left: 4px solid #e74c3c;
+            border-right: 4px solid #e74c3c;
             padding: 15px;
             margin: 20px 0;
             border-radius: 4px;

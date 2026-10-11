@@ -55,6 +55,7 @@ class Employee extends Model
         'passport_number',
         'sponsorship_documents',
         'passport_issue_date',
+        'passport_expiry_date',
         'id_expiry_date',
         'driver_license_number',
         'medical_insurance',
@@ -65,8 +66,9 @@ class Employee extends Model
     ];
     protected $casts = [
         'joining_date'       => 'date',
-        'passport_issue_date'=> 'date',
-        'id_expiry_date'     => 'date',
+        'passport_issue_date'  => 'date',
+        'passport_expiry_date' => 'date',
+        'id_expiry_date'       => 'date',
         'vehicle_info'       => 'array',
         'payload'            => 'array',
         'languages'              => 'array',

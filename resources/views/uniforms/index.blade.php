@@ -72,7 +72,7 @@
                             $statusKey = !$uniform ? 'none' : ($eligible ? 'due' : 'not_due');
                         @endphp
                         <tr class="hover:bg-gray-50 transition-colors"
-                            x-data="uniformRow({{ $employee->id }}, {{ $uniform ? "'" . $uniform->received_at->format('Y-m-d') . "'" : 'null' }})"
+                            x-data="uniformRow({{ $employee->id }}, {{ $uniform ? "'" . $uniform->received_at->format('Y-m-d') . "'" : 'null' }}, {{ $uniform->tshirt_count ?? 0 }}, {{ $uniform->hat_count ?? 0 }}, {{ $uniform->id_card_count ?? 0 }}, {{ $uniform->tool_bag_count ?? 0 }})"
                             x-show="(filter === 'all' || filter === '{{ $statusKey }}') && @js($employee->user->name).toLowerCase().includes(search.toLowerCase())">
                             <td class="px-4 py-3 text-gray-500">{{ $i + 1 }}</td>
                             <td class="px-4 py-3">
@@ -321,12 +321,12 @@
 
 @push('scripts')
 <script>
-function uniformRow(employeeId, receivedAt) {
+function uniformRow(employeeId, receivedAt, tshirtInit, hatInit, idCardInit, toolBagInit) {
     return {
-        tshirt: 0,
-        hat: 0,
-        id_card: 0,
-        tool_bag: 0,
+        tshirt: tshirtInit || 0,
+        hat: hatInit || 0,
+        id_card: idCardInit || 0,
+        tool_bag: toolBagInit || 0,
         received_at: receivedAt || '',
         save(id) {
             axios.post('/uniforms', {

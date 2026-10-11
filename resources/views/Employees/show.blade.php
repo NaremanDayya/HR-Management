@@ -1309,6 +1309,52 @@
                     </div>
                 @endif
 
+                <!-- Uniform Section -->
+                @if($emp->uniform)
+                <div class="unified-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-tshirt me-1" style="color:var(--danger)"></i>اليونيفورم</h2>
+                    </div>
+                    <div class="section-body">
+                        @php $uni = $emp->uniform; @endphp
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-tshirt" style="color:var(--secondary)"></i>التيشيرتات:</div>
+                            <div class="info-value">{{ $uni->tshirt_count ?? 0 }} قطعة</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-hat-wizard" style="color:var(--warning)"></i>القبعات:</div>
+                            <div class="info-value">{{ $uni->hat_count ?? 0 }} قطعة</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-id-card" style="color:var(--info)"></i>بطاقات ID:</div>
+                            <div class="info-value">{{ $uni->id_card_count ?? 0 }} قطعة</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-toolbox" style="color:var(--accent)"></i>شنط الأدوات:</div>
+                            <div class="info-value">{{ $uni->tool_bag_count ?? 0 }} قطعة</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-calendar-check" style="color:var(--success)"></i>تاريخ الاستلام:</div>
+                            <div class="info-value">{{ $uni->received_at?->format('Y/m/d') ?? '—' }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label"><i class="fas fa-circle" style="color:var(--primary)"></i>الحالة:</div>
+                            <div class="info-value">
+                                @if($uni->isEligibleForFree())
+                                    <span class="badge" style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:20px;font-size:.8rem;">
+                                        <i class="fas fa-check-circle me-1"></i>مؤهل لاستلام مجاني
+                                    </span>
+                                @else
+                                    <span class="badge" style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:20px;font-size:.8rem;">
+                                        <i class="fas fa-clock me-1"></i>متبقي {{ $uni->daysUntilEligible() }} يوم
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Project Data Section -->
                 <div class="unified-section">
                     <div class="section-header">

@@ -197,9 +197,10 @@
 
     $docs = $employee->sponsorship_documents ?? [];
     $docMap = [
-        'passport'       => ['label'=>'جواز السفر',        'icon'=>'fas fa-passport'],
-        'id_card'        => ['label'=>'الهوية / الإقامة',  'icon'=>'fas fa-id-card'],
-        'driver_license' => ['label'=>'رخصة القيادة',      'icon'=>'fas fa-car'],
+        'passport'        => ['label'=>'جواز السفر',        'icon'=>'fas fa-passport'],
+        'id_card'         => ['label'=>'الهوية / الإقامة',  'icon'=>'fas fa-id-card'],
+        'driver_license'  => ['label'=>'رخصة القيادة',      'icon'=>'fas fa-car'],
+        'application_form'=> ['label'=>'الاستمارة',          'icon'=>'fas fa-file-alt'],
     ];
 @endphp
 
@@ -316,6 +317,18 @@
                             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold {{ $expiryStatus['cls'] }}">
                                 {{ $employee->id_expiry_date->format('Y/m/d') }}
                                 <span class="text-xs opacity-75">({{ $expiryStatus['label'] }})</span>
+                            </span>
+                        @else <span style="color:#94a3b8;">—</span> @endif
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="fas fa-calendar-times" style="color:var(--danger)"></i>انتهاء جواز السفر</div>
+                    <div class="info-value">
+                        @if($employee->passport_expiry_date)
+                            @php $passExp = $employee->passport_expiry_date; $passLeft = now()->diffInDays($passExp, false); @endphp
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold {{ $passLeft < 0 ? 'bg-red-50 text-red-700' : ($passLeft < 180 ? 'bg-orange-50 text-orange-700' : 'bg-green-50 text-green-700') }}">
+                                {{ $passExp->format('Y/m/d') }}
+                                <span class="text-xs opacity-75">({{ $passLeft < 0 ? 'منتهي' : 'متبقي ' . abs((int)$passLeft) . ' يوم' }})</span>
                             </span>
                         @else <span style="color:#94a3b8;">—</span> @endif
                     </div>
@@ -646,6 +659,11 @@
                 <div>
                     <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:5px;">تاريخ انتهاء الإقامة / الهوية</label>
                     <input type="date" name="id_expiry_date" value="{{ $employee->id_expiry_date?->format('Y-m-d') }}"
+                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:.88rem;">
+                </div>
+                <div>
+                    <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:5px;">تاريخ انتهاء جواز السفر</label>
+                    <input type="date" name="passport_expiry_date" value="{{ $employee->passport_expiry_date?->format('Y-m-d') }}"
                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:.88rem;">
                 </div>
                 <div>
