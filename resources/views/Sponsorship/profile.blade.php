@@ -334,8 +334,8 @@
                     </div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label"><i class="fas fa-car" style="color:var(--secondary)"></i>رقم رخصة القيادة</div>
-                    <div class="info-value" style="font-family:monospace;">{{ $employee->driver_license_number ?? '—' }}</div>
+                    <div class="info-label"><i class="fas fa-file-alt" style="color:var(--secondary)"></i>رقم الاستمارة</div>
+                    <div class="info-value" style="font-family:monospace;">{{ $employee->application_form_number ?? '—' }}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label"><i class="fas fa-id-card" style="color:var(--accent)"></i>رقم الهوية / الإقامة</div>
@@ -667,8 +667,8 @@
                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:.88rem;">
                 </div>
                 <div>
-                    <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:5px;">رقم رخصة القيادة</label>
-                    <input type="text" name="driver_license_number" value="{{ $employee->driver_license_number }}"
+                    <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:5px;">رقم الاستمارة</label>
+                    <input type="text" name="application_form_number" value="{{ $employee->application_form_number }}"
                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:.88rem;">
                 </div>
                 <div>

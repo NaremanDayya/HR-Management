@@ -127,6 +127,7 @@ Route::get('/financials/export', [EmployeeController::class, 'exportFinancials']
 Route::post('/employees/{employee}/terminate', [EmployeeController::class, 'terminateEmployee'])->name('employees.terminate')->middleware('auth');
 Route::get('/employees/{employee}/termination-summary', [EmployeeController::class, 'getTerminationSummary'])->name('employees.termination-summary')->middleware('auth');
 Route::post('/employees/{employee}/update-work-days', [EmployeeController::class, 'updateWorkDays'])->name('employees.update-work-days')->middleware('auth');
+Route::post('/employees/{employee}/toggle-sponsorship', [EmployeeController::class, 'toggleSponsorship'])->name('employees.toggle-sponsorship')->middleware('auth');
 
 Route::middleware([
     'auth',

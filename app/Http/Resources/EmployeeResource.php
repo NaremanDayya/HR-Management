@@ -64,6 +64,7 @@ class EmployeeResource extends JsonResource
             'bank_name' => $emp->bank_name,
             'email' => $emp->user->email,
             'absence_days' => $emp->absence_days,
+            'is_sponsorship_employee' => (bool) $emp->is_sponsorship_employee,
         ];
     }
 }

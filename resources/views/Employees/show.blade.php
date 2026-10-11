@@ -638,6 +638,14 @@
                                 <i class="fas fa-link"></i>
                                 <span>رابط تعديل البيانات البنكية</span>
                             </button>
+                            <button type="button" id="sponsorshipToggleBtn"
+                                onclick="toggleSponsorship({{ $emp->id }})"
+                                title="{{ $emp->is_sponsorship_employee ? 'إلغاء تصنيف كفالة' : 'تصنيف كموظف كفالة' }}"
+                                style="background: linear-gradient(to right, {{ $emp->is_sponsorship_employee ? '#7c3aed, #9d50bb' : '#64748b, #475569' }}); color: white; box-shadow: 0 2px 10px rgba(0,0,0,.15);"
+                                class="action-button">
+                                <i class="fas fa-passport"></i>
+                                <span id="sponsorshipBtnLabel">{{ $emp->is_sponsorship_employee ? 'موظف كفالة ✓' : 'تصنيف كفالة' }}</span>
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -1908,6 +1916,27 @@
         @endif
 
         <script>
+            function toggleSponsorship(employeeId) {
+                fetch(`/employees/${employeeId}/toggle-sponsorship`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    }
+                }).then(r => r.json()).then(data => {
+                    if (data.success) {
+                        const btn = document.getElementById('sponsorshipToggleBtn');
+                        const label = document.getElementById('sponsorshipBtnLabel');
+                        const is = data.is_sponsorship;
+                        label.textContent = is ? 'موظف كفالة ✓' : 'تصنيف كفالة';
+                        btn.style.background = is
+                            ? 'linear-gradient(to right, #7c3aed, #9d50bb)'
+                            : 'linear-gradient(to right, #64748b, #475569)';
+                        Swal.fire({ icon: 'success', title: data.message, timer: 1500, showConfirmButton: false });
+                    }
+                }).catch(() => Swal.fire({ icon: 'error', title: 'حدث خطأ', timer: 1500 }));
+            }
+
             function copyBankUpdateLink(employeeId) {
                 const link = `{{ url('/bank-update-request') }}/${employeeId}`;
                 navigator.clipboard.writeText(link).then(() => {

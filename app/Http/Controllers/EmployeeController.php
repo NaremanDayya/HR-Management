@@ -1035,6 +1035,23 @@ class EmployeeController extends Controller
         }
     }
 
+    public function toggleSponsorship(Employee $employee)
+    {
+        abort_unless(
+            in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']),
+            403
+        );
+
+        $new = !$employee->is_sponsorship_employee;
+        $employee->update(['is_sponsorship_employee' => $new]);
+
+        return response()->json([
+            'success' => true,
+            'is_sponsorship' => $new,
+            'message' => $new ? 'تم تصنيف الموظف كموظف كفالة' : 'تم إلغاء تصنيف الكفالة',
+        ]);
+    }
+
     public function updateWorkDays(Request $request, Employee $employee)
     {
         $selectedMonth = (int) $request->input('month', now()->month);

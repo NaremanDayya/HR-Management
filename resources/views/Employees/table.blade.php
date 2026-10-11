@@ -2087,6 +2087,14 @@
                                             </button>
                                         @endif
 
+                                        @if($employee['is_sponsorship_employee'] ?? false)
+                                            <span class="badge rounded-pill ms-1"
+                                                  style="font-size:.65rem;background:#7c3aed;color:#fff;padding:2px 6px;"
+                                                  title="موظف كفالة">
+                                                <i class="fas fa-passport" style="font-size:.6rem;"></i>
+                                            </span>
+                                        @endif
+
                                         @if ($replacementCount > 0)
                                             <span class="badge bg-primary rounded-pill ms-1"
                                                   style="font-size: 0.75rem;">

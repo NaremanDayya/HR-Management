@@ -58,6 +58,7 @@ class Employee extends Model
         'passport_expiry_date',
         'id_expiry_date',
         'driver_license_number',
+        'application_form_number',
         'medical_insurance',
         'wives_count',
         'languages',
