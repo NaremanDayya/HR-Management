@@ -276,7 +276,7 @@
                             </td>
                             <td class="px-4 py-3 text-gray-500 text-xs">{{ $req->created_at->format('Y-m-d H:i') }}</td>
                             <td class="px-4 py-3 text-center">
-                                @if($req->status === 'pending')
+                                @if($req->status === 'pending' && in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
                                 <div x-data="{ open: false }" class="relative inline-block">
                                     <button @click="open=!open"
                                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg transition-colors">

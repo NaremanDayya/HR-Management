@@ -454,7 +454,7 @@
                         </a>
                     @endif
 
-                    @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant']))
+                    @if (in_array(Auth::user()->role, ['admin', 'hr_manager', 'hr_assistant', 'project_manager']))
                         <a href="{{ route('uniforms.index') }}"
                             class="{{ request()->routeIs('uniforms.*') ? 'text-white border-white' : 'text-gray-200 hover:text-white border-transparent' }} py-4 px-1 inline-flex items-center text-sm font-medium border-b-2 transition-all duration-300 group relative">
                             <i class="fas fa-tshirt ml-2 group-hover:text-white transition-colors"></i>

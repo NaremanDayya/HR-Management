@@ -19,9 +19,11 @@ use App\Notifications\NewEmployeeRequestNotification;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
@@ -99,6 +101,14 @@ class EmployeeActionController extends Controller
                     ], 400);
             }
         } catch (\Exception $e) {
+            Log::error('Bulk action failed', [
+                'action' => $action,
+                'employee_ids' => $employeeIds,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'file' => $e->getFile() . ':' . $e->getLine(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تنفيذ العملية: ' . $e->getMessage(),
@@ -157,27 +167,46 @@ class EmployeeActionController extends Controller
             ? $validated['other_stop_reason']
             : $validated['stop_reason'];
 
-        User::whereIn('id', function ($query) use ($employeeIds) {
-            $query->select('user_id')
-                ->from('employees')
-                ->whereIn('id', $employeeIds);
-        })->update([
-            'account_status' => 'inactive',
-            'updated_at' => now(),
-        ]);
-        foreach ($employeeIds as $id) {
-            $employee = Employee::find($id);
-            if ($employee) {
-                $payload = $employee->payload ?? [];
-                $payload['stop_description'] = $validated['stop_description'] ?? null;
-                $payload['stop_date'] = $validated['stop_date'] ?? now();
+        // The blacklist flag lives in an optional column — only touch it when the box is
+        // ticked so a plain stop never depends on it, and fail clearly if it is missing.
+        if ($addToBlacklist && !Schema::hasColumn('employees', 'is_blacklisted')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'عمود القائمة السوداء غير موجود في قاعدة البيانات، يرجى تشغيل php artisan migrate ثم المحاولة مرة أخرى.',
+            ], 500);
+        }
 
-                $employee->update([
+        // All-or-nothing: a failure part-way must not leave accounts stopped without a history record.
+        DB::transaction(function () use ($employeeIds, $validated, $finalReason, $addToBlacklist) {
+            User::whereIn('id', function ($query) use ($employeeIds) {
+                $query->select('user_id')
+                    ->from('employees')
+                    ->whereIn('id', $employeeIds);
+            })->update([
+                'account_status' => 'inactive',
+                'updated_at' => now(),
+            ]);
+
+            foreach ($employeeIds as $id) {
+                $employee = Employee::find($id);
+                if (!$employee) {
+                    continue;
+                }
+
+                $payload = is_array($employee->payload) ? $employee->payload : [];
+                $payload['stop_description'] = $validated['stop_description'] ?? null;
+                $payload['stop_date'] = $validated['stop_date'] ?? now()->toDateString();
+
+                $attributes = [
                     'stop_reason' => $finalReason,
                     'payload' => $payload,
-                    'is_blacklisted' => $addToBlacklist,
                     'updated_at' => now(),
-                ]);
+                ];
+                if ($addToBlacklist) {
+                    $attributes['is_blacklisted'] = true;
+                }
+                $employee->update($attributes);
+
                 EmployeeWorkHistory::create([
                     'employee_id' => $id,
                     'start_date' => $employee->joining_date ?? $validated['stop_date'],
@@ -187,7 +216,7 @@ class EmployeeActionController extends Controller
                     'work_days' => 0
                 ]);
             }
-        }
+        });
 
 
         return response()->json([

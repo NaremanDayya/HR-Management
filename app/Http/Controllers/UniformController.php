@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Project;
 use App\Models\Uniform;
 use App\Models\UniformRequest;
 use Illuminate\Http\Request;
@@ -10,13 +11,61 @@ use Illuminate\Support\Facades\Auth;
 
 class UniformController extends Controller
 {
+    // Roles that see every employee and may approve/reject uniform requests.
+    private const REVIEWER_ROLES = ['admin', 'hr_manager', 'hr_assistant'];
+
+    private function isReviewer(): bool
+    {
+        return in_array(Auth::user()->role, self::REVIEWER_ROLES);
+    }
+
+    private function isProjectManager(): bool
+    {
+        return Auth::user()->role === 'project_manager';
+    }
+
+    /** Project managers may only touch employees that belong to a project they manage. */
+    private function authorizeEmployeeAccess(int $employeeId): void
+    {
+        if ($this->isReviewer()) {
+            return;
+        }
+
+        abort_unless($this->isProjectManager(), 403, 'ليس لديك صلاحية الوصول إلى اليونيفورم.');
+
+        $allowed = Employee::where('id', $employeeId)
+            ->whereIn('project_id', $this->managedProjectIds())
+            ->exists();
+
+        abort_unless($allowed, 403, 'هذا الموظف لا يتبع أحد مشاريعك.');
+    }
+
+    private function managedProjectIds()
+    {
+        return Project::withoutGlobalScopes()
+            ->where('manager_id', Auth::id())
+            ->pluck('id');
+    }
+
     public function index()
     {
-        $employees = Employee::with(['user', 'uniform', 'uniformRequests'])
+        abort_unless($this->isReviewer() || $this->isProjectManager(), 403, 'ليس لديك صلاحية الوصول إلى اليونيفورم.');
+
+        $employeesQuery = Employee::with(['user', 'uniform', 'uniformRequests'])
             ->whereHas('user', fn($q) => $q
                 ->where('account_status', 'active')
                 ->whereIn('role', ['shelf_stacker', 'supervisor', 'area_manager'])
-            )
+            );
+
+        $requestsQuery = UniformRequest::with(['employee.user'])->latest();
+
+        if ($this->isProjectManager()) {
+            $projectIds = $this->managedProjectIds();
+            $employeesQuery->whereIn('project_id', $projectIds);
+            $requestsQuery->whereHas('employee', fn($q) => $q->whereIn('project_id', $projectIds));
+        }
+
+        $employees = $employeesQuery
             ->get()
             ->sortBy(fn($e) => [
                 $e->uniform ? 0 : 1,
@@ -24,9 +73,7 @@ class UniformController extends Controller
             ])
             ->values();
 
-        $requests = UniformRequest::with(['employee.user'])
-            ->latest()
-            ->get();
+        $requests = $requestsQuery->get();
 
         return view('uniforms.index', compact('employees', 'requests'));
     }
@@ -41,6 +88,8 @@ class UniformController extends Controller
             'tool_bag_count'=> 'required|integer|min:0',
             'received_at'   => 'required|date',
         ]);
+
+        $this->authorizeEmployeeAccess((int) $validated['employee_id']);
 
         Uniform::updateOrCreate(
             ['employee_id' => $validated['employee_id']],
@@ -61,6 +110,8 @@ class UniformController extends Controller
             'tool_bag_count'=> 'required|integer|min:0',
             'notes'         => 'nullable|string|max:500',
         ]);
+
+        $this->authorizeEmployeeAccess((int) $validated['employee_id']);
 
         $employee = Employee::with('uniform')->findOrFail($validated['employee_id']);
 
@@ -91,6 +142,8 @@ class UniformController extends Controller
 
     public function reviewRequest(Request $request, UniformRequest $uniformRequest)
     {
+        abort_unless($this->isReviewer(), 403, 'مراجعة طلبات اليونيفورم متاحة للإدارة فقط.');
+
         $validated = $request->validate([
             'status'      => 'required|in:approved,rejected',
             'deduct_cost' => 'nullable|boolean',
