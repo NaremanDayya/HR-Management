@@ -985,6 +985,31 @@
                                                            placeholder="اختر تاريخ بداية استرداد السلفة من الراتب"
                                                            required>
                                                 </div>
+
+                                                <!-- Work-day balance check -->
+                                                <div id="advance_balance_box" class="hidden text-right rounded-lg border p-3 text-sm">
+                                                    <p class="font-semibold text-gray-700 mb-2">
+                                                        رصيد أيام العمل المتاح للسلفة
+                                                    </p>
+                                                    <ul id="advance_balance_list" class="space-y-1"></ul>
+                                                    <p class="text-xs text-gray-500 mt-2">
+                                                        الرصيد = أجر أيام العمل في الشهر الحالي − الخصومات − السلف القائمة.
+                                                    </p>
+                                                </div>
+
+                                                <!-- Responsibility option (only when the advance exceeds the balance) -->
+                                                <div id="advance_responsibility_box"
+                                                     class="hidden text-right rounded-lg border border-red-300 bg-red-50 p-3">
+                                                    <label class="flex items-start gap-2 cursor-pointer justify-end">
+                                                        <span class="text-sm font-medium text-red-700">
+                                                            قيمة السلفة تتجاوز رصيد أيام العمل المتاح. أُقرّ بأنني أتحمل كامل المسؤولية
+                                                            عن هذه السلفة.
+                                                        </span>
+                                                        <input type="checkbox" name="accept_responsibility" value="1"
+                                                               id="accept_responsibility"
+                                                               class="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                                    </label>
+                                                </div>
                                             </x-bulk-action-modal>
                                         </li>
 
@@ -3321,6 +3346,9 @@
             if (document.getElementById('advance_amount').value) {
                 calculateAdvancePercentage();
             }
+            if (typeof refreshAdvanceBalance === 'function') {
+                refreshAdvanceBalance();
+            }
             if (document.getElementById('deduction_amount').value) {
                 calculateDeductionPercentage();
             }
@@ -3743,7 +3771,63 @@
             }
         }
 
+        // Shows each selected employee's available work-day balance for the advance and
+        // reveals the "I take responsibility" option when the amount exceeds it.
+        let advanceBalanceTimer = null;
+        function refreshAdvanceBalance() {
+            clearTimeout(advanceBalanceTimer);
+            advanceBalanceTimer = setTimeout(async () => {
+                const box = document.getElementById('advance_balance_box');
+                const list = document.getElementById('advance_balance_list');
+                const respBox = document.getElementById('advance_responsibility_box');
+                const respCheckbox = document.getElementById('accept_responsibility');
+                const ids = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+                const amount = parseFloat(document.getElementById('advance_amount').value) || 0;
+
+                if (ids.length === 0) {
+                    box.classList.add('hidden');
+                    respBox.classList.add('hidden');
+                    respCheckbox.checked = false;
+                    return;
+                }
+
+                const body = new FormData();
+                ids.forEach(id => body.append('ids[]', id));
+                body.append('advance_amount', amount);
+
+                try {
+                    const response = await fetch('{{ route('employees.advance-eligibility') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body,
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    const fmt = n => new Intl.NumberFormat('ar-SA').format(n);
+
+                    list.innerHTML = data.employees.map(e =>
+                        `<li class="${e.exceeds ? 'text-red-600 font-semibold' : 'text-gray-700'}">` +
+                        `${e.name}: المتاح ${fmt(e.available)} ر.س` +
+                        ` <span class="text-xs text-gray-400">(المكتسب ${fmt(e.earned)} − القائم ${fmt(e.outstanding)})</span>` +
+                        `${e.exceeds ? ' ⚠ يتجاوز الرصيد' : ''}</li>`
+                    ).join('');
+                    box.classList.remove('hidden');
+                    box.classList.toggle('border-red-300', data.any_exceeds);
+                    box.classList.toggle('border-gray-200', !data.any_exceeds);
+
+                    respBox.classList.toggle('hidden', !data.any_exceeds);
+                    if (!data.any_exceeds) respCheckbox.checked = false;
+                } catch (e) {
+                    console.error('advance balance check failed', e);
+                }
+            }, 350);
+        }
+
         document.getElementById('advance_amount').addEventListener('input', calculateAdvancePercentage);
+        document.getElementById('advance_amount').addEventListener('input', refreshAdvanceBalance);
         document.getElementById('deduction_amount').addEventListener('input', calculateDeductionPercentage);
     </script>
     <script>

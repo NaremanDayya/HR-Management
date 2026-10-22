@@ -65,6 +65,14 @@
                                                 بخصوص: {{ $req->employee->name }}
                                             </div>
                                         @endif
+                                        @if (($req->requestType->key ?? null) === 'salary_advance' && !empty($req->payload['amount']))
+                                            <div class="text-xs text-gray-600 mt-0.5">
+                                                المبلغ: {{ number_format((float) $req->payload['amount']) }} ر.س
+                                                @if (!empty($req->payload['exceeds_balance']))
+                                                    <span class="text-red-600 font-semibold">— تتجاوز الرصيد (بمسؤوليتك)</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
 
                                     @if ($req->status === 'pending')

@@ -266,6 +266,32 @@
                                                         <i class="fas fa-arrow-left mx-1"></i>
                                                         {{ $upgradeLabels[$newRole] ?? $newRole }}
                                                     </div>
+                                                @elseif (($request->requestType->key ?? null) === 'salary_advance' && $request->payload)
+                                                    @php $adv = $request->payload; @endphp
+                                                    <div class="text-xs mt-1 space-y-0.5">
+                                                        <div class="text-gray-900 font-semibold">
+                                                            المبلغ: {{ number_format((float) ($adv['amount'] ?? 0)) }} ر.س
+                                                            @if (!empty($adv['percentage']))
+                                                                <span class="text-gray-400 font-normal">({{ $adv['percentage'] }}% من الراتب)</span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-gray-500">
+                                                            {{ $adv['months_to_repay'] ?? '-' }} شهر × {{ number_format((float) ($adv['monthly_deduction'] ?? 0), 2) }} ر.س
+                                                            @if (!empty($adv['start_deduction_at']))
+                                                                — البدء {{ \Carbon\Carbon::parse($adv['start_deduction_at'])->format('Y-m-d') }}
+                                                            @endif
+                                                        </div>
+                                                        @if (array_key_exists('balance_available', $adv))
+                                                            <div class="text-gray-500">
+                                                                الرصيد المتاح: {{ number_format((float) $adv['balance_available'], 2) }} ر.س
+                                                            </div>
+                                                        @endif
+                                                        @if (!empty($adv['exceeds_balance']))
+                                                            <div class="inline-block rounded bg-red-100 text-red-700 px-2 py-0.5 font-semibold">
+                                                                ⚠ تتجاوز الرصيد المتاح — {{ $adv['responsibility_by'] ?? 'مقدّم الطلب' }} يتحمل المسؤولية الكاملة
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 @elseif (($request->requestType->key ?? null) === 'change_project' && $request->payload)
                                                     <div class="text-gray-500 text-xs mt-1">
                                                         {{ $request->payload['current_project_name'] ?? 'بدون مشروع' }}

@@ -92,6 +92,7 @@ Route::middleware(['auth', App\Http\Middleware\CheckProjectManagerEmployeeAccess
         Route::post('/replace', [EmployeeController::class, 'replace'])->name('replace');
         Route::get('/{employee}/replacements', [EmployeeController::class, 'showReplacements'])->name('replacements');
         Route::post('/bulk/{action}', [EmployeeActionController::class, 'bulkAction'])->name('action');
+        Route::post('/advance-eligibility', [EmployeeActionController::class, 'advanceEligibility'])->name('advance-eligibility');
         Route::get('/{employee}/alerts', [EmployeeController::class, 'showAlerts'])->name('alerts');
         Route::get('/{employee}/deductions', [EmployeeController::class, 'showDeductions'])->name('deductions');
         Route::get('/{employee}/advances', [EmployeeController::class, 'showAdvances'])->name('advances');

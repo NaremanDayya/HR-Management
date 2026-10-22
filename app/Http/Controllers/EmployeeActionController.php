@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Notifications\NewEmployeeAlertNotification;
 use App\Notifications\NewEmployeeDeductionNotification;
 use App\Notifications\NewEmployeeRequestNotification;
+use App\Services\AdvanceBalanceService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -277,59 +278,149 @@ class EmployeeActionController extends Controller
             'advance_amount' => 'required|numeric|min:100',
             'months_to_repay' => 'required|integer|min:1',
             'start_deduction_at' => 'required|date|after_or_equal:today',
+            'accept_responsibility' => 'nullable|in:1',
         ])->validate();
 
-        $advanceAmount = $validated['advance_amount'];
+        $advanceAmount = (float) $validated['advance_amount'];
         $monthsToRepay = $validated['months_to_repay'];
         $startDate = $validated['start_deduction_at'];
         $monthlyDeduction = round($advanceAmount / $monthsToRepay, 2);
+        $responsibilityAccepted = !empty($validated['accept_responsibility']);
+
+        // An advance may not exceed what the employee has already earned (work-day balance).
+        // If it does, the requester must explicitly take responsibility for it.
+        $balanceService = app(AdvanceBalanceService::class);
+        $employees = Employee::with('user')->whereIn('id', $employeeIds)->get()->keyBy('id');
+        $balances = [];
+        $exceeding = [];
 
         foreach ($employeeIds as $employeeId) {
-            $employee = Employee::findOrFail($employeeId);
-            $salary = $employee->salary;
+            $balances[$employeeId] = $balanceService->forEmployee($employees[$employeeId]);
 
-            // Prevent division by zero
-            $percentage = $salary > 0 ? round(($advanceAmount / $salary) * 100, 2) : 0;
-
-            $requestRecord = EmployeeRequest::create([
-                'employee_id' => $employeeId,
-                'request_type_id' => RequestType::getIdByKey('salary_advance'),
-                'status' => 'pending',
-                'requested_at' => now(),
-                'requester_type' => 'App\Models\User',
-                'requester_id' => Auth::id(),
-                'payload' => [
-                    'amount' => $advanceAmount,
-                    'salary' => $salary,
-                    'percentage' => $percentage,
-                    'months_to_repay' => $monthsToRepay,
-                    'start_deduction_at' => $startDate,
-                    'monthly_deduction' => $monthlyDeduction,
-                ],
-            ]);
-
-            Advance::create([
-                'employee_id'       => $employeeId,
-                'manager_id'        => Auth::id(),
-                'amount'            => $advanceAmount,
-                'percentage'        => $percentage,
-                'salary'            => $salary,
-                'status'            => 'pending',
-                'requested_at'      => now(),
-                'request_id'        => $requestRecord->id,
-                'months_to_repay'   => $monthsToRepay,
-                'months_remaining'  => $monthsToRepay,
-                'start_deduction_at' => $startDate,
-                'monthly_deduction' => $monthlyDeduction,
-            ]);
+            if ($balanceService->exceeds($advanceAmount, $balances[$employeeId])) {
+                $exceeding[] = [
+                    'id' => $employeeId,
+                    'name' => $employees[$employeeId]->user?->name ?? $employees[$employeeId]->name,
+                    'available' => $balances[$employeeId]['available'],
+                ];
+            }
         }
 
+        if (!empty($exceeding) && !$responsibilityAccepted) {
+            $lines = collect($exceeding)
+                ->map(fn ($e) => "{$e['name']} (المتاح: {$e['available']} ر.س)")
+                ->implode('، ');
+
+            return response()->json([
+                'success' => false,
+                'requires_responsibility' => true,
+                'employees' => $exceeding,
+                'message' => "قيمة السلفة تتجاوز رصيد أيام العمل المتاح للموظفين: {$lines}. "
+                    . 'لإرسال الطلب فعّل خيار "أتحمل كامل المسؤولية عن هذه السلفة".',
+            ], 422);
+        }
+
+        $exceedingIds = collect($exceeding)->pluck('id')->all();
+
+        $requestRecord = DB::transaction(function () use (
+            $employeeIds, $employees, $balances, $exceedingIds, $advanceAmount, $monthsToRepay,
+            $startDate, $monthlyDeduction, $responsibilityAccepted
+        ) {
+            $last = null;
+
+            foreach ($employeeIds as $employeeId) {
+                $salary = $employees[$employeeId]->salary;
+                $balance = $balances[$employeeId];
+                $exceedsBalance = in_array($employeeId, $exceedingIds);
+
+                // Prevent division by zero
+                $percentage = $salary > 0 ? round(($advanceAmount / $salary) * 100, 2) : 0;
+
+                $last = EmployeeRequest::create([
+                    'employee_id' => $employeeId,
+                    'request_type_id' => RequestType::getIdByKey('salary_advance'),
+                    'status' => 'pending',
+                    'requested_at' => now(),
+                    'requester_type' => 'App\Models\User',
+                    'requester_id' => Auth::id(),
+                    'payload' => [
+                        'amount' => $advanceAmount,
+                        'salary' => $salary,
+                        'percentage' => $percentage,
+                        'months_to_repay' => $monthsToRepay,
+                        'start_deduction_at' => $startDate,
+                        'monthly_deduction' => $monthlyDeduction,
+                        'balance_earned' => $balance['earned'],
+                        'balance_outstanding' => $balance['outstanding'],
+                        'balance_available' => $balance['available'],
+                        'exceeds_balance' => $exceedsBalance,
+                        'responsibility_accepted' => $exceedsBalance && $responsibilityAccepted,
+                        'responsibility_by' => $exceedsBalance && $responsibilityAccepted ? Auth::user()->name : null,
+                    ],
+                ]);
+
+                Advance::create([
+                    'employee_id'       => $employeeId,
+                    'manager_id'        => Auth::id(),
+                    'amount'            => $advanceAmount,
+                    'percentage'        => $percentage,
+                    'salary'            => $salary,
+                    'status'            => 'pending',
+                    'requested_at'      => now(),
+                    'request_id'        => $last->id,
+                    'months_to_repay'   => $monthsToRepay,
+                    'months_remaining'  => $monthsToRepay,
+                    'start_deduction_at' => $startDate,
+                    'monthly_deduction' => $monthlyDeduction,
+                ]);
+            }
+
+            return $last;
+        });
+
         $admin = User::where('role', 'admin')->first();
-        $admin->notify(new NewEmployeeRequestNotification($requestRecord, 'salary_advance'));
+        if ($requestRecord) {
+            $admin?->notify(new NewEmployeeRequestNotification($requestRecord, 'salary_advance'));
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'تم تقديم طلب السلفة للموظفين المحددين'
+        ]);
+    }
+
+    /**
+     * Live pre-check used by the salary-advance modal: for the selected employees,
+     * show the balance an advance would be measured against and who would exceed it.
+     */
+    public function advanceEligibility(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:employees,id',
+            'advance_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $amount = (float) ($validated['advance_amount'] ?? 0);
+        $balanceService = app(AdvanceBalanceService::class);
+
+        $rows = Employee::with('user')->whereIn('id', $validated['ids'])->get()->map(function ($employee) use ($balanceService, $amount) {
+            $balance = $balanceService->forEmployee($employee);
+
+            return [
+                'id' => $employee->id,
+                'name' => $employee->user?->name ?? $employee->name,
+                'earned' => $balance['earned'],
+                'outstanding' => $balance['outstanding'],
+                'available' => $balance['available'],
+                'exceeds' => $amount > 0 && $balanceService->exceeds($amount, $balance),
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'employees' => $rows,
+            'any_exceeds' => $rows->contains('exceeds', true),
         ]);
     }
 
