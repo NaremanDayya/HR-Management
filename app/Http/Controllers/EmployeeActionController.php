@@ -670,41 +670,80 @@ class EmployeeActionController extends Controller
         // default — bypass it here so moving to/from an older-year project still works.
         $newProject = Project::withoutGlobalScope(\App\Scopes\YearScope::class)->findOrFail($validated['new_project_id']);
 
-        foreach ($employeeIds as $employeeId) {
-            $employee = Employee::findOrFail($employeeId);
+        // A project manager knows his own employees: when he moves someone between projects
+        // he manages, the transfer is applied straight away with no admin approval.
+        // Anything outside his own projects still goes through the normal approval flow.
+        $actor = Auth::user();
+        $managedProjectIds = $actor->role === 'project_manager'
+            ? Project::withoutGlobalScopes()->where('manager_id', $actor->id)->pluck('id')->all()
+            : [];
 
-            if ($employee->project_id == $newProject->id) {
-                continue;
+        $appliedCount = 0;
+        $pendingCount = 0;
+        $lastPending = null;
+
+        DB::transaction(function () use (
+            $employeeIds, $newProject, $validated, $managedProjectIds,
+            &$appliedCount, &$pendingCount, &$lastPending
+        ) {
+            foreach ($employeeIds as $employeeId) {
+                $employee = Employee::findOrFail($employeeId);
+
+                if ($employee->project_id == $newProject->id) {
+                    continue;
+                }
+
+                $currentProjectName = $employee->project_id
+                    ? Project::withoutGlobalScope(\App\Scopes\YearScope::class)->find($employee->project_id)?->name
+                    : null;
+
+                $autoApprove = !empty($managedProjectIds)
+                    && in_array($employee->project_id, $managedProjectIds)
+                    && in_array($newProject->id, $managedProjectIds);
+
+                $record = EmployeeRequest::create([
+                    'employee_id' => $employeeId,
+                    'request_type_id' => RequestType::getIdByKey('change_project'),
+                    'status' => $autoApprove ? 'approved' : 'pending',
+                    'response_date' => $autoApprove ? now() : null,
+                    'requester_type' => 'App\Models\User',
+                    'requester_id' => Auth::id(),
+                    'description' => $validated['change_project_reason'] ?? null,
+                    'payload' => [
+                        'current_project_id' => $employee->project_id,
+                        'current_project_name' => $currentProjectName,
+                        'new_project_id' => $newProject->id,
+                        'new_project_name' => $newProject->name,
+                        'auto_approved' => $autoApprove,
+                    ],
+                ]);
+
+                if ($autoApprove) {
+                    $employee->update(['project_id' => $newProject->id]);
+                    $appliedCount++;
+                } else {
+                    $pendingCount++;
+                    $lastPending = $record;
+                }
             }
+        });
 
-            $currentProjectName = $employee->project_id
-                ? Project::withoutGlobalScope(\App\Scopes\YearScope::class)->find($employee->project_id)?->name
-                : null;
-
-            $empRequest = EmployeeRequest::create([
-                'employee_id' => $employeeId,
-                'request_type_id' => RequestType::getIdByKey('change_project'),
-                'status' => 'pending',
-                'requester_type' => 'App\Models\User',
-                'requester_id' => Auth::id(),
-                'description' => $validated['change_project_reason'] ?? null,
-                'payload' => [
-                    'current_project_id' => $employee->project_id,
-                    'current_project_name' => $currentProjectName,
-                    'new_project_id' => $newProject->id,
-                    'new_project_name' => $newProject->name,
-                ],
-            ]);
+        if ($lastPending) {
+            $admin = User::where('role', 'admin')->first();
+            $admin?->notify(new NewEmployeeRequestNotification($lastPending, 'change_project'));
         }
 
-        if (isset($empRequest)) {
-            $admin = User::where('role', 'admin')->first();
-            $admin?->notify(new NewEmployeeRequestNotification($empRequest, 'change_project'));
+        if ($appliedCount && !$pendingCount) {
+            $message = 'تم نقل الموظفين المحددين إلى المشروع الجديد';
+        } elseif ($appliedCount) {
+            $message = "تم نقل {$appliedCount} موظف مباشرة، وتم تقديم طلب لـ {$pendingCount} موظف بانتظار موافقة الأدمن";
+        } else {
+            $message = 'تم تقديم طلب نقل المشروع للموظفين المحددين، بانتظار موافقة الأدمن';
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تقديم طلب نقل المشروع للموظفين المحددين، بانتظار موافقة الأدمن',
+            'message' => $message,
         ]);
     }
 
