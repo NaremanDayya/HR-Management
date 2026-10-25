@@ -133,20 +133,24 @@ class ProjectController extends Controller
         $salaryCounts = $this->getEmployeeSalaryCounts($request, $projectIds);
 
         // Add employee roles statistics with project filtering
-        $rolesStats = Employee::with('user')
-            ->when($request->account_status === 'active', function ($q) {
-                $q->where('account_status', 'active');
-            })
-            ->when($request->account_status === 'inactive', function ($q) {
-                $q->where('account_status', 'inactive');
-            })
+        $rolesRaw = Employee::with('user')
+            ->when($request->account_status === 'active', fn ($q) => $q->whereHas('user', fn($u) => $u->where('account_status','active')))
+            ->when($request->account_status === 'inactive', fn ($q) => $q->whereHas('user', fn($u) => $u->where('account_status','inactive')))
             ->whereIn('project_id', $projectIds)
-            ->select(DB::raw('users.role as role'), DB::raw('count(*) as count'))
-            ->join('users', 'employees.user_id', '=', 'users.id')
-            ->groupBy('users.role')
-            ->orderByDesc('count')
-            ->pluck('count', 'role')
-            ->toArray();
+            ->get();
+
+        $rolesStats = [];
+        foreach ($rolesRaw as $emp) {
+            $role = $emp->user->role ?? 'غير محدد';
+            if (!isset($rolesStats[$role])) {
+                $rolesStats[$role] = ['count' => 0, 'names' => []];
+            }
+            $rolesStats[$role]['count']++;
+            if ($emp->user->name) {
+                $rolesStats[$role]['names'][] = $emp->user->name;
+            }
+        }
+        arsort($rolesStats);
 
         return view('Projects.statistics', compact(
                 'totalProjects',
@@ -186,7 +190,10 @@ class ProjectController extends Controller
             $birthday = $employee->user->birthday;
             return $birthday ? \Carbon\Carbon::parse($birthday)->age : 'غير محدد';
         })->map(function ($group) {
-            return count($group);
+            return [
+                'count' => count($group),
+                'names' => $group->pluck('user.name')->filter()->values()->toArray(),
+            ];
         })->sortKeys();
 
         return $ageGroups;
@@ -196,11 +203,9 @@ class ProjectController extends Controller
     {
         $status = $request->get('account_status');
 
-        $query = DB::table('employees')
-            ->join('users', 'employees.user_id', '=', 'users.id')
-            ->select('users.nationality', DB::raw('COUNT(*) as count'))
+        $query = Employee::with('user')
             ->whereNotIn('users.account_status', ['pending', 'rejected'])
-            ->groupBy('users.nationality');
+            ->join('users', 'employees.user_id', '=', 'users.id');
 
         if (!empty($status)) {
             $query->where('users.account_status', $status);
@@ -210,17 +215,23 @@ class ProjectController extends Controller
             $query->whereIn('employees.project_id', $projectIds);
         }
 
-        $results = $query->get();
+        $employees = $query->select('employees.*')->get();
 
-        // Normalize nationality variants then re-aggregate
+        // Group by normalized nationality, collecting names
         $normalized = [];
-        foreach ($results as $item) {
-            $key = NationalityHelper::normalize($item->nationality);
-            $normalized[$key] = ($normalized[$key] ?? 0) + $item->count;
+        foreach ($employees as $emp) {
+            $key = NationalityHelper::normalize($emp->user->nationality ?? '');
+            if (!isset($normalized[$key])) {
+                $normalized[$key] = ['count' => 0, 'names' => []];
+            }
+            $normalized[$key]['count']++;
+            if ($emp->user->name) {
+                $normalized[$key]['names'][] = $emp->user->name;
+            }
         }
         arsort($normalized);
 
-        return collect($normalized)->mapWithKeys(fn ($count, $nat) => [$nat => $count]);
+        return collect($normalized);
     }
 
     public function getEmployeeSalariesStats(Request $request, $projectIds = null)

@@ -340,14 +340,16 @@
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الجنسية</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
+                                <th class="py-3 px-5 border border-indigo-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($nationalities as $nat => $count)
+                            @forelse ($nationalities as $nat => $group)
                                 @php
+                                    $natCount = is_array($group) ? $group['count'] : $group;
+                                    $natNames = is_array($group) ? ($group['names'] ?? []) : [];
                                     $baseNationality = preg_replace('/(ة|ه)$/u', '', $nat);
                                     $flagCode = null;
-
                                     if (isset($nationalityFlags[$nat])) {
                                         $flagCode = $nationalityFlags[$nat];
                                     } elseif (isset($nationalityFlags[$baseNationality])) {
@@ -355,15 +357,11 @@
                                     }
                                 @endphp
                                 <tr class="hover:bg-indigo-50 transition-colors duration-200">
-                                    <td
-                                        class="py-3 px-5 font-semibold text-indigo-600 border border-indigo-300 whitespace-nowrap text-center align-middle">
+                                    <td class="py-3 px-5 font-semibold text-indigo-600 border border-indigo-300 whitespace-nowrap text-center align-middle">
                                         <div class="grid grid-cols-2 gap-x-4 items-center justify-center">
                                             <div class="flex flex-col items-center gap-y-2">
-
                                                 @if ($flagCode)
-                                                    <img src="https://flagcdn.com/w40/{{ $flagCode }}.png"
-                                                        alt="{{ $nat }}"
-                                                        class="w-8 h-6 rounded shadow-md border border-gray-300">
+                                                    <img src="https://flagcdn.com/w40/{{ $flagCode }}.png" alt="{{ $nat }}" class="w-8 h-6 rounded shadow-md border border-gray-300">
                                                 @else
                                                     <span class="text-gray-400">—</span>
                                                 @endif
@@ -373,15 +371,12 @@
                                             </div>
                                         </div>
                                     </td>
-
-                                    <td class="py-3 px-5 font-bold text-indigo-700 border border-indigo-300">
-                                        {{ $count }}
-                                    </td>
-
+                                    <td class="py-3 px-5 font-bold text-indigo-700 border border-indigo-300">{{ $natCount }}</td>
+                                    <td class="py-3 px-4 border border-indigo-300 text-right text-sm text-gray-700">{{ implode('، ', $natNames) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                    <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -409,34 +404,33 @@
                 <div class="overflow-x-auto">
                     <table id="ageGroupsTable" class="min-w-full border-collapse border border-gray-300 text-center">
                         <thead class="bg-green-50 hover:bg-green-100 border-l-4 border-green-500 text-black text-lg rounded-t-xl">
-
                         <tr>
                                 <th class="py-3 px-5 border border-green-700">العمر</th>
                                 <th class="py-3 px-5 border border-green-700">عدد الموظفين</th>
+                                <th class="py-3 px-5 border border-green-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($ageGroups as $ageGroup => $count)
+                            @forelse ($ageGroups as $ageGroup => $group)
+                                @php
+                                    $ageCount = is_array($group) ? $group['count'] : $group;
+                                    $ageNames = is_array($group) ? ($group['names'] ?? []) : [];
+                                @endphp
                                 <tr class="hover:bg-green-50 transition-colors duration-200">
-                                    <td
-                                        class="py-3 px-5 font-semibold text-green-600 border border-green-300 whitespace-nowrap text-center align-middle">
+                                    <td class="py-3 px-5 font-semibold text-green-600 border border-green-300 whitespace-nowrap text-center align-middle">
                                         <div class="grid grid-cols-2 gap-x-16 items-center justify-center">
-                                            <div
-                                                class="flex flex-col items-center gap-y-2 text-green-600 text-xl select-none">
-                                                📅
-                                            </div>
+                                            <div class="flex flex-col items-center gap-y-2 text-green-600 text-xl select-none">📅</div>
                                             <div class="flex flex-col items-start gap-y-2">
-                                                <span> {{ is_numeric($ageGroup) ? $ageGroup . ' سنة' : $ageGroup }}
+                                                <span>{{ is_numeric($ageGroup) ? $ageGroup . ' سنة' : $ageGroup }}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-5 font-bold text-green-700 border border-green-300">
-                                        {{ $count }}
-                                    </td>
+                                    <td class="py-3 px-5 font-bold text-green-700 border border-green-300">{{ $ageCount }}</td>
+                                    <td class="py-3 px-4 border border-green-300 text-right text-sm text-gray-700">{{ implode('، ', $ageNames) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                    <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -570,10 +564,15 @@
                         <tr>
                                 <th class="py-3 px-5 border border-purple-700">الدور الوظيفي</th>
                                 <th class="py-3 px-5 border border-purple-700">عدد الموظفين</th>
+                                <th class="py-3 px-5 border border-purple-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($rolesStats as $role => $count)
+                            @forelse ($rolesStats as $role => $group)
+                                @php
+                                    $roleCount = is_array($group) ? $group['count'] : $group;
+                                    $roleNames = is_array($group) ? ($group['names'] ?? []) : [];
+                                @endphp
                                 <tr class="hover:bg-purple-50 transition-colors duration-200">
                                     <td
                                         class="py-3 px-5 font-semibold text-purple-600 border border-purple-300 whitespace-nowrap text-center">
@@ -614,13 +613,12 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 px-5 font-bold text-purple-700 border border-purple-300">
-                                        {{ $count }}
-                                    </td>
+                                    <td class="py-3 px-5 font-bold text-purple-700 border border-purple-300">{{ $roleCount }}</td>
+                                    <td class="py-3 px-4 border border-purple-300 text-right text-sm text-gray-700">{{ implode('، ', $roleNames) }}</td>
                                 </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                        <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                     </tr>
                                 @endforelse
                             </tbody>

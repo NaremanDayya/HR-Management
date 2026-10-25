@@ -24,6 +24,7 @@ class SponsorshipController extends Controller
         $this->authorizeHR();
 
         $query = Employee::with(['user', 'project', 'leaveRequests' => fn($q) => $q->where('status', 'approved')])
+            ->where('is_sponsorship_employee', true)
             ->whereHas('user', fn($q) => $q->where('account_status', 'active'));
 
         // Search
