@@ -629,6 +629,12 @@
         </div>
     @push('scripts')
         <script>
+            // PHP data for Excel export
+            const phpAgeGroups        = @json($ageGroups);
+            const phpNationalities    = @json($nationalities);
+            const phpRolesStats       = @json($rolesStats);
+            const phpSalaryCounts     = @json($salaryCounts);
+
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof $ === 'undefined' || typeof Swal === 'undefined') {
                     console.error('Required libraries not loaded');
@@ -717,76 +723,265 @@
                     });
                 });
 
-                // Function to export all tables to Excel in one file with multiple sheets
+                // ── Styled Excel export ──────────────────────────────────────────────
                 function exportAllToExcel(fileName) {
                     if (typeof XLSX === 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ!',
-                            text: 'مكتبة Excel غير محملة',
-                            confirmButtonText: 'حسناً'
-                        });
+                        Swal.fire({ icon: 'error', title: 'خطأ!', text: 'مكتبة Excel غير محملة', confirmButtonText: 'حسناً' });
                         return false;
                     }
 
                     try {
-                        const tables = [
-                            { id: 'nationalitiesTable', name: 'جنسيات الموظفين' },
-                            { id: 'ageGroupsTable', name: 'الفئات العمرية' },
-                            { id: 'salariesTable', name: 'توزيع الرواتب' },
-                            { id: 'rolesTable', name: 'أدوار الموظفين' }
-                        ];
-
                         const wb = XLSX.utils.book_new();
+                        const today = new Date().toLocaleDateString('ar-SA');
 
-                        tables.forEach(tableInfo => {
-                            const table = document.getElementById(tableInfo.id);
-                            if (!table) {
-                                console.warn(`Table with id ${tableInfo.id} not found`);
-                                return; // Continue to next table, don't break the loop
-                            }
+                        // ── colour palette ────────────────────────────────────────────────
+                        const C = {
+                            brand:      'FF1A3C5E',   // dark navy  (brand primary)
+                            brandLight: 'FFD6E4F0',   // pale blue
+                            groupBg:    'FF2D6A9F',   // medium blue  (group header)
+                            groupFg:    'FFFFFFFF',   // white
+                            nameBg:     'FFF0F6FF',   // very light blue (name row)
+                            altBg:      'FFFAFAFA',   // near-white alt row
+                            headerFg:   'FFFFFFFF',
+                            border:     'FF2D6A9F',
+                            titleText:  'FF0D2137',
+                        };
 
-                            const tableClone = table.cloneNode(true);
+                        // ─── helpers ─────────────────────────────────────────────────────
+                        function cell(v, opts = {}) {
+                            return Object.assign({ v, t: typeof v === 'number' ? 'n' : 's' }, opts);
+                        }
 
-                            // Prepare data
-                            const headers = Array.from(tableClone.querySelectorAll('thead th'))
-                                .map(th => th.textContent.trim());
+                        function applyStyle(ws, addr, style) {
+                            if (!ws[addr]) return;
+                            ws[addr].s = style;
+                        }
 
-                            const data = [
-                                headers,
-                                ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
-                                    return Array.from(row.querySelectorAll('td')).map((td, index) => {
-                                        // Special handling for age groups table
-                                        if (tableInfo.id === 'ageGroupsTable' && index === 0) {
-                                            const ageSpan = td.querySelector(
-                                                '.flex.flex-col.items-start.gap-y-2 span');
-                                            return ageSpan ? ageSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Special handling for nationalities table (remove flag images)
-                                        if (tableInfo.id === 'nationalitiesTable' && index === 0) {
-                                            // Get only the text content, ignore images
-                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
-                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Special handling for roles table (remove icons)
-                                        if (tableInfo.id === 'rolesTable' && index === 0) {
-                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
-                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Default handling for all other cases
-                                        return td.textContent.trim();
+                        function setColWidths(ws, widths) {
+                            ws['!cols'] = widths.map(w => ({ wch: w }));
+                        }
+
+                        function addMerge(ws, s, e) {
+                            if (!ws['!merges']) ws['!merges'] = [];
+                            ws['!merges'].push({ s, e });
+                        }
+
+                        function borderAll(color) {
+                            const b = { style: 'thin', color: { rgb: color } };
+                            return { top: b, bottom: b, left: b, right: b };
+                        }
+
+                        const titleStyle = {
+                            font: { bold: true, sz: 16, color: { rgb: C.titleText }, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.brandLight } },
+                            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2, wrapText: true },
+                            border: borderAll(C.brand),
+                        };
+                        const subStyle = {
+                            font: { sz: 10, color: { rgb: 'FF555555' }, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: 'FFF5F5F5' } },
+                            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+                        };
+                        const colHeaderStyle = {
+                            font: { bold: true, sz: 11, color: { rgb: C.headerFg }, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.brand } },
+                            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+                            border: borderAll(C.brand),
+                        };
+                        const groupHeaderStyle = {
+                            font: { bold: true, sz: 11, color: { rgb: C.groupFg }, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.groupBg } },
+                            alignment: { horizontal: 'right', vertical: 'center', readingOrder: 2 },
+                            border: borderAll(C.groupBg),
+                        };
+                        const countStyle = {
+                            font: { bold: true, sz: 11, color: { rgb: C.groupFg }, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.groupBg } },
+                            alignment: { horizontal: 'center', vertical: 'center' },
+                            border: borderAll(C.groupBg),
+                        };
+                        const nameStyle = {
+                            font: { sz: 10, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.nameBg } },
+                            alignment: { horizontal: 'right', vertical: 'center', readingOrder: 2, indent: 1 },
+                            border: { top: { style: 'hair', color: { rgb: 'FFCCDDEE' } }, bottom: { style: 'hair', color: { rgb: 'FFCCDDEE' } }, left: borderAll(C.brand).left, right: borderAll(C.brand).right },
+                        };
+                        const nameIdxStyle = Object.assign({}, nameStyle, {
+                            font: { sz: 9, color: { rgb: 'FF888888' }, name: 'Tahoma' },
+                            alignment: { horizontal: 'center', vertical: 'center' },
+                        });
+                        const salaryStyle = {
+                            font: { sz: 10, name: 'Tahoma' },
+                            fill: { fgColor: { rgb: C.altBg } },
+                            alignment: { horizontal: 'center', vertical: 'center' },
+                            border: borderAll('FFDDDDDD'),
+                            numFmt: '#,##0',
+                        };
+
+                        // ─── sheet builder for groups-with-names ─────────────────────────
+                        function buildGroupSheet(sheetTitle, groups, labelFn, cols) {
+                            // cols = [colLabel, colCount, colIndex, colName]  widths
+                            const aoa = [];
+                            const styles = [];   // parallel array: {r, c, style}
+
+                            // Row 0: main title (merged across 3 cols)
+                            aoa.push([sheetTitle, '', '']);
+                            styles.push({ r: 0, c: 0, s: titleStyle }, { r: 0, c: 1, s: titleStyle }, { r: 0, c: 2, s: titleStyle });
+
+                            // Row 1: date sub-header
+                            aoa.push([`تاريخ التصدير: ${today}`, '', '']);
+                            styles.push({ r: 1, c: 0, s: subStyle }, { r: 1, c: 1, s: subStyle }, { r: 1, c: 2, s: subStyle });
+
+                            // Row 2: blank
+                            aoa.push(['', '', '']);
+
+                            // Row 3: column headers  [التصنيف | العدد | م | اسم الموظف]
+                            aoa.push(['التصنيف', 'العدد', 'م', 'اسم الموظف']);
+                            styles.push(
+                                { r: 3, c: 0, s: colHeaderStyle },
+                                { r: 3, c: 1, s: colHeaderStyle },
+                                { r: 3, c: 2, s: colHeaderStyle },
+                                { r: 3, c: 3, s: colHeaderStyle },
+                            );
+
+                            let rowIdx = 4;
+                            Object.entries(groups).forEach(([key, group]) => {
+                                const count  = (group && typeof group === 'object') ? (group.count ?? 0) : group;
+                                const names  = (group && typeof group === 'object') ? (group.names ?? []) : [];
+                                const label  = labelFn(key);
+                                const nameCount = names.length || 1;
+
+                                // Group header spans all name rows
+                                aoa.push([label, count, '', '']);
+                                styles.push(
+                                    { r: rowIdx, c: 0, s: groupHeaderStyle },
+                                    { r: rowIdx, c: 1, s: countStyle },
+                                    { r: rowIdx, c: 2, s: groupHeaderStyle },
+                                    { r: rowIdx, c: 3, s: groupHeaderStyle },
+                                );
+
+                                // Name rows
+                                if (names.length === 0) {
+                                    aoa.push(['', '', '—', 'لا يوجد']);
+                                    styles.push(
+                                        { r: rowIdx + 1, c: 0, s: nameStyle },
+                                        { r: rowIdx + 1, c: 1, s: nameStyle },
+                                        { r: rowIdx + 1, c: 2, s: nameIdxStyle },
+                                        { r: rowIdx + 1, c: 3, s: nameStyle },
+                                    );
+                                    rowIdx += 2;
+                                } else {
+                                    names.forEach((name, ni) => {
+                                        aoa.push(['', '', ni + 1, name]);
+                                        styles.push(
+                                            { r: rowIdx + 1 + ni, c: 0, s: nameStyle },
+                                            { r: rowIdx + 1 + ni, c: 1, s: nameStyle },
+                                            { r: rowIdx + 1 + ni, c: 2, s: nameIdxStyle },
+                                            { r: rowIdx + 1 + ni, c: 3, s: nameStyle },
+                                        );
                                     });
-                                })
+                                    rowIdx += 1 + names.length;
+                                }
+                            });
+
+                            const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+                            // Apply styles
+                            styles.forEach(({ r, c, s }) => {
+                                const addr = XLSX.utils.encode_cell({ r, c });
+                                if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+                                ws[addr].s = s;
+                            });
+
+                            // Merges: title + sub rows
+                            ws['!merges'] = [
+                                { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+                                { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+                                { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
                             ];
 
-                            const ws = XLSX.utils.aoa_to_sheet(data);
-                            XLSX.utils.book_append_sheet(wb, ws, tableInfo.name);
-                        });
+                            // Merge group-label col across its name rows
+                            let mergeRow = 4;
+                            Object.entries(groups).forEach(([key, group]) => {
+                                const names = (group && typeof group === 'object') ? (group.names ?? []) : [];
+                                const span  = Math.max(names.length, 1);
+                                if (span > 1) {
+                                    ws['!merges'].push({ s: { r: mergeRow, c: 0 }, e: { r: mergeRow + span - 1, c: 0 } });
+                                    ws['!merges'].push({ s: { r: mergeRow, c: 1 }, e: { r: mergeRow + span - 1, c: 1 } });
+                                }
+                                mergeRow += 1 + span;
+                            });
 
-                        // Check if any sheets were added
-                        if (wb.SheetNames.length === 0) {
-                            throw new Error('لم يتم العثور على أي جداول للتصدير');
+                            ws['!cols'] = cols.map(w => ({ wch: w }));
+                            ws['!rows'] = [{ hpt: 30 }, { hpt: 18 }, { hpt: 6 }];
+
+                            return ws;
                         }
+
+                        // ─── 1. Nationalities ─────────────────────────────────────────────
+                        const wsNat = buildGroupSheet(
+                            'إحصائيات جنسيات الموظفين',
+                            phpNationalities,
+                            k => k || 'غير محدد',
+                            [28, 10, 6, 36]
+                        );
+                        XLSX.utils.book_append_sheet(wb, wsNat, 'جنسيات الموظفين');
+
+                        // ─── 2. Age groups ────────────────────────────────────────────────
+                        const wsAge = buildGroupSheet(
+                            'إحصائيات الفئات العمرية للموظفين',
+                            phpAgeGroups,
+                            k => isNaN(k) ? k : `${k} سنة`,
+                            [20, 10, 6, 36]
+                        );
+                        XLSX.utils.book_append_sheet(wb, wsAge, 'الفئات العمرية');
+
+                        // ─── 3. Roles ─────────────────────────────────────────────────────
+                        const roleLabels = {
+                            admin: 'مدير النظام', hr_manager: 'مدير الموارد البشرية',
+                            hr_assistant: 'مساعد الموارد البشرية', project_manager: 'مدير المشروع',
+                            senior_project_manager: 'مدير مشروع أول', operations_manager: 'مدير العمليات',
+                            shelf_stacker: 'رصّاص رفوف', area_manager: 'مدير المنطقة', supervisor: 'مشرف',
+                        };
+                        const wsRoles = buildGroupSheet(
+                            'إحصائيات أدوار الموظفين',
+                            phpRolesStats,
+                            k => roleLabels[k] || k,
+                            [28, 10, 6, 36]
+                        );
+                        XLSX.utils.book_append_sheet(wb, wsRoles, 'أدوار الموظفين');
+
+                        // ─── 4. Salaries (simple table, no names) ─────────────────────────
+                        const salAoa = [
+                            ['إحصائيات توزيع الرواتب', ''],
+                            [`تاريخ التصدير: ${today}`, ''],
+                            ['', ''],
+                            ['الراتب (ر.س)', 'عدد الموظفين'],
+                        ];
+                        const salStyles = [
+                            { r: 0, c: 0, s: titleStyle }, { r: 0, c: 1, s: titleStyle },
+                            { r: 1, c: 0, s: subStyle  }, { r: 1, c: 1, s: subStyle  },
+                            { r: 3, c: 0, s: colHeaderStyle }, { r: 3, c: 1, s: colHeaderStyle },
+                        ];
+                        let salRow = 4;
+                        Object.entries(phpSalaryCounts).forEach(([sal, cnt]) => {
+                            salAoa.push([Number(sal), Number(cnt)]);
+                            salStyles.push({ r: salRow, c: 0, s: salaryStyle }, { r: salRow, c: 1, s: salaryStyle });
+                            salRow++;
+                        });
+                        const wsSal = XLSX.utils.aoa_to_sheet(salAoa);
+                        salStyles.forEach(({ r, c, s }) => {
+                            const addr = XLSX.utils.encode_cell({ r, c });
+                            if (!wsSal[addr]) wsSal[addr] = { v: '', t: 's' };
+                            wsSal[addr].s = s;
+                        });
+                        wsSal['!merges'] = [
+                            { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+                            { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
+                            { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } },
+                        ];
+                        wsSal['!cols'] = [{ wch: 20 }, { wch: 16 }];
+                        XLSX.utils.book_append_sheet(wb, wsSal, 'توزيع الرواتب');
 
                         XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
                         return true;
