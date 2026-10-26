@@ -340,7 +340,6 @@
                             <tr>
                                 <th class="py-3 px-5 border border-indigo-700">الجنسية</th>
                                 <th class="py-3 px-5 border border-indigo-700">عدد الموظفين</th>
-                                <th class="py-3 px-5 border border-indigo-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -372,11 +371,10 @@
                                         </div>
                                     </td>
                                     <td class="py-3 px-5 font-bold text-indigo-700 border border-indigo-300">{{ $natCount }}</td>
-                                    <td class="py-3 px-4 border border-indigo-300 text-right text-sm text-gray-700">{{ implode('، ', $natNames) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                    <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -407,7 +405,6 @@
                         <tr>
                                 <th class="py-3 px-5 border border-green-700">العمر</th>
                                 <th class="py-3 px-5 border border-green-700">عدد الموظفين</th>
-                                <th class="py-3 px-5 border border-green-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -426,11 +423,10 @@
                                         </div>
                                     </td>
                                     <td class="py-3 px-5 font-bold text-green-700 border border-green-300">{{ $ageCount }}</td>
-                                    <td class="py-3 px-4 border border-green-300 text-right text-sm text-gray-700">{{ implode('، ', $ageNames) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                    <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -564,7 +560,6 @@
                         <tr>
                                 <th class="py-3 px-5 border border-purple-700">الدور الوظيفي</th>
                                 <th class="py-3 px-5 border border-purple-700">عدد الموظفين</th>
-                                <th class="py-3 px-5 border border-purple-700">أسماء الموظفين</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -614,11 +609,10 @@
                                         </div>
                                     </td>
                                     <td class="py-3 px-5 font-bold text-purple-700 border border-purple-300">{{ $roleCount }}</td>
-                                    <td class="py-3 px-4 border border-purple-300 text-right text-sm text-gray-700">{{ implode('، ', $roleNames) }}</td>
                                 </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="py-6 text-gray-400 font-medium">لا بيانات</td>
+                                        <td colspan="2" class="py-6 text-gray-400 font-medium">لا بيانات</td>
                                     </tr>
                                 @endforelse
                             </tbody>
