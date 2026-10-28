@@ -639,6 +639,12 @@
         </div>
     </div>
     @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+        <script src="{{ asset('js/branded-excel.js') }}?v={{ filemtime(public_path('js/branded-excel.js')) }}"></script>
+        <script>
+            const EXCEL_LOGO_URL = @json(asset('images/gulf-horizons-logo.png'));
+            const EXCEL_SCOPE = @json('مشروع ' . $project->name . (request('account_status') === 'active' ? ' | الحالة: نشط' : (request('account_status') === 'inactive' ? ' | الحالة: غير نشط' : '')));
+        </script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 if (typeof $ === 'undefined' || typeof Swal === 'undefined') {
@@ -726,78 +732,19 @@
                     });
                 });
 
-                // Function to export all tables to Excel in one file with multiple sheets
-                function exportAllToExcel(fileName) {
-                    if (typeof XLSX === 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ!',
-                            text: 'مكتبة Excel غير محملة',
-                            confirmButtonText: 'حسناً'
-                        });
+                // Branded Excel export — same header/footer/logo layout as the HR report template
+                async function exportAllToExcel(fileName) {
+                    if (typeof ExcelJS === 'undefined' || typeof BrandedExcel === 'undefined') {
+                        Swal.fire({ icon: 'error', title: 'خطأ!', text: 'مكتبة Excel غير محملة', confirmButtonText: 'حسناً' });
                         return false;
                     }
 
                     try {
-                        const tables = [
-                            {id: 'nationalitiesTable', name: 'جنسيات الموظفين'},
-                            {id: 'ageGroupsTable', name: 'الفئات العمرية'},
-                            {id: 'salariesTable', name: 'توزيع الرواتب'},
-                            {id: 'rolesTable', name: 'أدوار الموظفين'}
-                        ];
-
-                        const wb = XLSX.utils.book_new();
-
-                        tables.forEach(tableInfo => {
-                            const table = document.getElementById(tableInfo.id);
-                            if (!table) {
-                                console.warn(`Table with id ${tableInfo.id} not found`);
-                                return;
-                            }
-
-                            const tableClone = table.cloneNode(true);
-
-                            // Prepare data
-                            const headers = Array.from(tableClone.querySelectorAll('thead th'))
-                                .map(th => th.textContent.trim());
-
-                            const data = [
-                                headers,
-                                ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
-                                    return Array.from(row.querySelectorAll('td')).map((td, index) => {
-                                        // Special handling for age groups table
-                                        if (tableInfo.id === 'ageGroupsTable' && index === 0) {
-                                            const ageSpan = td.querySelector(
-                                                '.flex.flex-col.items-start.gap-y-2 span');
-                                            return ageSpan ? ageSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Special handling for nationalities table (remove flag images)
-                                        if (tableInfo.id === 'nationalitiesTable' && index === 0) {
-                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
-                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Special handling for roles table (remove icons)
-                                        if (tableInfo.id === 'rolesTable' && index === 0) {
-                                            const textSpan = td.querySelector('.flex.flex-col.items-start.gap-y-2 span');
-                                            return textSpan ? textSpan.textContent.trim() : td.textContent.trim();
-                                        }
-                                        // Default handling for all other cases
-                                        return td.textContent.trim();
-                                    });
-                                })
-                            ];
-
-                            const ws = XLSX.utils.aoa_to_sheet(data);
-                            XLSX.utils.book_append_sheet(wb, ws, tableInfo.name);
+                        return await BrandedExcel.exportStatTables({
+                            fileName: fileName,
+                            logoUrl: EXCEL_LOGO_URL,
+                            scope: EXCEL_SCOPE,
                         });
-
-                        // Check if any sheets were added
-                        if (wb.SheetNames.length === 0) {
-                            throw new Error('لم يتم العثور على أي جداول للتصدير');
-                        }
-
-                        XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
-                        return true;
                     } catch (error) {
                         console.error('Excel export error:', error);
                         Swal.fire({
@@ -981,8 +928,8 @@
                 }
 
                 // Individual table export functions
-                function exportToExcel(tableId, fileName) {
-                    if (typeof XLSX === 'undefined') {
+                async function exportToExcel(tableId, fileName) {
+                    if (typeof ExcelJS === 'undefined' || typeof BrandedExcel === 'undefined') {
                         Swal.fire({
                             icon: 'error',
                             title: 'خطأ!',
@@ -993,38 +940,12 @@
                     }
 
                     try {
-                        const table = document.getElementById(tableId);
-                        if (!table) throw new Error('Table not found');
-
-                        const tableClone = table.cloneNode(true);
-
-                        // Prepare data
-                        const headers = Array.from(tableClone.querySelectorAll('thead th'))
-                            .map(th => th.textContent.trim());
-
-                        const data = [
-                            headers,
-                            ...Array.from(tableClone.querySelectorAll('tbody tr')).map(row => {
-                                return Array.from(row.querySelectorAll('td')).map((td, index) => {
-                                    // Special handling for age groups table
-                                    if (tableId === 'ageGroupsTable' && index === 0) {
-                                        const ageSpan = td.querySelector(
-                                            '.flex.flex-col.items-start.gap-y-2 span');
-                                        return ageSpan ? ageSpan.textContent.trim() : '';
-                                    }
-                                    // Default handling for all other cases
-                                    return td.textContent.trim();
-                                });
-                            })
-                        ];
-
-                        // Create workbook
-                        const wb = XLSX.utils.book_new();
-                        const ws = XLSX.utils.aoa_to_sheet(data);
-                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-                        XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
-
-                        return true;
+                        return await BrandedExcel.exportStatTables({
+                            tables: [tableId],
+                            fileName: fileName,
+                            logoUrl: EXCEL_LOGO_URL,
+                            scope: EXCEL_SCOPE,
+                        });
                     } catch (error) {
                         console.error('Excel export error:', error);
                         Swal.fire({
