@@ -128,6 +128,7 @@ class ProjectController extends Controller
 
         // Update all statistics methods to filter by project IDs
         $ageGroups = $this->getEmployeeAgies($request, $projectIds);
+        $employeeDetails = $this->employeeDetailRows($this->employeesForAgeStats($request, $projectIds));
         $nationalities = $this->getEmployeeNationalities($request, $projectIds);
         $salariesStats = $this->getEmployeeSalariesStats($request, $projectIds);
         $salaryCounts = $this->getEmployeeSalaryCounts($request, $projectIds);
@@ -159,6 +160,7 @@ class ProjectController extends Controller
                 'maxActiveEmployeesProject',
                 'minActiveEmployeesProject',
                 'ageGroups',
+                'employeeDetails',
                 'nationalities',
                 'salariesStats',
                 'salaryCounts',
@@ -167,7 +169,8 @@ class ProjectController extends Controller
                 'rolesStats'
             ) + $this->dropdownService->getDropdownData());
     }
-    public function getEmployeeAgies(Request $request, $projectIds = null)
+    /** Employees the age statistics are calculated from (status + project filters applied). */
+    private function employeesForAgeStats(Request $request, $projectIds = null)
     {
         $query = Employee::with('user');
 
@@ -184,7 +187,39 @@ class ProjectController extends Controller
             $query->whereIn('project_id', $projectIds);
         }
 
-        $employees = $query->get();
+        return $query->get();
+    }
+
+    /**
+     * One row per employee for the Excel "details" sheet: [age, employee code, name, project].
+     * Sorted by age (unknown ages last), then by name.
+     */
+    private function employeeDetailRows($employees): array
+    {
+        $projectNames = Project::withoutGlobalScopes()->pluck('name', 'id');
+
+        return $employees
+            ->map(function ($employee) use ($projectNames) {
+                $birthday = $employee->user?->birthday;
+
+                return [
+                    'age' => $birthday ? \Carbon\Carbon::parse($birthday)->age : null,
+                    'code' => 'EMP-' . str_pad($employee->id, 3, '0', STR_PAD_LEFT),
+                    'name' => $employee->user?->name ?? $employee->name,
+                    'project' => $projectNames[$employee->project_id] ?? '',
+                ];
+            })
+            ->sort(function ($a, $b) {
+                return [$a['age'] === null, $a['age'], $a['name']] <=> [$b['age'] === null, $b['age'], $b['name']];
+            })
+            ->map(fn ($row) => [$row['age'] ?? 'غير محدد', $row['code'], $row['name'], $row['project']])
+            ->values()
+            ->all();
+    }
+
+    public function getEmployeeAgies(Request $request, $projectIds = null)
+    {
+        $employees = $this->employeesForAgeStats($request, $projectIds);
 
         $ageGroups = $employees->groupBy(function ($employee) {
             $birthday = $employee->user->birthday;
@@ -316,6 +351,7 @@ class ProjectController extends Controller
 
         $employeesByNationality = $this->getEmployeesByNationality($project, $status);
         $employeesByAgeGroup = $this->getEmployeesByAgeGroup($project, $status);
+        $employeeDetails = $this->employeeDetailRows($employeesByAgeGroup->flatten(1));
         $employeesByStatus = $this->getEmployeesByAccountStatus($project);
         $employeesSalaries = $this->getEmployeesSalaries($project, $status);
 
@@ -350,6 +386,7 @@ class ProjectController extends Controller
                 'project',
                 'employeesByNationality',
                 'employeesByAgeGroup',
+                'employeeDetails',
                 'employeesByStatus',
                 'employeesSalaries',
                 'salaryStats',

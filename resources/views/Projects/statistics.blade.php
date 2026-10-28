@@ -626,6 +626,7 @@
         <script src="{{ asset('js/branded-excel.js') }}?v={{ filemtime(public_path('js/branded-excel.js')) }}"></script>
         <script>
             const EXCEL_LOGO_URL = @json(asset('images/gulf-horizons-logo.png'));
+            const EMPLOYEE_DETAILS = @json($employeeDetails);
             const EXCEL_SCOPE = @json('جميع المشاريع' . (request('account_status') === 'active' ? ' | الحالة: نشط' : (request('account_status') === 'inactive' ? ' | الحالة: غير نشط' : '')));
         </script>
         <script>
@@ -729,6 +730,7 @@
                             fileName: fileName,
                             logoUrl: EXCEL_LOGO_URL,
                             scope: EXCEL_SCOPE,
+                            details: EMPLOYEE_DETAILS,
                         });
                     } catch (error) {
                         console.error('Excel export error:', error);
@@ -931,6 +933,7 @@
                             fileName: fileName,
                             logoUrl: EXCEL_LOGO_URL,
                             scope: EXCEL_SCOPE,
+                            details: EMPLOYEE_DETAILS,
                         });
                     } catch (error) {
                         console.error('Excel export error:', error);

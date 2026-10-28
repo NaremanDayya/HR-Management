@@ -346,6 +346,19 @@
             added++;
         });
 
+        // Details sheet (age | employee id | name | project), exported together with the age statistics.
+        if (Array.isArray(opts.details) && opts.details.length && wantedIds.includes('ageGroupsTable')) {
+            addTableSheet(wb, {
+                name: 'تفاصيل الموظفين',
+                title: 'تفاصيل الموظفين حسب العمر',
+                subtitle: [opts.scope, 'العمر بالسنوات المكتملة حتى تاريخ التقرير'].filter(Boolean).join(' | '),
+                headers: ['العمر (سنة)', 'رقم الموظف', 'اسم الموظف', 'المشروع'],
+                widths: [14, 18, 34, 30],
+                rows: opts.details,
+            });
+            added++;
+        }
+
         if (!added) throw new Error('لم يتم العثور على أي جداول للتصدير');
 
         await download(wb, opts.fileName + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
