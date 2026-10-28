@@ -304,10 +304,22 @@
 
     /** The statistics tables that exist on the project pages. */
     const STAT_TABLES = [
-        { id: 'nationalitiesTable', name: 'جنسيات الموظفين', title: 'إحصائيات جنسيات الموظفين', about: 'توزيع الموظفين حسب الجنسية' },
-        { id: 'ageGroupsTable', name: 'الفئات العمرية', title: 'إحصائيات الفئات العمرية', about: 'العمر بالسنوات المكتملة حتى تاريخ التقرير' },
-        { id: 'salariesTable', name: 'توزيع الرواتب', title: 'إحصائيات توزيع الرواتب', about: 'توزيع الموظفين حسب الراتب (ر.س)', salary: true },
-        { id: 'rolesTable', name: 'أدوار الموظفين', title: 'إحصائيات أدوار الموظفين', about: 'توزيع الموظفين حسب الدور الوظيفي' },
+        {
+            id: 'nationalitiesTable', name: 'جنسيات الموظفين', title: 'إحصائيات جنسيات الموظفين', about: 'توزيع الموظفين حسب الجنسية',
+            details: { name: 'تفاصيل الجنسيات', title: 'تفاصيل الموظفين حسب الجنسية', header: 'الجنسية' },
+        },
+        {
+            id: 'ageGroupsTable', name: 'الفئات العمرية', title: 'إحصائيات الفئات العمرية', about: 'العمر بالسنوات المكتملة حتى تاريخ التقرير',
+            details: { name: 'تفاصيل الأعمار', title: 'تفاصيل الموظفين حسب العمر', header: 'العمر (سنة)' },
+        },
+        {
+            id: 'salariesTable', name: 'توزيع الرواتب', title: 'إحصائيات توزيع الرواتب', about: 'توزيع الموظفين حسب الراتب (ر.س)', salary: true,
+            details: { name: 'تفاصيل الرواتب', title: 'تفاصيل الموظفين حسب الراتب', header: 'الراتب (ر.س)', numFmt: '#,##0' },
+        },
+        {
+            id: 'rolesTable', name: 'أدوار الموظفين', title: 'إحصائيات أدوار الموظفين', about: 'توزيع الموظفين حسب الدور الوظيفي',
+            details: { name: 'تفاصيل الأدوار', title: 'تفاصيل الموظفين حسب الدور الوظيفي', header: 'الدور الوظيفي' },
+        },
     ];
 
     /** Cell text without the flag / icon markup the page puts next to some labels. */
@@ -318,7 +330,8 @@
 
     /**
      * Exports one or more of the page's statistics tables into a single branded workbook.
-     * opts: { tables: ['ageGroupsTable', ...] (default: all that exist), fileName, logoUrl, scope }
+     * opts: { tables: ['ageGroupsTable', ...] (default: all that exist), fileName, logoUrl, scope,
+     *         details: { <tableId>: [[value, code, name, project], ...] } }
      * Returns true when a file was produced, false when no table was found.
      */
     async function exportStatTables(opts) {
@@ -344,20 +357,22 @@
                 labelNumFmt: def.salary ? '#,##0' : null,
             });
             added++;
-        });
 
-        // Details sheet (age | employee id | name | project), exported together with the age statistics.
-        if (Array.isArray(opts.details) && opts.details.length && wantedIds.includes('ageGroupsTable')) {
-            addTableSheet(wb, {
-                name: 'تفاصيل الموظفين',
-                title: 'تفاصيل الموظفين حسب العمر',
-                subtitle: [opts.scope, 'العمر بالسنوات المكتملة حتى تاريخ التقرير'].filter(Boolean).join(' | '),
-                headers: ['العمر (سنة)', 'رقم الموظف', 'اسم الموظف', 'المشروع'],
-                widths: [14, 18, 34, 30],
-                rows: opts.details,
-            });
-            added++;
-        }
+            // Details sheet right after its summary: value | employee id | name | project
+            const rows = opts.details && opts.details[def.id];
+            if (Array.isArray(rows) && rows.length) {
+                addTableSheet(wb, {
+                    name: def.details.name,
+                    title: def.details.title,
+                    subtitle: [opts.scope, def.about].filter(Boolean).join(' | '),
+                    headers: [def.details.header, 'رقم الموظف', 'اسم الموظف', 'المشروع'],
+                    widths: [22, 18, 34, 30],
+                    numFmts: def.details.numFmt ? { 0: def.details.numFmt } : {},
+                    rows,
+                });
+                added++;
+            }
+        });
 
         if (!added) throw new Error('لم يتم العثور على أي جداول للتصدير');
 

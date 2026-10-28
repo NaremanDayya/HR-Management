@@ -128,7 +128,14 @@ class ProjectController extends Controller
 
         // Update all statistics methods to filter by project IDs
         $ageGroups = $this->getEmployeeAgies($request, $projectIds);
-        $employeeDetails = $this->employeeDetailRows($this->employeesForAgeStats($request, $projectIds));
+        $employeeDetails = [
+            'ageGroupsTable' => $this->employeeDetailRows($this->employeesForAgeStats($request, $projectIds), fn ($e) => $this->ageOf($e)),
+            'nationalitiesTable' => $this->employeeDetailRows(
+                $this->employeesForNationalityStats($request, $projectIds),
+                fn ($e) => NationalityHelper::normalize($e->user?->nationality)
+            ),
+            'salariesTable' => $this->employeeDetailRows($this->employeesForSalaryCounts($request, $projectIds), fn ($e) => $this->salaryOf($e)),
+        ];
         $nationalities = $this->getEmployeeNationalities($request, $projectIds);
         $salariesStats = $this->getEmployeeSalariesStats($request, $projectIds);
         $salaryCounts = $this->getEmployeeSalaryCounts($request, $projectIds);
@@ -152,6 +159,11 @@ class ProjectController extends Controller
             }
         }
         arsort($rolesStats);
+
+        $employeeDetails['rolesTable'] = $this->employeeDetailRows(
+            $rolesRaw,
+            fn ($e) => $e->user?->role ? __($e->user->role) : null
+        );
 
         return view('Projects.statistics', compact(
                 'totalProjects',
@@ -191,30 +203,52 @@ class ProjectController extends Controller
     }
 
     /**
-     * One row per employee for the Excel "details" sheet: [age, employee code, name, project].
-     * Sorted by age (unknown ages last), then by name.
+     * One row per employee for an Excel "details" sheet: [value, employee code, name, project].
+     * $valueOf returns the statistic the sheet is about (age, nationality, salary, role...);
+     * rows are sorted by that value (unknown values last), then by name.
      */
-    private function employeeDetailRows($employees): array
+    private function employeeDetailRows($employees, callable $valueOf): array
     {
         $projectNames = Project::withoutGlobalScopes()->pluck('name', 'id');
 
         return $employees
-            ->map(function ($employee) use ($projectNames) {
-                $birthday = $employee->user?->birthday;
+            ->map(function ($employee) use ($projectNames, $valueOf) {
+                $value = $valueOf($employee);
+                if ($value === '' || $value === 'غير محدد') {
+                    $value = null;
+                }
 
                 return [
-                    'age' => $birthday ? \Carbon\Carbon::parse($birthday)->age : null,
+                    'value' => $value,
                     'code' => 'EMP-' . str_pad($employee->id, 3, '0', STR_PAD_LEFT),
                     'name' => $employee->user?->name ?? $employee->name,
                     'project' => $projectNames[$employee->project_id] ?? '',
                 ];
             })
             ->sort(function ($a, $b) {
-                return [$a['age'] === null, $a['age'], $a['name']] <=> [$b['age'] === null, $b['age'], $b['name']];
+                return [$a['value'] === null, $a['value'], $a['name']] <=> [$b['value'] === null, $b['value'], $b['name']];
             })
-            ->map(fn ($row) => [$row['age'] ?? 'غير محدد', $row['code'], $row['name'], $row['project']])
+            ->map(fn ($row) => [$row['value'] ?? 'غير محدد', $row['code'], $row['name'], $row['project']])
             ->values()
             ->all();
+    }
+
+    private function ageOf($employee): ?int
+    {
+        $birthday = $employee->user?->birthday;
+
+        return $birthday ? \Carbon\Carbon::parse($birthday)->age : null;
+    }
+
+    private function salaryOf($employee)
+    {
+        if ($employee->salary === null) {
+            return null;
+        }
+
+        $salary = (float) $employee->salary;
+
+        return $salary == floor($salary) ? (int) $salary : $salary;
     }
 
     public function getEmployeeAgies(Request $request, $projectIds = null)
@@ -234,7 +268,8 @@ class ProjectController extends Controller
         return $ageGroups;
     }
 
-    public function getEmployeeNationalities(Request $request, $projectIds = null)
+    /** Employees the nationality statistics are calculated from. */
+    private function employeesForNationalityStats(Request $request, $projectIds = null)
     {
         $status = $request->get('account_status');
 
@@ -250,7 +285,30 @@ class ProjectController extends Controller
             $query->whereIn('employees.project_id', $projectIds);
         }
 
-        $employees = $query->select('employees.*')->get();
+        return $query->select('employees.*')->get();
+    }
+
+    /** Employees behind the salary-distribution counts (same joins and filters as the counts). */
+    private function employeesForSalaryCounts(Request $request, $projectIds = null)
+    {
+        $status = $request->get('account_status');
+
+        $query = Employee::with('user')->join('users', 'employees.user_id', '=', 'users.id');
+
+        if (!empty($status)) {
+            $query->where('users.account_status', $status);
+        }
+
+        if ($projectIds) {
+            $query->whereIn('employees.project_id', $projectIds);
+        }
+
+        return $query->select('employees.*')->get();
+    }
+
+    public function getEmployeeNationalities(Request $request, $projectIds = null)
+    {
+        $employees = $this->employeesForNationalityStats($request, $projectIds);
 
         // Group by normalized nationality, collecting names
         $normalized = [];
@@ -351,25 +409,37 @@ class ProjectController extends Controller
 
         $employeesByNationality = $this->getEmployeesByNationality($project, $status);
         $employeesByAgeGroup = $this->getEmployeesByAgeGroup($project, $status);
-        $employeeDetails = $this->employeeDetailRows($employeesByAgeGroup->flatten(1));
         $employeesByStatus = $this->getEmployeesByAccountStatus($project);
         $employeesSalaries = $this->getEmployeesSalaries($project, $status);
 
         // Add employee roles statistics
-        $employeesByRole = $project->employees()
+        $roleEmployees = $project->employees()
             ->whereHas('user', function ($q) use ($status) {
                 $q->whereNotIn('role', ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant']);
                 if ($status === 'active') $q->where('account_status', 'active');
                 if ($status === 'inactive') $q->where('account_status', 'inactive');
             })
             ->with('user')
-            ->get()
+            ->get();
+
+        $employeesByRole = $roleEmployees
             ->groupBy(function ($employee) {
                 return $employee->user ? $employee->user->role : 'unknown';
             })
             ->map->count()
             ->sortDesc()
             ->toArray();
+
+        // Rows for the "details" sheets of the Excel export (same employees as each table counts)
+        $employeeDetails = [
+            'ageGroupsTable' => $this->employeeDetailRows($employeesByAgeGroup->flatten(1), fn ($e) => $this->ageOf($e)),
+            'nationalitiesTable' => $this->employeeDetailRows(
+                $employeesByNationality->flatten(1),
+                fn ($e) => NationalityHelper::normalize($e->user?->nationality)
+            ),
+            'salariesTable' => $this->employeeDetailRows($this->employeesForProjectSalaries($project, $status), fn ($e) => $this->salaryOf($e)),
+            'rolesTable' => $this->employeeDetailRows($roleEmployees, fn ($e) => $e->user?->role ? __($e->user->role) : null),
+        ];
 
         $totalSalary = $employeesSalaries['salaryStats']['totalSalary'];
         $averageSalary = $employeesSalaries['salaryStats']['averageSalary'];
@@ -451,7 +521,8 @@ class ProjectController extends Controller
         });
     }
 
-    public function getEmployeesSalaries(Project $project, $status = null)
+    /** Employees behind a project's salary statistics (management roles excluded). */
+    private function employeesForProjectSalaries(Project $project, $status = null)
     {
         $excludedRoles = ['project_manager', 'senior_project_manager', 'admin', 'hr_manager', 'hr_assistant'];
 
@@ -464,7 +535,12 @@ class ProjectController extends Controller
             });
         }
 
-        $employees = $query->get();
+        return $query->get();
+    }
+
+    public function getEmployeesSalaries(Project $project, $status = null)
+    {
+        $employees = $this->employeesForProjectSalaries($project, $status);
 
         // تجميع الموظفين حسب الراتب، وحساب عدد الموظفين لكل راتب، مع ترتيب المفاتيح (الرواتب) تصاعدياً
         $salaryCounts = $employees->groupBy('salary')->map->count()->sortKeys();
