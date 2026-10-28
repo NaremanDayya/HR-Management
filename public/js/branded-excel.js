@@ -34,10 +34,13 @@
     const FONT = 'Arial';
     const FOOTER_TEXT = 'GULF HORIZONS GROUP  |  HUMAN RESOURCES';
     const HEADER_ROW = 11;
-    const MIN_GRID_COLS = 5;          // A..D hold the title block, the last column holds the logo
-    const LOGO_COL_WIDTH = 38;
-    const LOGO_SIZE = { width: 250, height: 154 };
-    const TOP_ROW_HEIGHTS = [24, 31.95, 24, 24, 24, 24, 24, 24, 24, 24];
+    const MIN_GRID_COLS = 3;          // title block spans all but the last column; the last column holds the logo
+    const LOGO_COL_MIN_WIDTH = 30;    // wide enough (~215px) to hold the logo inside the table edge
+    const LOGO_SIZE = { width: 190, height: 117 };
+    // Compact header block: the table header stays on row 11, the rows in between are just spacing.
+    const TOP_ROW_HEIGHTS = [12, 34, 6, 22, 6, 22, 8, 8, 8, 8];
+    const RULE = { style: 'thin', color: { argb: 'FFE3E6E8' } };            // light row separator
+    const ACCENT = { style: 'medium', color: { argb: 'FFA52939' } };         // crimson accent line
 
     /** Arabic sheets are right-to-left (title block on the right, logo on the left). */
     let RTL = true;
@@ -99,12 +102,13 @@
             pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true },
         });
 
-        // Column widths: table columns as requested, spare columns padded, last one sized for the logo.
+        // Column widths: table columns as requested; the last column is kept wide enough for the logo
+        // so the whole header block sits inside the table's edges.
         const widths = spec.widths || [];
         for (let c = 1; c <= gridCols; c++) {
             let w = widths[c - 1];
-            if (w === undefined) w = c === gridCols ? LOGO_COL_WIDTH : 24;
-            if (c === gridCols && c > tableCols) w = LOGO_COL_WIDTH;
+            if (w === undefined) w = 24;
+            if (c === gridCols) w = Math.max(w, LOGO_COL_MIN_WIDTH);
             ws.getColumn(c).width = w;
         }
 
@@ -112,15 +116,16 @@
 
         const titleEnd = gridCols - 1;
         const textAlign = { vertical: 'middle', readingOrder: RTL ? 'rtl' : 'ltr' };
+        const mergeAcross = row => { if (titleEnd > 1) ws.mergeCells(row, 1, row, titleEnd); };
 
-        ws.mergeCells(2, 1, 2, titleEnd);
+        mergeAcross(2);
         Object.assign(ws.getCell(2, 1), {
             value: spec.title || '',
             font: { name: FONT, size: 17, bold: true, color: { argb: BRAND.crimson } },
             alignment: textAlign,
         });
 
-        ws.mergeCells(4, 1, 4, titleEnd);
+        mergeAcross(4);
         Object.assign(ws.getCell(4, 1), {
             value: spec.dateText || reportDateText(),
             font: { name: FONT, size: 11, color: { argb: BRAND.ink } },
@@ -128,7 +133,7 @@
         });
 
         if (spec.subtitle) {
-            ws.mergeCells(6, 1, 6, titleEnd);
+            mergeAcross(6);
             Object.assign(ws.getCell(6, 1), {
                 value: spec.subtitle,
                 font: { name: FONT, size: 10, color: { argb: BRAND.ink } },
@@ -138,7 +143,7 @@
 
         if (wb.__logoId !== null) {
             ws.addImage(wb.__logoId, {
-                tl: { col: gridCols - 1 + 0.03, row: 0.3 },
+                tl: { col: gridCols - 1 + 0.06, row: 0.2 },
                 ext: LOGO_SIZE,
                 editAs: 'oneCell',
             });
@@ -154,6 +159,7 @@
                 font: { name: FONT, size: 11, bold: true, color: { argb: BRAND.white } },
                 fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND.ink } },
                 alignment: { horizontal: 'center', vertical: 'middle', wrapText: true, readingOrder: RTL ? 'rtl' : 'ltr' },
+                border: { bottom: ACCENT },
             });
         });
 
@@ -165,6 +171,7 @@
         cell.font = { name: FONT, size: 11, color: { argb: BRAND.ink } };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: band ? BRAND.band : BRAND.white } };
         cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true, readingOrder: RTL ? 'rtl' : 'ltr' };
+        cell.border = { bottom: RULE };
         if (numFmt && typeof cell.value === 'number') cell.numFmt = numFmt;
     }
 
@@ -173,18 +180,25 @@
         cell.font = { name: FONT, size: 11, bold: true, color: { argb: BRAND.crimson } };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND.blush } };
         cell.alignment = { horizontal: 'center', vertical: 'middle', readingOrder: RTL ? 'rtl' : 'ltr' };
+        cell.border = { top: { style: 'thin', color: { argb: BRAND.crimson } } };
         if (numFmt && typeof value === 'number') cell.numFmt = numFmt;
     }
 
     function addFooter(ws, lastRow, gridCols) {
         const footerRow = lastRow + 3;
+        const rule = { top: { style: 'thin', color: { argb: BRAND.crimson } } };
+
+        // Style every cell of the row first so the rule shows across the whole merged width.
+        for (let c = 1; c <= gridCols; c++) ws.getCell(footerRow, c).border = rule;
+
         ws.mergeCells(footerRow, 1, footerRow, gridCols);
         Object.assign(ws.getCell(footerRow, 1), {
             value: FOOTER_TEXT,
             font: { name: FONT, size: 10, bold: true, color: { argb: BRAND.crimson } },
-            alignment: { vertical: 'middle' },
+            alignment: { horizontal: 'center', vertical: 'middle' },
+            border: rule,
         });
-        ws.getRow(footerRow).height = 24;
+        ws.getRow(footerRow).height = 26;
     }
 
     /**
@@ -238,7 +252,7 @@
             title: spec.title,
             subtitle: spec.subtitle,
             headers: [spec.labelHeader || 'التصنيف', 'عدد الموظفين', 'النسبة من الموظفين'],
-            widths: spec.widths || [28, 20, 22],
+            widths: spec.widths || [34, 22, 30],
             numFmts: { 0: spec.labelNumFmt || null, 1: '0', 2: '0.0%' },
             rows: items.map(it => [it.label, Number(it.count) || 0, total ? (Number(it.count) || 0) / total : 0]),
             total: items.length ? { label: 'الإجمالي', sumCols: [1, 2] } : null,
