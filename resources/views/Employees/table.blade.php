@@ -3474,7 +3474,7 @@
 
             // Company logo - adjust path as needed
             const logo = document.createElement('img');
-            logo.src = '{{ asset('build/assets/img/logo.png') }}';
+            logo.src = '{{ asset('images/logo.png') }}';
             logo.style.maxWidth = '100%';
             logo.style.maxHeight = '100px'; // Larger height
             logo.style.objectFit = 'contain';

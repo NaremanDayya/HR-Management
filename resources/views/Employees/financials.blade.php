@@ -997,7 +997,7 @@
 
             const logoContainer = document.createElement('div');
             const logo = document.createElement('img');
-            logo.src = '{{ asset('build/assets/img/logo.png') }}';
+            logo.src = '{{ asset('images/logo.png') }}';
             logo.style.maxWidth = '100px';
             logo.style.maxHeight = '60px';
             logo.alt = 'شعار الشركة';

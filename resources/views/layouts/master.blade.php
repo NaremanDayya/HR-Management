@@ -261,7 +261,7 @@
                     <!-- Brand Info - Wider Logo -->
                     <div class="flex items-center space-x-4 space-x-reverse">
                         <div class="relative group">
-                            <img src="{{ asset('build/assets/img/logo.png') }}" alt="Logo"
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo"
                                 class="h-12 w-auto transition-all duration-300 group-hover:rotate-6 group-hover:scale-105 filter brightness-0 invert opacity-90">
                             <span
                                 class="absolute -inset-1 bg-white bg-opacity-20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>

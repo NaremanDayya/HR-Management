@@ -15,7 +15,7 @@ $salesRepId = Auth::user()->salesRep->id;
         <div class="header-brand flex-shrink-0">
             <a href="{{ route('dashboard') }}" class="logo block transition-transform hover:scale-105">
                 <div class="flex items-center space-x-2 space-x-reverse">
-                    <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="logo-img h-16 w-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo-img h-16 w-auto">
                 </div>
             </a>
         </div>

@@ -296,7 +296,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="logo-container">
-                <img src="{{ asset('build/assets/img/logo.png') }}" alt="شعار الشركة" class="logo-img">
+                <img src="{{ asset('images/logo.png') }}" alt="شعار الشركة" class="logo-img">
                 <h1 class="login-title">نظام إدارة الموارد البشرية</h1>
                 <p class="login-subtitle">سجل الدخول للوصول إلى حسابك</p>
             </div>

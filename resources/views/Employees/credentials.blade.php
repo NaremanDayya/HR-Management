@@ -359,7 +359,7 @@
             <div class="pdf-header hidden print:block">
                 <div class="flex items-center justify-between p-4 border-b-2 border-gray-200 mb-4">
                     <div class="flex items-center gap-4">
-                        <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="h-16" />
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16" />
                         <div class="text-right">
                             <h2 class="text-2xl font-bold text-blue-600">تقرير بيانات الدخول للموظفين</h2>
                             <p class="text-gray-500">تاريخ التقرير: {{ now()->format('Y-m-d') }}</p>

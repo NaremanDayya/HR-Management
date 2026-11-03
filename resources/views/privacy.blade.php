@@ -26,7 +26,7 @@
 <body>
 
 <div class="header">
-    <img src="{{ asset('build/assets/img/logo.png') }}" alt="مجموعة آفاق الخليج">
+    <img src="{{ asset('images/logo.png') }}" alt="مجموعة آفاق الخليج">
     <h1>سياسة الخصوصية</h1>
     <p>مجموعة آفاق الخليج — نظام إدارة الموارد البشرية</p>
 </div>

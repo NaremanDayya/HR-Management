@@ -253,7 +253,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <img src="{{ asset('build/assets/img/logo.png') }}" alt="شعار النظام">
+                <img src="{{ asset('images/logo.png') }}" alt="شعار النظام">
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

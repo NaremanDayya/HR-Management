@@ -629,7 +629,7 @@
             // Add logo (optional)
             const logoContainer = document.createElement('div');
             const logo = document.createElement('img');
-            logo.src = '{{ asset('build/assets/img/logo.png') }}';
+            logo.src = '{{ asset('images/logo.png') }}';
             logo.style.maxWidth = '80px';
             logo.style.maxHeight = '50px';
             logo.alt = 'شعار الشركة';
